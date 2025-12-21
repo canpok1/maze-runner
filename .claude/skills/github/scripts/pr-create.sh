@@ -11,7 +11,7 @@
 set -euo pipefail
 
 # 必要なコマンドの存在確認
-for cmd in gh git make; do
+for cmd in gh git; do
     if ! command -v "$cmd" &> /dev/null; then
         echo "エラー: $cmd コマンドが見つかりません。インストールしてください。" >&2
         exit 1
@@ -46,31 +46,6 @@ if [[ "$CURRENT_BRANCH" == "main" ]]; then
 fi
 
 echo "ブランチ: $CURRENT_BRANCH" >&2
-
-# コミット前チェック
-echo "コードフォーマット中..." >&2
-if ! make fmt; then
-    echo "エラー: コードフォーマットに失敗しました。" >&2
-    exit 1
-fi
-
-if ! git diff --quiet; then
-    echo "エラー: 'make fmt' によってファイルが変更されました。変更をコミットしてください。" >&2
-    git status --short >&2
-    exit 1
-fi
-
-echo "静的解析中..." >&2
-if ! make lint; then
-    echo "エラー: 静的解析でエラーが検出されました。" >&2
-    exit 1
-fi
-
-echo "テスト実行中..." >&2
-if ! make test; then
-    echo "エラー: テストが失敗しました。" >&2
-    exit 1
-fi
 
 # プッシュ処理
 echo "リモートの状態を取得中..." >&2

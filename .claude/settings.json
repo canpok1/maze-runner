@@ -1,6 +1,11 @@
 {
   "permissions": {
     "allow": [
+      "Bash(./.claude/skills/github/scripts/pr-create.sh:*)",
+      "Bash(./.claude/skills/github/scripts/thread-details.sh:*)",
+      "Bash(./.claude/skills/github/scripts/thread-list.sh:*)",
+      "Bash(./.claude/skills/github/scripts/thread-reply.sh:*)",
+      "Bash(./.claude/skills/github/scripts/thread-resolve.sh:*)",
       "Bash(cat:*)",
       "Bash(cp:*)",
       "Bash(done)",
@@ -25,6 +30,7 @@
       "Bash(golangci-lint run:*)",
       "Bash(grep:*)",
       "Bash(head:*)",
+      "Bash(jq:*)",
       "Bash(ls:*)",
       "Bash(make:*)",
       "Bash(mkdir:*)",
