@@ -25,7 +25,8 @@ if [[ $# -lt 2 ]]; then
 fi
 
 PR_TITLE="$1"
-PR_BODY="$2"
+shift
+PR_BODY="$*"
 
 if [[ -z "$PR_TITLE" ]]; then
     echo "エラー: PRタイトルが空です。" >&2

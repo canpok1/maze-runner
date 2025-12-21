@@ -2,14 +2,14 @@
 # PRレビュースレッドに返信を投稿するスクリプト
 #
 # 使用方法:
-#   echo "コメント内容" | ./scripts/thread-reply.sh <スレッドID>
-#   ./scripts/thread-reply.sh <スレッドID> <<EOF
+#   echo "コメント内容" | $0 <スレッドID>
+#   $0 <スレッドID> <<EOF
 #   複数行の
 #   コメント内容
 #   EOF
 #
 # 例:
-#   echo "ご指摘ありがとうございます。修正しました。" | ./scripts/thread-reply.sh "xxxxxxxxxxxxxxxxxxxx"
+#   echo "ご指摘ありがとうございます。修正しました。" | $0 "xxxxxxxxxxxxxxxxxxxx"
 #
 # 注意事項:
 #   - スレッドIDはGitHub GraphQL APIのNode ID形式で指定してください

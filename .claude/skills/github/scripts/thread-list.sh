@@ -2,10 +2,10 @@
 # PRの未解決レビューコメントを取得するスクリプト
 #
 # 使用方法:
-#   ./scripts/get-pr-review-comments.sh <PR番号>
+#   $0 <PR番号>
 #
 # 例:
-#   ./scripts/get-pr-review-comments.sh 123
+#   $0 123
 #
 # 注意事項:
 #   - 最大30件のレビュースレッドを取得します

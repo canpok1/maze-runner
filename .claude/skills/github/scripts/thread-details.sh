@@ -2,14 +2,14 @@
 # PRレビュースレッドの詳細情報を取得するスクリプト
 #
 # 使用方法:
-#   ./scripts/get-pr-review-thread-details.sh <スレッドID> [スレッドID...]
+#   $0 <スレッドID> [スレッドID...]
 #
 # 例:
 #   # 単一スレッドの詳細を取得
-#   ./scripts/get-pr-review-thread-details.sh "xxxxxxxxxxxxxxxxxxxx"
+#   $0 "xxxxxxxxxxxxxxxxxxxx"
 #
 #   # 複数スレッドの詳細を取得
-#   ./scripts/get-pr-review-thread-details.sh "xxxxxxxxxxxxxxxxxxxx" "xxxxxxxxxxxxxxxxxxxx"
+#   $0 "xxxxxxxxxxxxxxxxxxxx" "xxxxxxxxxxxxxxxxxxxx"
 #
 # 出力情報:
 #   - スレッドID

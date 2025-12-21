@@ -2,10 +2,10 @@
 # レビュースレッドをresolveするスクリプト
 #
 # 使用方法:
-#   ./scripts/resolve-review-thread.sh <スレッドID>
+#   $0 <スレッドID>
 #
 # 例:
-#   ./scripts/resolve-review-thread.sh "xxxxxxxxxxxxxxxxxxxx"
+#   $0 "xxxxxxxxxxxxxxxxxxxx"
 
 set -euo pipefail
 
