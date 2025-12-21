@@ -3,11 +3,7 @@
   "type": "module",
   "scripts": {
     "dev": "wrangler dev --ip 0.0.0.0",
-    "deploy": "wrangler deploy --minify",
-    "cf-typegen": "wrangler types --env-interface CloudflareBindings"
-  },
-  "dependencies": {
-    "hono": "^4.11.1"
+    "deploy": "wrangler deploy"
   },
   "devDependencies": {
     "wrangler": "^4.4.0"
