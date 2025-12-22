@@ -53,7 +53,7 @@ function startGame(size: number): void {
     menuElement,
     resizeCanvas,
     render,
-    cancelAnimationFrame,
+    cancelAnimationFrame: (id: number) => cancelAnimationFrame(id),
   };
   startGameCore(size, deps);
 }
@@ -238,7 +238,7 @@ function win(): void {
   const deps: WinDependencies = {
     gameState,
     menuElement,
-    cancelAnimationFrame,
+    cancelAnimationFrame: (id: number) => cancelAnimationFrame(id),
   };
   winCore(deps);
 }
