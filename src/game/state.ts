@@ -1,5 +1,18 @@
 import type { GameState } from '../types';
 
+/** プレイヤーのスタートグリッド座標 X */
+const START_GRID_X = 1;
+/** プレイヤーのスタートグリッド座標 Y */
+const START_GRID_Y = 1;
+
+/** 方向チェック用の定数配列 [東, 南, 西, 北] */
+const DIRECTIONS_TO_CHECK = [
+  { dx: 1, dy: 0, dir: 0 }, // East (右)
+  { dx: 0, dy: 1, dir: Math.PI / 2 }, // South (下)
+  { dx: -1, dy: 0, dir: Math.PI }, // West (左)
+  { dx: 0, dy: -1, dir: (3 * Math.PI) / 2 }, // North (上)
+];
+
 /**
  * startGame関数の依存関係を定義するインターフェース
  */
@@ -36,20 +49,12 @@ export function startGame(size: number, deps: StartGameDependencies): void {
   );
 
   // プレイヤーのマップグリッド座標
-  const startX = 1;
-  const startY = 1;
+  const startX = START_GRID_X;
+  const startY = START_GRID_Y;
   let initialDir = 0; // 初期方向 (デフォルトは東)
 
-  // 方向チェック: (dx, dy, direction_in_radians) [東, 南, 西, 北 の順]
-  const directionsToCheck = [
-    { dx: 1, dy: 0, dir: 0 }, // East (右)
-    { dx: 0, dy: 1, dir: Math.PI / 2 }, // South (下)
-    { dx: -1, dy: 0, dir: Math.PI }, // West (左)
-    { dx: 0, dy: -1, dir: (3 * Math.PI) / 2 }, // North (上)
-  ];
-
   // 通路が開いている方向を探索
-  for (const { dx, dy, dir } of directionsToCheck) {
+  for (const { dx, dy, dir } of DIRECTIONS_TO_CHECK) {
     const checkX = startX + dx;
     const checkY = startY + dy;
 
@@ -61,7 +66,12 @@ export function startGame(size: number, deps: StartGameDependencies): void {
   }
 
   // プレイヤーの初期設定
-  deps.gameState.player = { x: 1.5, y: 1.5, dir: initialDir, speed: 0 };
+  deps.gameState.player = {
+    x: START_GRID_X + 0.5,
+    y: START_GRID_Y + 0.5,
+    dir: initialDir,
+    speed: 0,
+  };
 
   // スタート地点を探索済みとしてマーク
   deps.gameState.exploredMap[startY][startX] = 1;

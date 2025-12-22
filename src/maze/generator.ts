@@ -1,3 +1,10 @@
+/** 迷路タイルの種類 */
+const TILE = {
+  PATH: 0,
+  WALL: 1,
+  GOAL: 2,
+} as const;
+
 /**
  * 穴掘り法を用いて迷路を生成する純粋関数
  *
@@ -8,11 +15,11 @@ export function generateMaze(size: number): number[][] {
   // サイズが偶数の場合は奇数に調整
   size = size % 2 === 0 ? size + 1 : size;
   // 全て壁(1)で初期化
-  const newMap: number[][] = Array.from({ length: size }, () => Array(size).fill(1));
+  const newMap: number[][] = Array.from({ length: size }, () => Array(size).fill(TILE.WALL));
 
   // 再帰的に通路を掘り進む関数
   function walk(x: number, y: number): void {
-    newMap[y][x] = 0; // 現在地を通路にする
+    newMap[y][x] = TILE.PATH; // 現在地を通路にする
     // 掘り進む方向 (東, 西, 南, 北) をランダムにシャッフル
     const dirs: [number, number][] = [
       [0, 2],
@@ -27,9 +34,9 @@ export function generateMaze(size: number): number[][] {
         ny = y + dy; // 2マス先の座標
 
       // 2マス先がマップ内でかつ壁(1)であれば
-      if (nx > 0 && nx < size - 1 && ny > 0 && ny < size - 1 && newMap[ny][nx] === 1) {
+      if (nx > 0 && nx < size - 1 && ny > 0 && ny < size - 1 && newMap[ny][nx] === TILE.WALL) {
         // 間の壁を崩して通路にする
-        newMap[y + dy / 2][x + dx / 2] = 0;
+        newMap[y + dy / 2][x + dx / 2] = TILE.PATH;
         // 2マス先に移動して再帰
         walk(nx, ny);
       }
@@ -38,6 +45,6 @@ export function generateMaze(size: number): number[][] {
 
   walk(1, 1); // スタート地点(1, 1)から掘り始め
 
-  newMap[size - 2][size - 2] = 2; // ゴールを設定
+  newMap[size - 2][size - 2] = TILE.GOAL; // ゴールを設定
   return newMap;
 }
