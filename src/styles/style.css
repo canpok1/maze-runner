@@ -1,0 +1,170 @@
+/* グローバルスタイリング */
+body {
+  margin: 0;
+  background: #1a1a2e; /* ダークネイビー */
+  color: #e4e6eb; /* オフホワイト */
+  font-family: "Inter", sans-serif;
+  overflow: hidden;
+  touch-action: manipulation; /* スマホでの操作性を向上 */
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* HUD (タイマー) */
+#hud {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 5;
+  font-size: 1.2rem;
+  font-weight: bold;
+  text-shadow: 0 0 5px rgba(0, 0, 0, 0.7);
+}
+
+/* メニュー画面 */
+#menu {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  z-index: 20;
+  background: rgba(26, 26, 46, 0.95);
+  padding: 20px;
+  box-sizing: border-box;
+}
+#menu h1 {
+  font-size: 2.5rem;
+  color: #ffd700; /* ゴールド */
+  margin-bottom: 5px;
+}
+#menu p {
+  margin-bottom: 25px;
+  font-size: 1rem;
+}
+
+/* 難易度ボタン */
+.diff-btn {
+  padding: 15px;
+  margin: 8px 0;
+  font-size: 1.1rem;
+  cursor: pointer;
+  border: 2px solid #5267a1;
+  border-radius: 8px;
+  width: 80%;
+  max-width: 300px;
+  color: white;
+  transition:
+    background 0.2s,
+    transform 0.1s;
+  box-shadow: 0 4px #5267a1;
+}
+.diff-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px #5267a1;
+}
+.easy {
+  background: #2ecc71;
+  box-shadow: 0 4px #27ae60;
+  border-color: #27ae60;
+}
+.easy:active {
+  box-shadow: 0 2px #27ae60;
+}
+
+.normal {
+  background: #f1c40f;
+  color: #333;
+  box-shadow: 0 4px #f39c12;
+  border-color: #f39c12;
+}
+.normal:active {
+  box-shadow: 0 2px #f39c12;
+}
+
+.hard {
+  background: #e74c3c;
+  box-shadow: 0 4px #c0392b;
+  border-color: #c0392b;
+}
+.hard:active {
+  box-shadow: 0 2px #c0392b;
+}
+
+#last-score {
+  margin-top: 30px;
+  padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 5px;
+  min-height: 40px;
+}
+#last-score h2 {
+  font-size: 1.5rem;
+  color: #3498db; /* ブルー */
+}
+
+/* ゲーム画面とキャンバス */
+#canvas-container {
+  flex-grow: 1; /* 残りの高さを占める */
+  position: relative;
+}
+canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  background: #000;
+}
+
+/* スマホ操作パネル */
+#controls {
+  height: 40vh; /* 画面下40%を操作に使う */
+  min-height: 200px;
+  max-height: 300px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 10px;
+  padding: 10px;
+  background: #2c3e50; /* 濃いブルーグレー */
+  box-sizing: border-box;
+}
+.ctrl-btn {
+  background: #34495e; /* 暗めのボタン色 */
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  color: #ecf0f1;
+  -webkit-user-select: none; /* テキスト選択防止 */
+  box-shadow: 0 5px #2c3e50;
+  transition: transform 0.05s;
+}
+.ctrl-btn:active {
+  background: #3e5672;
+  transform: translateY(3px);
+  box-shadow: 0 2px #2c3e50;
+}
+/* グリッド配置 */
+.btn-up {
+  grid-column: 2;
+  grid-row: 1;
+}
+.btn-left {
+  grid-column: 1;
+  grid-row: 2;
+}
+.btn-down {
+  grid-column: 2;
+  grid-row: 2;
+}
+.btn-right {
+  grid-column: 3;
+  grid-row: 2;
+}

@@ -1,10 +1,14 @@
-// --- 型定義 ---
-interface Player {
-  x: number;
-  y: number;
-  dir: number;
-  speed: number;
-}
+// --- インポート ---
+
+import {
+  MAP_PADDING,
+  MAX_WALL_HEIGHT_FACTOR,
+  MIN_DISTANCE,
+  MINI_MAP_SIZE,
+  MOVE_SPEED,
+  ROTATION_STEP,
+} from './config';
+import type { Player } from './types';
 
 // --- DOM要素の取得とバリデーション ---
 function getRequiredElement<T extends HTMLElement>(id: string, type: new () => T): T {
@@ -28,17 +32,6 @@ const canvas = getRequiredElement('gameCanvas', HTMLCanvasElement);
 const ctx = getRequired2DContext(canvas);
 const timerElement = getRequiredElement('timer', HTMLElement);
 const menuElement = getRequiredElement('menu', HTMLElement);
-
-// 45度 (π/4) をラジアンで定義
-const ROTATION_STEP = Math.PI / 4;
-// 最小距離 (これより近い距離はクリップされる)
-const MIN_DISTANCE = 0.3;
-// 壁の高さの最大値 (画面の高さの 2倍に制限)
-const MAX_WALL_HEIGHT_FACTOR = 2;
-
-// ミニマップの設定
-const MINI_MAP_SIZE = 150; // ミニマップの幅と高さ (pixels)
-const MAP_PADDING = 10;
 
 let map: number[][] = []; // 迷路データ (1: 壁, 0: 通路, 2: ゴール)
 let exploredMap: number[][] = []; // 探索済みデータ (0: 未探索, 1: 探索済み)
@@ -325,8 +318,6 @@ function resizeCanvas(): void {
 
 // --- 入力（タッチ/マウス）処理 ---
 function setupControls(): void {
-  const MOVE_SPEED = 0.1; // 移動速度
-
   const controlMappings: { id: string; type: 'move' | 'rot'; val: number }[] = [
     // 移動: 連続入力 (start/end)
     { id: 'forward', type: 'move', val: MOVE_SPEED },
