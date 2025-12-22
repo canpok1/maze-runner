@@ -113,6 +113,7 @@ body {
 #canvas-container {
   flex-grow: 1; /* 残りの高さを占める */
   position: relative;
+  z-index: 1;
 }
 canvas {
   width: 100%;
@@ -123,6 +124,8 @@ canvas {
 
 /* スマホ操作パネル */
 #controls {
+  position: relative;
+  z-index: 1;
   height: 40vh; /* 画面下40%を操作に使う */
   min-height: 200px;
   max-height: 300px;
