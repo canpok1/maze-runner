@@ -47,7 +47,7 @@ export function renderRaycasting(params: RaycastingParams): void {
   for (let i = 0; i < rayCount; i++) {
     const rayAngle = player.dir - fov / 2 + (i / rayCount) * fov;
     let distance = 0;
-    let hitType = 0;
+    let hitType: TileType = TileType.FLOOR;
 
     // レイを進めて壁との衝突を検出
     while (distance < RAYCASTING_CONSTANTS.MAX_RAY_DISTANCE) {

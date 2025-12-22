@@ -1,12 +1,19 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { ExplorationState, type GameConfig, type Player, TileType } from '../types';
+import {
+  ExplorationState,
+  type ExploredMap,
+  type GameConfig,
+  type MazeMap,
+  type Player,
+  TileType,
+} from '../types';
 import { type MinimapParams, renderMinimap } from './minimap';
 
 describe('renderMinimap', () => {
   let mockCtx: CanvasRenderingContext2D;
   let player: Player;
-  let map: number[][];
-  let exploredMap: number[][];
+  let map: MazeMap;
+  let exploredMap: ExploredMap;
   let config: GameConfig;
 
   beforeEach(() => {

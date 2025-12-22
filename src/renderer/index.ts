@@ -1,4 +1,4 @@
-import type { GameConfig, GameState } from '../types';
+import type { GameConfig, GameState, MazeMap } from '../types';
 import { ExplorationState, TileType } from '../types';
 import { renderMinimap } from './minimap';
 import { renderRaycasting } from './raycasting';
@@ -22,7 +22,7 @@ export interface RenderDependencies {
  * @param y Y座標
  * @returns タイルの値（範囲外の場合undefined）
  */
-function getTile(map: number[][], x: number, y: number): number | undefined {
+function getTile(map: MazeMap, x: number, y: number): TileType | undefined {
   const mapY = Math.floor(y);
   const mapX = Math.floor(x);
   return map[mapY]?.[mapX];

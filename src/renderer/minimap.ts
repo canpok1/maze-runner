@@ -1,4 +1,4 @@
-import type { GameConfig, Player } from '../types';
+import type { ExploredMap, GameConfig, MazeMap, Player } from '../types';
 import { ExplorationState, TileType } from '../types';
 
 /**
@@ -21,8 +21,8 @@ export interface MinimapParams {
   ctx: CanvasRenderingContext2D;
   canvasWidth: number;
   player: Player;
-  map: number[][];
-  exploredMap: number[][];
+  map: MazeMap;
+  exploredMap: ExploredMap;
   mapSize: number;
   config: GameConfig;
 }
