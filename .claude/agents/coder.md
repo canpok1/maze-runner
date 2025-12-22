@@ -1,6 +1,24 @@
 ---
 name: coder
-description: Use this agent when the user needs to implement new features, write code, or create functionality in TypeScript, HTML, or CSS. This includes creating new components, functions, modules, or any source code implementation tasks. The agent follows TDD (Test-Driven Development) methodology and focuses on minimal, clean implementations.\n\nExamples:\n- user: "ユーザー認証機能を実装してください"\n  assistant: "ユーザー認証機能の実装ですね。coderエージェントを使用してTDDで実装を進めます。"\n  <Task tool call to launch coder agent>\n\n- user: "商品一覧を表示するコンポーネントを作成して"\n  assistant: "商品一覧コンポーネントの作成を承りました。coderエージェントでTDDアプローチにより実装します。"\n  <Task tool call to launch coder agent>\n\n- user: "APIからデータを取得する関数が必要です"\n  assistant: "API通信関数の実装ですね。coderエージェントを起動して、まずテストから書いていきます。"\n  <Task tool call to launch coder agent>\n\n- user: "フォームのバリデーションロジックを追加してほしい"\n  assistant: "バリデーションロジックの追加ですね。coderエージェントでTDDにより実装を行います。"\n  <Task tool call to launch coder agent>
+description: |
+  Use this agent when the user needs to implement new features, write code, or create functionality in TypeScript, HTML, or CSS. This includes creating new components, functions, modules, or any source code implementation tasks. The agent follows TDD (Test-Driven Development) methodology and focuses on minimal, clean implementations.
+
+  Examples:
+  - user: "ユーザー認証機能を実装してください"
+    assistant: "ユーザー認証機能の実装ですね。coderエージェントを使用してTDDで実装を進めます。"
+    <Task tool call to launch coder agent>
+
+  - user: "商品一覧を表示するコンポーネントを作成して"
+    assistant: "商品一覧コンポーネントの作成を承りました。coderエージェントでTDDアプローチにより実装します。"
+    <Task tool call to launch coder agent>
+
+  - user: "APIからデータを取得する関数が必要です"
+    assistant: "API通信関数の実装ですね。coderエージェントを起動して、まずテストから書いていきます。"
+    <Task tool call to launch coder agent>
+
+  - user: "フォームのバリデーションロジックを追加してほしい"
+    assistant: "バリデーションロジックの追加ですね。coderエージェントでTDDにより実装を行います。"
+    <Task tool call to launch coder agent>
 model: sonnet
 ---
 
