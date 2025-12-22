@@ -62,11 +62,7 @@ elif [[ ! -t 0 ]]; then
     # 標準入力がパイプまたはリダイレクトの場合
     COMMENT_BODY=""
     while IFS= read -r line || [[ -n "$line" ]]; do
-        if [[ -n "$COMMENT_BODY" ]]; then
-            COMMENT_BODY="${COMMENT_BODY}"$'\n'"${line}"
-        else
-            COMMENT_BODY="${line}"
-        fi
+        COMMENT_BODY+="${COMMENT_BODY:+$'\n'}${line}"
     done
 else
     echo "エラー: コメント本文を指定してください。" >&2
