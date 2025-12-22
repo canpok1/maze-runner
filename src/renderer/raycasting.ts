@@ -1,4 +1,5 @@
-import type { GameConfig, Player } from '../types';
+import type { GameConfig, MazeMap, Player } from '../types';
+import { TileType } from '../types';
 
 /**
  * レイキャスティングの定数
@@ -14,7 +15,7 @@ export interface RaycastingParams {
   ctx: CanvasRenderingContext2D;
   canvas: HTMLCanvasElement;
   player: Player;
-  map: number[][];
+  map: MazeMap;
   config: GameConfig;
 }
 
@@ -58,14 +59,14 @@ export function renderRaycasting(params: RaycastingParams): void {
       const mapY = Math.floor(ry);
 
       // 壁との衝突判定
-      if (map[mapY] && map[mapY][mapX] === 1) {
-        hitType = 1;
+      if (map[mapY] && map[mapY][mapX] === TileType.WALL) {
+        hitType = TileType.WALL;
         break;
       }
 
       // ゴールとの衝突判定
-      if (map[mapY] && map[mapY][mapX] === 2) {
-        hitType = 2;
+      if (map[mapY] && map[mapY][mapX] === TileType.GOAL) {
+        hitType = TileType.GOAL;
         break;
       }
     }
@@ -88,10 +89,10 @@ export function renderRaycasting(params: RaycastingParams): void {
 
     let wallColor = `rgb(${colorValue}, ${colorValue}, ${colorValue})`;
 
-    if (hitType === 2) {
+    if (hitType === TileType.GOAL) {
       // ゴール（赤色）
       wallColor = `rgb(255, ${colorValue * 0.5}, ${colorValue * 0.5})`;
-    } else if (hitType === 1) {
+    } else if (hitType === TileType.WALL) {
       // 壁に簡単なテクスチャ効果（縦の影）
       const mapTileX = Math.floor(player.x + Math.cos(rayAngle) * distance);
       const isVerticalHit =

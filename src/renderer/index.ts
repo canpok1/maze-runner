@@ -1,4 +1,5 @@
 import type { GameConfig, GameState } from '../types';
+import { ExplorationState, TileType } from '../types';
 import { renderMinimap } from './minimap';
 import { renderRaycasting } from './raycasting';
 
@@ -48,16 +49,17 @@ function update(gameState: GameState, timerElement: HTMLElement): boolean {
   const checkX = gameState.player.x + Math.cos(gameState.player.dir) * moveStep * (1 + margin);
   const checkY = gameState.player.y + Math.sin(gameState.player.dir) * moveStep * (1 + margin);
 
-  if (getTile(gameState.map, checkX, checkY) !== 1) {
+  if (getTile(gameState.map, checkX, checkY) !== TileType.WALL) {
     gameState.player.x = nx;
     gameState.player.y = ny;
 
     // 探索済みタイルを更新
-    gameState.exploredMap[Math.floor(gameState.player.y)][Math.floor(gameState.player.x)] = 1;
+    gameState.exploredMap[Math.floor(gameState.player.y)][Math.floor(gameState.player.x)] =
+      ExplorationState.EXPLORED;
   }
 
   // 3. ゴール判定
-  if (getTile(gameState.map, gameState.player.x, gameState.player.y) === 2) {
+  if (getTile(gameState.map, gameState.player.x, gameState.player.y) === TileType.GOAL) {
     return true; // ゴール到達
   }
 

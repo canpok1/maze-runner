@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { GameConfig, Player } from '../types';
+import { ExplorationState, type GameConfig, type Player, TileType } from '../types';
 import { type MinimapParams, renderMinimap } from './minimap';
 
 describe('renderMinimap', () => {
@@ -46,15 +46,15 @@ describe('renderMinimap', () => {
 
     // 3x3の簡単な迷路
     map = [
-      [1, 1, 1],
-      [1, 0, 1],
-      [1, 2, 1],
+      [TileType.WALL, TileType.WALL, TileType.WALL],
+      [TileType.WALL, TileType.FLOOR, TileType.WALL],
+      [TileType.WALL, TileType.GOAL, TileType.WALL],
     ];
 
     exploredMap = [
-      [1, 1, 1],
-      [1, 1, 0],
-      [0, 0, 0],
+      [ExplorationState.EXPLORED, ExplorationState.EXPLORED, ExplorationState.EXPLORED],
+      [ExplorationState.EXPLORED, ExplorationState.EXPLORED, ExplorationState.UNEXPLORED],
+      [ExplorationState.UNEXPLORED, ExplorationState.UNEXPLORED, ExplorationState.UNEXPLORED],
     ];
 
     config = {
@@ -142,14 +142,14 @@ describe('renderMinimap', () => {
         canvasWidth: 800,
         player,
         map: [
-          [1, 1, 1],
-          [1, 0, 1],
-          [1, 0, 1],
+          [TileType.WALL, TileType.WALL, TileType.WALL],
+          [TileType.WALL, TileType.FLOOR, TileType.WALL],
+          [TileType.WALL, TileType.FLOOR, TileType.WALL],
         ],
         exploredMap: [
-          [1, 1, 1],
-          [1, 1, 1],
-          [1, 1, 1],
+          [ExplorationState.EXPLORED, ExplorationState.EXPLORED, ExplorationState.EXPLORED],
+          [ExplorationState.EXPLORED, ExplorationState.EXPLORED, ExplorationState.EXPLORED],
+          [ExplorationState.EXPLORED, ExplorationState.EXPLORED, ExplorationState.EXPLORED],
         ],
         mapSize: 3,
         config,
@@ -168,14 +168,14 @@ describe('renderMinimap', () => {
         canvasWidth: 800,
         player,
         map: [
-          [1, 1, 1],
-          [1, 0, 1],
-          [1, 2, 1],
+          [TileType.WALL, TileType.WALL, TileType.WALL],
+          [TileType.WALL, TileType.FLOOR, TileType.WALL],
+          [TileType.WALL, TileType.GOAL, TileType.WALL],
         ],
         exploredMap: [
-          [1, 1, 1],
-          [1, 1, 1],
-          [1, 1, 1],
+          [ExplorationState.EXPLORED, ExplorationState.EXPLORED, ExplorationState.EXPLORED],
+          [ExplorationState.EXPLORED, ExplorationState.EXPLORED, ExplorationState.EXPLORED],
+          [ExplorationState.EXPLORED, ExplorationState.EXPLORED, ExplorationState.EXPLORED],
         ],
         mapSize: 3,
         config,

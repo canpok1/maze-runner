@@ -1,4 +1,5 @@
 import type { GameConfig, Player } from '../types';
+import { ExplorationState, TileType } from '../types';
 
 /**
  * ミニマップの色定数
@@ -51,10 +52,10 @@ export function renderMinimap(params: MinimapParams): void {
       let color = '';
 
       // 探索済みの場合のみ内容を表示
-      if (exploredMap[y][x] === 1) {
-        if (map[y][x] === 1) {
+      if (exploredMap[y][x] === ExplorationState.EXPLORED) {
+        if (map[y][x] === TileType.WALL) {
           color = MINIMAP_COLORS.WALL_EXPLORED;
-        } else if (map[y][x] === 2) {
+        } else if (map[y][x] === TileType.GOAL) {
           color = MINIMAP_COLORS.GOAL;
         } else {
           color = MINIMAP_COLORS.PATH_EXPLORED;
