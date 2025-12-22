@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { GameConfig, Player } from '../types';
+import type { GameConfig, MazeMap, Player } from '../types';
+import { TileType } from '../types';
 import type { RaycastingParams } from './raycasting';
 import { renderRaycasting } from './raycasting';
 
@@ -7,7 +8,7 @@ describe('renderRaycasting', () => {
   let mockCanvas: HTMLCanvasElement;
   let mockCtx: CanvasRenderingContext2D;
   let mockPlayer: Player;
-  let mockMap: number[][];
+  let mockMap: MazeMap;
   let mockConfig: GameConfig;
 
   beforeEach(() => {
@@ -32,11 +33,11 @@ describe('renderRaycasting', () => {
 
     // シンプルな迷路マップ
     mockMap = [
-      [1, 1, 1, 1, 1],
-      [1, 0, 0, 0, 1],
-      [1, 0, 0, 0, 1],
-      [1, 0, 0, 2, 1],
-      [1, 1, 1, 1, 1],
+      [TileType.WALL, TileType.WALL, TileType.WALL, TileType.WALL, TileType.WALL],
+      [TileType.WALL, TileType.FLOOR, TileType.FLOOR, TileType.FLOOR, TileType.WALL],
+      [TileType.WALL, TileType.FLOOR, TileType.FLOOR, TileType.FLOOR, TileType.WALL],
+      [TileType.WALL, TileType.FLOOR, TileType.FLOOR, TileType.GOAL, TileType.WALL],
+      [TileType.WALL, TileType.WALL, TileType.WALL, TileType.WALL, TileType.WALL],
     ];
 
     // 設定のモックデータ
@@ -154,9 +155,9 @@ describe('renderRaycasting', () => {
   describe('空のマップでの動作', () => {
     it('壁がない場合でもエラーが発生しないこと', () => {
       const emptyMap = [
-        [0, 0, 0],
-        [0, 0, 0],
-        [0, 0, 0],
+        [TileType.FLOOR, TileType.FLOOR, TileType.FLOOR],
+        [TileType.FLOOR, TileType.FLOOR, TileType.FLOOR],
+        [TileType.FLOOR, TileType.FLOOR, TileType.FLOOR],
       ];
 
       const params: RaycastingParams = {

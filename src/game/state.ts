@@ -1,4 +1,5 @@
-import type { GameState } from '../types';
+import type { GameState, MazeMap } from '../types';
+import { ExplorationState, TileType } from '../types';
 
 /** プレイヤーのスタートグリッド座標 X */
 const START_GRID_X = 1;
@@ -18,7 +19,7 @@ const DIRECTIONS_TO_CHECK = [
  */
 export interface StartGameDependencies {
   gameState: GameState;
-  generateMaze: (size: number) => number[][];
+  generateMaze: (size: number) => MazeMap;
   menuElement: HTMLElement;
   resizeCanvas: () => void;
   render: () => void;
@@ -45,7 +46,7 @@ export function startGame(size: number, deps: StartGameDependencies): void {
   deps.gameState.map = deps.generateMaze(deps.gameState.mapSize); // ランダム迷路生成
   // 探索済みマップを初期化 (すべて未探索 0)
   deps.gameState.exploredMap = Array.from({ length: deps.gameState.mapSize }, () =>
-    Array(deps.gameState.mapSize).fill(0)
+    Array(deps.gameState.mapSize).fill(ExplorationState.UNEXPLORED)
   );
 
   // プレイヤーのマップグリッド座標
@@ -59,7 +60,7 @@ export function startGame(size: number, deps: StartGameDependencies): void {
     const checkY = startY + dy;
 
     // 座標がマップ内であり、かつ壁(1)ではないことを確認
-    if (deps.gameState.map[checkY] && deps.gameState.map[checkY][checkX] !== 1) {
+    if (deps.gameState.map[checkY] && deps.gameState.map[checkY][checkX] !== TileType.WALL) {
       initialDir = dir;
       break; // 最初の通路を見つけたら確定
     }
@@ -74,7 +75,7 @@ export function startGame(size: number, deps: StartGameDependencies): void {
   };
 
   // スタート地点を探索済みとしてマーク
-  deps.gameState.exploredMap[startY][startX] = 1;
+  deps.gameState.exploredMap[startY][startX] = ExplorationState.EXPLORED;
 
   deps.menuElement.style.display = 'none';
   deps.gameState.gameActive = true;

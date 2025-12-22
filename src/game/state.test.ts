@@ -1,15 +1,15 @@
-import type { GameState } from '../types';
+import { ExplorationState, type GameState, type MazeMap, TileType } from '../types';
 import { type StartGameDependencies, startGame } from './state';
 
 describe('startGame', () => {
-  const createMockMaze = (size: number): number[][] => {
-    const maze = Array.from({ length: size }, () => Array(size).fill(1));
+  const createMockMaze = (size: number): MazeMap => {
+    const maze = Array.from({ length: size }, () => Array(size).fill(TileType.WALL));
     // スタート地点を通路に
-    maze[1][1] = 0;
+    maze[1][1] = TileType.FLOOR;
     // ゴール地点をゴールに
-    maze[size - 2][size - 2] = 2;
+    maze[size - 2][size - 2] = TileType.GOAL;
     // スタートから右に通路を作る
-    maze[1][2] = 0;
+    maze[1][2] = TileType.FLOOR;
     return maze;
   };
 
@@ -126,7 +126,7 @@ describe('startGame', () => {
 
       startGame(11, deps);
 
-      expect(gameState.exploredMap[1][1]).toBe(1);
+      expect(gameState.exploredMap[1][1]).toBe(ExplorationState.EXPLORED);
     });
 
     it('スタート地点以外が未探索(0)であること', () => {
@@ -140,7 +140,7 @@ describe('startGame', () => {
       for (let y = 0; y < size; y++) {
         for (let x = 0; x < size; x++) {
           if (x === 1 && y === 1) continue;
-          expect(gameState.exploredMap[y][x]).toBe(0);
+          expect(gameState.exploredMap[y][x]).toBe(ExplorationState.UNEXPLORED);
         }
       }
     });

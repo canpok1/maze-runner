@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { GameConfig, GameState } from '../types';
+import { ExplorationState, type GameConfig, type GameState, TileType } from '../types';
 import type { RenderDependencies } from './index';
 import { createRenderer } from './index';
 
@@ -16,18 +16,48 @@ describe('createRenderer', () => {
     // ゲームステートのモック
     mockGameState = {
       map: [
-        [1, 1, 1, 1, 1],
-        [1, 0, 0, 0, 1],
-        [1, 0, 1, 0, 1],
-        [1, 0, 0, 2, 1],
-        [1, 1, 1, 1, 1],
+        [TileType.WALL, TileType.WALL, TileType.WALL, TileType.WALL, TileType.WALL],
+        [TileType.WALL, TileType.FLOOR, TileType.FLOOR, TileType.FLOOR, TileType.WALL],
+        [TileType.WALL, TileType.FLOOR, TileType.WALL, TileType.FLOOR, TileType.WALL],
+        [TileType.WALL, TileType.FLOOR, TileType.FLOOR, TileType.GOAL, TileType.WALL],
+        [TileType.WALL, TileType.WALL, TileType.WALL, TileType.WALL, TileType.WALL],
       ],
       exploredMap: [
-        [0, 0, 0, 0, 0],
-        [0, 1, 0, 0, 0],
-        [0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0],
+        [
+          ExplorationState.UNEXPLORED,
+          ExplorationState.UNEXPLORED,
+          ExplorationState.UNEXPLORED,
+          ExplorationState.UNEXPLORED,
+          ExplorationState.UNEXPLORED,
+        ],
+        [
+          ExplorationState.UNEXPLORED,
+          ExplorationState.EXPLORED,
+          ExplorationState.UNEXPLORED,
+          ExplorationState.UNEXPLORED,
+          ExplorationState.UNEXPLORED,
+        ],
+        [
+          ExplorationState.UNEXPLORED,
+          ExplorationState.UNEXPLORED,
+          ExplorationState.UNEXPLORED,
+          ExplorationState.UNEXPLORED,
+          ExplorationState.UNEXPLORED,
+        ],
+        [
+          ExplorationState.UNEXPLORED,
+          ExplorationState.UNEXPLORED,
+          ExplorationState.UNEXPLORED,
+          ExplorationState.UNEXPLORED,
+          ExplorationState.UNEXPLORED,
+        ],
+        [
+          ExplorationState.UNEXPLORED,
+          ExplorationState.UNEXPLORED,
+          ExplorationState.UNEXPLORED,
+          ExplorationState.UNEXPLORED,
+          ExplorationState.UNEXPLORED,
+        ],
       ],
       mapSize: 5,
       player: {
@@ -166,7 +196,7 @@ describe('createRenderer', () => {
     it('プレイヤーの探索済みマップを更新する', () => {
       mockGameState.player.x = 2.5;
       mockGameState.player.y = 1.5;
-      mockGameState.exploredMap[1][2] = 0; // 未探索
+      mockGameState.exploredMap[1][2] = ExplorationState.UNEXPLORED; // 未探索
 
       const renderer = createRenderer(deps);
       renderer.render();
@@ -176,14 +206,14 @@ describe('createRenderer', () => {
         mockGameState.exploredMap[Math.floor(mockGameState.player.y)][
           Math.floor(mockGameState.player.x)
         ]
-      ).toBe(1);
+      ).toBe(ExplorationState.EXPLORED);
     });
 
     it('ゴール位置に到達した場合winコールバックを呼び出す', () => {
       // ゴール位置（3, 3）に配置
       mockGameState.player.x = 3.5;
       mockGameState.player.y = 3.5;
-      mockGameState.map[3][3] = 2; // ゴール
+      mockGameState.map[3][3] = TileType.GOAL; // ゴール
 
       const renderer = createRenderer(deps);
       renderer.render();
@@ -194,7 +224,7 @@ describe('createRenderer', () => {
     it('ゴール到達時はrequestAnimationFrameを呼び出さない', () => {
       mockGameState.player.x = 3.5;
       mockGameState.player.y = 3.5;
-      mockGameState.map[3][3] = 2;
+      mockGameState.map[3][3] = TileType.GOAL;
 
       const renderer = createRenderer(deps);
       renderer.render();
