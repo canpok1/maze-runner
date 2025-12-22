@@ -1,10 +1,7 @@
-// --- 型定義 ---
-interface Player {
-  x: number;
-  y: number;
-  dir: number;
-  speed: number;
-}
+// --- インポート ---
+
+import { config } from './config';
+import type { GameState } from './types';
 
 // --- DOM要素の取得とバリデーション ---
 function getRequiredElement<T extends HTMLElement>(id: string, type: new () => T): T {
@@ -29,24 +26,16 @@ const ctx = getRequired2DContext(canvas);
 const timerElement = getRequiredElement('timer', HTMLElement);
 const menuElement = getRequiredElement('menu', HTMLElement);
 
-// 45度 (π/4) をラジアンで定義
-const ROTATION_STEP = Math.PI / 4;
-// 最小距離 (これより近い距離はクリップされる)
-const MIN_DISTANCE = 0.3;
-// 壁の高さの最大値 (画面の高さの 2倍に制限)
-const MAX_WALL_HEIGHT_FACTOR = 2;
-
-// ミニマップの設定
-const MINI_MAP_SIZE = 150; // ミニマップの幅と高さ (pixels)
-const MAP_PADDING = 10;
-
-let map: number[][] = []; // 迷路データ (1: 壁, 0: 通路, 2: ゴール)
-let exploredMap: number[][] = []; // 探索済みデータ (0: 未探索, 1: 探索済み)
-let mapSize = 11;
-let player: Player = { x: 1.5, y: 1.5, dir: 0, speed: 0 }; // プレイヤー位置, 向き, 移動速度
-let gameActive = false;
-let startTime = 0;
-let animationId: number;
+// ゲームの状態
+const gameState: GameState = {
+  map: [], // 迷路データ (1: 壁, 0: 通路, 2: ゴール)
+  exploredMap: [], // 探索済みデータ (0: 未探索, 1: 探索済み)
+  mapSize: 11,
+  player: { x: 1.5, y: 1.5, dir: 0, speed: 0 }, // プレイヤー位置, 向き, 移動速度
+  gameActive: false,
+  startTime: 0,
+  animationId: 0,
+};
 
 // --- 迷路生成関数 (穴掘り法) ---
 function generateMaze(size: number): number[][] {
@@ -89,10 +78,12 @@ function generateMaze(size: number): number[][] {
 
 // --- ゲーム開始 ---
 function startGame(size: number): void {
-  mapSize = size;
-  map = generateMaze(mapSize); // ランダム迷路生成
+  gameState.mapSize = size;
+  gameState.map = generateMaze(gameState.mapSize); // ランダム迷路生成
   // 探索済みマップを初期化 (すべて未探索 0)
-  exploredMap = Array.from({ length: mapSize }, () => Array(mapSize).fill(0));
+  gameState.exploredMap = Array.from({ length: gameState.mapSize }, () =>
+    Array(gameState.mapSize).fill(0)
+  );
 
   // プレイヤーのマップグリッド座標
   const startX = 1;
@@ -113,55 +104,61 @@ function startGame(size: number): void {
     const checkY = startY + dy;
 
     // 座標がマップ内であり、かつ壁(1)ではないことを確認
-    if (map[checkY] && map[checkY][checkX] !== 1) {
+    if (gameState.map[checkY] && gameState.map[checkY][checkX] !== 1) {
       initialDir = dir;
       break; // 最初の通路を見つけたら確定
     }
   }
 
   // プレイヤーの初期設定
-  player = { x: 1.5, y: 1.5, dir: initialDir, speed: 0 };
+  gameState.player = { x: 1.5, y: 1.5, dir: initialDir, speed: 0 };
 
   // スタート地点を探索済みとしてマーク
-  exploredMap[startY][startX] = 1;
+  gameState.exploredMap[startY][startX] = 1;
 
   menuElement.style.display = 'none';
-  gameActive = true;
-  startTime = Date.now();
+  gameState.gameActive = true;
+  gameState.startTime = Date.now();
 
   resizeCanvas();
-  if (animationId) cancelAnimationFrame(animationId);
+  if (gameState.animationId) cancelAnimationFrame(gameState.animationId);
   render();
 }
 
 // --- レイキャスティング描画ループ ---
 function render(): void {
-  if (!gameActive) return;
+  if (!gameState.gameActive) return;
 
   // 1. タイマー更新
-  timerElement.innerText = ((Date.now() - startTime) / 1000).toFixed(2);
+  timerElement.innerText = ((Date.now() - gameState.startTime) / 1000).toFixed(2);
 
   // 2. プレイヤーの移動
-  const moveStep = player.speed;
+  const moveStep = gameState.player.speed;
 
-  const nx = player.x + Math.cos(player.dir) * moveStep;
-  const ny = player.y + Math.sin(player.dir) * moveStep;
+  const nx = gameState.player.x + Math.cos(gameState.player.dir) * moveStep;
+  const ny = gameState.player.y + Math.sin(gameState.player.dir) * moveStep;
 
   // 壁衝突判定 (マージンを設ける)
   const margin = 0.2;
-  const checkX = player.x + Math.cos(player.dir) * moveStep * (1 + margin);
-  const checkY = player.y + Math.sin(player.dir) * moveStep * (1 + margin);
+  const checkX = gameState.player.x + Math.cos(gameState.player.dir) * moveStep * (1 + margin);
+  const checkY = gameState.player.y + Math.sin(gameState.player.dir) * moveStep * (1 + margin);
 
-  if (map[Math.floor(checkY)] && map[Math.floor(checkY)][Math.floor(checkX)] !== 1) {
-    player.x = nx;
-    player.y = ny;
+  if (
+    gameState.map[Math.floor(checkY)] &&
+    gameState.map[Math.floor(checkY)][Math.floor(checkX)] !== 1
+  ) {
+    gameState.player.x = nx;
+    gameState.player.y = ny;
 
     // 探索済みタイルを更新
-    exploredMap[Math.floor(player.y)][Math.floor(player.x)] = 1;
+    gameState.exploredMap[Math.floor(gameState.player.y)][Math.floor(gameState.player.x)] = 1;
   }
 
   // 3. ゴール判定
-  if (map[Math.floor(player.y)] && map[Math.floor(player.y)][Math.floor(player.x)] === 2) {
+  if (
+    gameState.map[Math.floor(gameState.player.y)] &&
+    gameState.map[Math.floor(gameState.player.y)][Math.floor(gameState.player.x)] === 2
+  ) {
     win();
     return;
   }
@@ -178,36 +175,36 @@ function render(): void {
   const fov = Math.PI / 3;
   const rayCount = 320;
   const sliceWidth = cw / rayCount;
-  const maxWallHeight = ch * MAX_WALL_HEIGHT_FACTOR;
+  const maxWallHeight = ch * config.maxWallHeightFactor;
 
   for (let i = 0; i < rayCount; i++) {
-    const rayAngle = player.dir - fov / 2 + (i / rayCount) * fov;
+    const rayAngle = gameState.player.dir - fov / 2 + (i / rayCount) * fov;
     let distance = 0;
     let hitType = 0;
 
     while (distance < 30) {
       distance += 0.05;
-      const rx = player.x + Math.cos(rayAngle) * distance;
-      const ry = player.y + Math.sin(rayAngle) * distance;
+      const rx = gameState.player.x + Math.cos(rayAngle) * distance;
+      const ry = gameState.player.y + Math.sin(rayAngle) * distance;
 
       const mapX = Math.floor(rx);
       const mapY = Math.floor(ry);
 
-      if (map[mapY] && map[mapY][mapX] === 1) {
+      if (gameState.map[mapY] && gameState.map[mapY][mapX] === 1) {
         hitType = 1;
         break;
       }
-      if (map[mapY] && map[mapY][mapX] === 2) {
+      if (gameState.map[mapY] && gameState.map[mapY][mapX] === 2) {
         hitType = 2;
         break;
       }
     }
 
     // 魚眼レンズ効果の補正
-    let correctedDistance = distance * Math.cos(rayAngle - player.dir);
+    let correctedDistance = distance * Math.cos(rayAngle - gameState.player.dir);
 
     // 近すぎる距離をクリップ
-    correctedDistance = Math.max(correctedDistance, MIN_DISTANCE);
+    correctedDistance = Math.max(correctedDistance, config.minDistance);
 
     // 壁の高さ
     let wallHeight = ch / (correctedDistance || 0.01);
@@ -226,10 +223,10 @@ function render(): void {
       wallColor = `rgb(255, ${colorValue * 0.5}, ${colorValue * 0.5})`;
     } else if (hitType === 1) {
       // 壁に簡単なテクスチャ効果（横の影）
-      const mapTileX = Math.floor(player.x + Math.cos(rayAngle) * distance);
+      const mapTileX = Math.floor(gameState.player.x + Math.cos(rayAngle) * distance);
       const isVerticalHit =
-        Math.abs(mapTileX - (player.x + Math.cos(rayAngle) * distance)) < 0.05 ||
-        Math.abs(mapTileX + 1 - (player.x + Math.cos(rayAngle) * distance)) < 0.05;
+        Math.abs(mapTileX - (gameState.player.x + Math.cos(rayAngle) * distance)) < 0.05 ||
+        Math.abs(mapTileX + 1 - (gameState.player.x + Math.cos(rayAngle) * distance)) < 0.05;
 
       if (isVerticalHit) {
         colorValue = Math.floor(colorValue * 0.8);
@@ -242,26 +239,26 @@ function render(): void {
   }
 
   // --- 6. ミニマップ描画 ---
-  const cellSize = MINI_MAP_SIZE / mapSize;
+  const cellSize = config.miniMapSize / gameState.mapSize;
 
   // 背景 (右上に描画)
   ctx.globalAlpha = 0.8;
   ctx.fillStyle = '#111122'; // 濃い背景
-  const mapOriginX = cw - MINI_MAP_SIZE - MAP_PADDING;
-  const mapOriginY = MAP_PADDING;
-  ctx.fillRect(mapOriginX, mapOriginY, MINI_MAP_SIZE, MINI_MAP_SIZE);
+  const mapOriginX = cw - config.miniMapSize - config.mapPadding;
+  const mapOriginY = config.mapPadding;
+  ctx.fillRect(mapOriginX, mapOriginY, config.miniMapSize, config.miniMapSize);
   ctx.globalAlpha = 1.0;
 
   // 迷路の描画
-  for (let y = 0; y < mapSize; y++) {
-    for (let x = 0; x < mapSize; x++) {
+  for (let y = 0; y < gameState.mapSize; y++) {
+    for (let x = 0; x < gameState.mapSize; x++) {
       let color = '';
 
       // 探索済みの場合のみ内容を表示
-      if (exploredMap[y][x] === 1) {
-        if (map[y][x] === 1) {
+      if (gameState.exploredMap[y][x] === 1) {
+        if (gameState.map[y][x] === 1) {
           color = '#555577'; // 壁 (探索済み)
-        } else if (map[y][x] === 2) {
+        } else if (gameState.map[y][x] === 2) {
           color = '#ff4444'; // ゴール
         } else {
           color = '#222244'; // 通路 (探索済み)
@@ -277,8 +274,8 @@ function render(): void {
   }
 
   // プレイヤーの描画
-  const pX = mapOriginX + player.x * cellSize;
-  const pY = mapOriginY + player.y * cellSize;
+  const pX = mapOriginX + gameState.player.x * cellSize;
+  const pY = mapOriginY + gameState.player.y * cellSize;
   const playerRadius = cellSize / 3;
 
   // プレイヤー円 (緑)
@@ -293,19 +290,22 @@ function render(): void {
   ctx.lineWidth = 2;
   ctx.beginPath();
   ctx.moveTo(pX, pY);
-  ctx.lineTo(pX + Math.cos(player.dir) * dirLength, pY + Math.sin(player.dir) * dirLength);
+  ctx.lineTo(
+    pX + Math.cos(gameState.player.dir) * dirLength,
+    pY + Math.sin(gameState.player.dir) * dirLength
+  );
   ctx.stroke();
   // --- ミニマップ描画 終了 ---
 
-  animationId = requestAnimationFrame(render);
+  gameState.animationId = requestAnimationFrame(render);
 }
 
 // --- クリア処理 ---
 function win(): void {
-  gameActive = false;
-  cancelAnimationFrame(animationId);
+  gameState.gameActive = false;
+  cancelAnimationFrame(gameState.animationId);
 
-  const score = ((Date.now() - startTime) / 1000).toFixed(2);
+  const score = ((Date.now() - gameState.startTime) / 1000).toFixed(2);
 
   const lastScoreElement = document.getElementById('last-score');
   if (lastScoreElement) {
@@ -325,33 +325,31 @@ function resizeCanvas(): void {
 
 // --- 入力（タッチ/マウス）処理 ---
 function setupControls(): void {
-  const MOVE_SPEED = 0.1; // 移動速度
-
   const controlMappings: { id: string; type: 'move' | 'rot'; val: number }[] = [
     // 移動: 連続入力 (start/end)
-    { id: 'forward', type: 'move', val: MOVE_SPEED },
-    { id: 'backward', type: 'move', val: -MOVE_SPEED },
+    { id: 'forward', type: 'move', val: config.moveSpeed },
+    { id: 'backward', type: 'move', val: -config.moveSpeed },
 
     // 旋回: 離散入力 (tap/click のみ)
-    { id: 'left', type: 'rot', val: -ROTATION_STEP },
-    { id: 'right', type: 'rot', val: ROTATION_STEP },
+    { id: 'left', type: 'rot', val: -config.rotationStep },
+    { id: 'right', type: 'rot', val: config.rotationStep },
   ];
 
   const startHandler = (e: Event, type: 'move' | 'rot', val: number): void => {
     e.preventDefault();
-    if (!gameActive) return;
+    if (!gameState.gameActive) return;
 
     if (type === 'move') {
-      player.speed = val;
+      gameState.player.speed = val;
     } else if (type === 'rot') {
-      player.dir += val;
+      gameState.player.dir += val;
     }
   };
 
   const endHandler = (_e: Event, type: 'move' | 'rot'): void => {
-    if (!gameActive) return;
+    if (!gameState.gameActive) return;
     if (type === 'move') {
-      player.speed = 0;
+      gameState.player.speed = 0;
     }
     // 旋回はタップ/クリックで完結するため、endHandlerは不要
   };
