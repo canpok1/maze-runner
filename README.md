@@ -22,7 +22,9 @@ npm run dev
 |-----------|------|
 | `npm run dev` | ローカル開発サーバーを起動 |
 | `npm run deploy` | Cloudflare Workersへ手動デプロイ |
-| `npm run cf-typegen` | Cloudflareバインディングの型定義を生成 |
+| `npm run lint` | コードの静的解析・フォーマットチェック |
+| `npm run lint:fix` | 静的解析とフォーマットを自動修正 |
+| `npm run format` | コードフォーマットのみ実行 |
 
 ## 型定義の生成
 
