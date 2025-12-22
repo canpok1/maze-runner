@@ -1,15 +1,13 @@
-name: Release
+name: PR Check
 
 on:
-  push:
+  pull_request:
     branches:
       - main
 
 jobs:
-  deploy-production:
+  pr-check:
     runs-on: ubuntu-latest
-    environment:
-      name: production
     steps:
       - uses: actions/checkout@v4
       - name: Setup Node.js
@@ -23,9 +21,3 @@ jobs:
         run: npm run lint
       - name: Build
         run: npm run build
-      - name: Deploy
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          wranglerVersion: "4.4.0"

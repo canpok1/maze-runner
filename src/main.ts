@@ -59,11 +59,17 @@ function generateMaze(size: number): number[][] {
   function walk(x: number, y: number): void {
     newMap[y][x] = 0; // 現在地を通路にする
     // 掘り進む方向 (東, 西, 南, 北) をランダムにシャッフル
-    const dirs: [number, number][] = [[0, 2], [0, -2], [2, 0], [-2, 0]];
+    const dirs: [number, number][] = [
+      [0, 2],
+      [0, -2],
+      [2, 0],
+      [-2, 0],
+    ];
     dirs.sort(() => Math.random() - 0.5);
 
     for (const [dx, dy] of dirs) {
-      const nx = x + dx, ny = y + dy; // 2マス先の座標
+      const nx = x + dx,
+        ny = y + dy; // 2マス先の座標
 
       // 2マス先がマップ内でかつ壁(1)であれば
       if (nx > 0 && nx < size - 1 && ny > 0 && ny < size - 1 && newMap[ny][nx] === 1) {
@@ -95,10 +101,10 @@ function startGame(size: number): void {
 
   // 方向チェック: (dx, dy, direction_in_radians) [東, 南, 西, 北 の順]
   const directionsToCheck = [
-    { dx: 1, dy: 0, dir: 0 },              // East (右)
-    { dx: 0, dy: 1, dir: Math.PI / 2 },    // South (下)
-    { dx: -1, dy: 0, dir: Math.PI },       // West (左)
-    { dx: 0, dy: -1, dir: 3 * Math.PI / 2 }, // North (上)
+    { dx: 1, dy: 0, dir: 0 }, // East (右)
+    { dx: 0, dy: 1, dir: Math.PI / 2 }, // South (下)
+    { dx: -1, dy: 0, dir: Math.PI }, // West (左)
+    { dx: 0, dy: -1, dir: (3 * Math.PI) / 2 }, // North (上)
   ];
 
   // 通路が開いている方向を探索
@@ -163,9 +169,9 @@ function render(): void {
   // 4. 画面クリア (天井と床)
   const cw = canvas.width;
   const ch = canvas.height;
-  ctx.fillStyle = "#5c5c8a"; // 天井色
+  ctx.fillStyle = '#5c5c8a'; // 天井色
   ctx.fillRect(0, 0, cw, ch / 2);
-  ctx.fillStyle = "#778899"; // 床色
+  ctx.fillStyle = '#778899'; // 床色
   ctx.fillRect(0, ch / 2, cw, ch / 2);
 
   // 5. 疑似3D壁描画 (レイキャスティング)
@@ -175,7 +181,7 @@ function render(): void {
   const maxWallHeight = ch * MAX_WALL_HEIGHT_FACTOR;
 
   for (let i = 0; i < rayCount; i++) {
-    const rayAngle = (player.dir - fov / 2) + (i / rayCount) * fov;
+    const rayAngle = player.dir - fov / 2 + (i / rayCount) * fov;
     let distance = 0;
     let hitType = 0;
 
@@ -209,7 +215,6 @@ function render(): void {
     // 壁の高さを制限
     wallHeight = Math.min(wallHeight, maxWallHeight);
 
-
     // 影（距離に応じて暗くする）
     const darkness = Math.min(1, correctedDistance / 10);
     let colorValue = Math.floor(255 * (1 - darkness));
@@ -222,7 +227,9 @@ function render(): void {
     } else if (hitType === 1) {
       // 壁に簡単なテクスチャ効果（横の影）
       const mapTileX = Math.floor(player.x + Math.cos(rayAngle) * distance);
-      const isVerticalHit = Math.abs(mapTileX - (player.x + Math.cos(rayAngle) * distance)) < 0.05 || Math.abs(mapTileX + 1 - (player.x + Math.cos(rayAngle) * distance)) < 0.05;
+      const isVerticalHit =
+        Math.abs(mapTileX - (player.x + Math.cos(rayAngle) * distance)) < 0.05 ||
+        Math.abs(mapTileX + 1 - (player.x + Math.cos(rayAngle) * distance)) < 0.05;
 
       if (isVerticalHit) {
         colorValue = Math.floor(colorValue * 0.8);
@@ -286,10 +293,7 @@ function render(): void {
   ctx.lineWidth = 2;
   ctx.beginPath();
   ctx.moveTo(pX, pY);
-  ctx.lineTo(
-    pX + Math.cos(player.dir) * dirLength,
-    pY + Math.sin(player.dir) * dirLength
-  );
+  ctx.lineTo(pX + Math.cos(player.dir) * dirLength, pY + Math.sin(player.dir) * dirLength);
   ctx.stroke();
   // --- ミニマップ描画 終了 ---
 
@@ -321,7 +325,7 @@ function resizeCanvas(): void {
 
 // --- 入力（タッチ/マウス）処理 ---
 function setupControls(): void {
-  const MOVE_SPEED = 0.10; // 移動速度
+  const MOVE_SPEED = 0.1; // 移動速度
 
   const controlMappings: { id: string; type: 'move' | 'rot'; val: number }[] = [
     // 移動: 連続入力 (start/end)
@@ -330,7 +334,7 @@ function setupControls(): void {
 
     // 旋回: 離散入力 (tap/click のみ)
     { id: 'left', type: 'rot', val: -ROTATION_STEP },
-    { id: 'right', type: 'rot', val: ROTATION_STEP }
+    { id: 'right', type: 'rot', val: ROTATION_STEP },
   ];
 
   const startHandler = (e: Event, type: 'move' | 'rot', val: number): void => {
@@ -366,9 +370,7 @@ function setupControls(): void {
       el.addEventListener('mousedown', (e) => startHandler(e, type, val));
       el.addEventListener('mouseup', (e) => endHandler(e, type));
       el.addEventListener('mouseleave', (e) => endHandler(e, type));
-    }
-
-    else if (type === 'rot') {
+    } else if (type === 'rot') {
       // 離散入力のイベント設定 (タッチ開始またはマウスダウンで即時実行)
       el.addEventListener('touchstart', (e) => startHandler(e, type, val));
       el.addEventListener('mousedown', (e) => startHandler(e, type, val));
