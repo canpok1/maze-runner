@@ -7,6 +7,7 @@ import {
   type WinDependencies,
   win as winCore,
 } from './game/state';
+import { setupControls } from './input/controls';
 import { generateMaze } from './maze/generator';
 import type { GameState } from './types';
 
@@ -251,59 +252,6 @@ function resizeCanvas(): void {
   canvas.height = canvas.parentElement.clientHeight;
 }
 
-// --- 入力（タッチ/マウス）処理 ---
-function setupControls(): void {
-  const controlMappings: { id: string; type: 'move' | 'rot'; val: number }[] = [
-    // 移動: 連続入力 (start/end)
-    { id: 'forward', type: 'move', val: config.moveSpeed },
-    { id: 'backward', type: 'move', val: -config.moveSpeed },
-
-    // 旋回: 離散入力 (tap/click のみ)
-    { id: 'left', type: 'rot', val: -config.rotationStep },
-    { id: 'right', type: 'rot', val: config.rotationStep },
-  ];
-
-  const startHandler = (e: Event, type: 'move' | 'rot', val: number): void => {
-    e.preventDefault();
-    if (!gameState.gameActive) return;
-
-    if (type === 'move') {
-      gameState.player.speed = val;
-    } else if (type === 'rot') {
-      gameState.player.dir += val;
-    }
-  };
-
-  const endHandler = (_e: Event, type: 'move' | 'rot'): void => {
-    if (!gameState.gameActive) return;
-    if (type === 'move') {
-      gameState.player.speed = 0;
-    }
-    // 旋回はタップ/クリックで完結するため、endHandlerは不要
-  };
-
-  controlMappings.forEach(({ id, type, val }) => {
-    const el = document.getElementById(id);
-    if (!el) {
-      throw new Error(`Required control element #${id} not found.`);
-    }
-
-    if (type === 'move') {
-      // 連続入力のイベント設定
-      el.addEventListener('touchstart', (e) => startHandler(e, type, val));
-      el.addEventListener('touchend', (e) => endHandler(e, type));
-      el.addEventListener('touchcancel', (e) => endHandler(e, type));
-      el.addEventListener('mousedown', (e) => startHandler(e, type, val));
-      el.addEventListener('mouseup', (e) => endHandler(e, type));
-      el.addEventListener('mouseleave', (e) => endHandler(e, type));
-    } else if (type === 'rot') {
-      // 離散入力のイベント設定 (タッチ開始またはマウスダウンで即時実行)
-      el.addEventListener('touchstart', (e) => startHandler(e, type, val));
-      el.addEventListener('mousedown', (e) => startHandler(e, type, val));
-    }
-  });
-}
-
 // --- 難易度ボタンのイベント設定 ---
 function setupDifficultyButtons(): void {
   const buttons = document.querySelectorAll('.diff-btn');
@@ -317,7 +265,7 @@ function setupDifficultyButtons(): void {
 
 // --- 初期化 ---
 window.addEventListener('load', () => {
-  setupControls();
+  setupControls(gameState);
   setupDifficultyButtons();
   resizeCanvas();
   window.addEventListener('resize', resizeCanvas);
