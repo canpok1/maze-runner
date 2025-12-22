@@ -74,16 +74,17 @@ function setupTouchAndMouseControls(gameState: GameState): void {
 
     if (type === 'move') {
       // 連続入力のイベント設定
-      el.addEventListener('touchstart', (e) => startHandler(e, type, val));
-      el.addEventListener('touchend', (e) => endHandler(e, type));
-      el.addEventListener('touchcancel', (e) => endHandler(e, type));
-      el.addEventListener('mousedown', (e) => startHandler(e, type, val));
-      el.addEventListener('mouseup', (e) => endHandler(e, type));
-      el.addEventListener('mouseleave', (e) => endHandler(e, type));
+      ['touchstart', 'mousedown'].forEach((event) => {
+        el.addEventListener(event, (e) => startHandler(e, type, val));
+      });
+      ['touchend', 'touchcancel', 'mouseup', 'mouseleave'].forEach((event) => {
+        el.addEventListener(event, (e) => endHandler(e, type));
+      });
     } else if (type === 'rot') {
       // 離散入力のイベント設定 (タッチ開始またはマウスダウンで即時実行)
-      el.addEventListener('touchstart', (e) => startHandler(e, type, val));
-      el.addEventListener('mousedown', (e) => startHandler(e, type, val));
+      ['touchstart', 'mousedown'].forEach((event) => {
+        el.addEventListener(event, (e) => startHandler(e, type, val));
+      });
     }
   });
 }
@@ -95,62 +96,52 @@ function setupTouchAndMouseControls(gameState: GameState): void {
  * @param gameState ゲーム状態
  */
 function setupKeyboardControls(gameState: GameState): void {
-  /**
-   * keydown イベントハンドラー
-   */
   const handleKeyDown = (e: KeyboardEvent): void => {
     if (!gameState.gameActive) return;
-
     const key = e.key.toLowerCase();
 
-    // 移動キー: W, S, ↑, ↓
-    if (key === 'w' || key === 'arrowup') {
-      gameState.player.speed = config.moveSpeed;
-      e.preventDefault();
-    } else if (key === 's' || key === 'arrowdown') {
-      gameState.player.speed = -config.moveSpeed;
+    const isNewPress = !pressedKeys.has(key);
+    pressedKeys.add(key);
+
+    // Movement
+    if (['w', 'arrowup', 's', 'arrowdown'].includes(key)) {
+      let move = 0;
+      if (pressedKeys.has('w') || pressedKeys.has('arrowup')) move += 1;
+      if (pressedKeys.has('s') || pressedKeys.has('arrowdown')) move -= 1;
+      gameState.player.speed = move * config.moveSpeed;
       e.preventDefault();
     }
 
-    // 旋回キー: A, D, ←, →
-    // キーリピート対策: 既に押下中の場合は無視
-    if (!pressedKeys.has(key)) {
+    // Rotation (only on first press)
+    if (isNewPress) {
       if (key === 'a' || key === 'arrowleft') {
         gameState.player.dir -= config.rotationStep;
-        pressedKeys.add(key);
         e.preventDefault();
       } else if (key === 'd' || key === 'arrowright') {
         gameState.player.dir += config.rotationStep;
-        pressedKeys.add(key);
         e.preventDefault();
       }
     }
   };
 
-  /**
-   * keyup イベントハンドラー
-   */
   const handleKeyUp = (e: KeyboardEvent): void => {
     if (!gameState.gameActive) return;
-
     const key = e.key.toLowerCase();
 
-    // 移動キーを離した時: 現在の速度方向と一致する場合のみ停止
-    if (key === 'w' || key === 'arrowup') {
-      if (gameState.player.speed > 0) {
-        gameState.player.speed = 0;
-      }
-      e.preventDefault();
-    } else if (key === 's' || key === 'arrowdown') {
-      if (gameState.player.speed < 0) {
-        gameState.player.speed = 0;
-      }
+    if (!pressedKeys.has(key)) return;
+    pressedKeys.delete(key);
+
+    // Movement
+    if (['w', 'arrowup', 's', 'arrowdown'].includes(key)) {
+      let move = 0;
+      if (pressedKeys.has('w') || pressedKeys.has('arrowup')) move += 1;
+      if (pressedKeys.has('s') || pressedKeys.has('arrowdown')) move -= 1;
+      gameState.player.speed = move * config.moveSpeed;
       e.preventDefault();
     }
 
-    // 旋回キーを離した時: 押下中キーのセットから削除
-    if (key === 'a' || key === 'arrowleft' || key === 'd' || key === 'arrowright') {
-      pressedKeys.delete(key);
+    // Rotation
+    if (['a', 'arrowleft', 'd', 'arrowright'].includes(key)) {
       e.preventDefault();
     }
   };
