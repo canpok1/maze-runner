@@ -6,11 +6,28 @@ interface Player {
   speed: number;
 }
 
+// --- DOM要素の取得とバリデーション ---
+function getRequiredElement<T extends HTMLElement>(id: string, type: new () => T): T {
+  const element = document.getElementById(id);
+  if (!(element instanceof type)) {
+    throw new Error(`Required element #${id} not found or is not a ${type.name}.`);
+  }
+  return element;
+}
+
+function getRequired2DContext(canvas: HTMLCanvasElement): CanvasRenderingContext2D {
+  const ctx = canvas.getContext('2d');
+  if (!ctx) {
+    throw new Error('Failed to get 2D rendering context.');
+  }
+  return ctx;
+}
+
 // --- ゲーム定数と変数 ---
-const canvas = document.getElementById('gameCanvas') as HTMLCanvasElement;
-const ctx = canvas.getContext('2d')!;
-const timerElement = document.getElementById('timer')!;
-const menuElement = document.getElementById('menu') as HTMLElement;
+const canvas = getRequiredElement('gameCanvas', HTMLCanvasElement);
+const ctx = getRequired2DContext(canvas);
+const timerElement = getRequiredElement('timer', HTMLElement);
+const menuElement = getRequiredElement('menu', HTMLElement);
 
 // 45度 (π/4) をラジアンで定義
 const ROTATION_STEP = Math.PI / 4;
@@ -90,7 +107,7 @@ function startGame(size: number): void {
     const checkY = startY + dy;
 
     // 座標がマップ内であり、かつ壁(1)ではないことを確認
-    if (map[checkY] !== undefined && map[checkY][checkX] !== undefined && map[checkY][checkX] !== 1) {
+    if (map[checkY] && map[checkY][checkX] !== 1) {
       initialDir = dir;
       break; // 最初の通路を見つけたら確定
     }
@@ -286,20 +303,25 @@ function win(): void {
 
   const score = ((Date.now() - startTime) / 1000).toFixed(2);
 
-  document.getElementById('last-score')!.innerHTML = `<h2>CLEAR! クリアタイム: ${score}秒</h2>`;
+  const lastScoreElement = document.getElementById('last-score');
+  if (lastScoreElement) {
+    lastScoreElement.innerHTML = `<h2>CLEAR! クリアタイム: ${score}秒</h2>`;
+  }
   menuElement.style.display = 'flex';
 }
 
 // --- キャンバスサイズ調整 ---
 function resizeCanvas(): void {
-  canvas.width = canvas.parentElement!.clientWidth;
-  canvas.height = canvas.parentElement!.clientHeight;
+  if (!canvas.parentElement) {
+    throw new Error('Canvas parent element not found.');
+  }
+  canvas.width = canvas.parentElement.clientWidth;
+  canvas.height = canvas.parentElement.clientHeight;
 }
 
 // --- 入力（タッチ/マウス）処理 ---
 function setupControls(): void {
   const MOVE_SPEED = 0.10; // 移動速度
-  const CTRL_ROTATION_STEP = Math.PI / 4; // 45度旋回
 
   const controlMappings: { id: string; type: 'move' | 'rot'; val: number }[] = [
     // 移動: 連続入力 (start/end)
@@ -307,8 +329,8 @@ function setupControls(): void {
     { id: 'backward', type: 'move', val: -MOVE_SPEED },
 
     // 旋回: 離散入力 (tap/click のみ)
-    { id: 'left', type: 'rot', val: -CTRL_ROTATION_STEP },
-    { id: 'right', type: 'rot', val: CTRL_ROTATION_STEP }
+    { id: 'left', type: 'rot', val: -ROTATION_STEP },
+    { id: 'right', type: 'rot', val: ROTATION_STEP }
   ];
 
   const startHandler = (e: Event, type: 'move' | 'rot', val: number): void => {
@@ -331,7 +353,10 @@ function setupControls(): void {
   };
 
   controlMappings.forEach(({ id, type, val }) => {
-    const el = document.getElementById(id)!;
+    const el = document.getElementById(id);
+    if (!el) {
+      throw new Error(`Required control element #${id} not found.`);
+    }
 
     if (type === 'move') {
       // 連続入力のイベント設定
