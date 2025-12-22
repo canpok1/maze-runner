@@ -1,8 +1,8 @@
-import { ExplorationState, type GameState, TileType } from '../types';
+import { ExplorationState, type GameState, type MazeMap, TileType } from '../types';
 import { type StartGameDependencies, startGame } from './state';
 
 describe('startGame', () => {
-  const createMockMaze = (size: number): number[][] => {
+  const createMockMaze = (size: number): MazeMap => {
     const maze = Array.from({ length: size }, () => Array(size).fill(TileType.WALL));
     // スタート地点を通路に
     maze[1][1] = TileType.FLOOR;

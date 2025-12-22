@@ -1,4 +1,4 @@
-import type { GameState } from '../types';
+import type { GameState, MazeMap } from '../types';
 import { ExplorationState, TileType } from '../types';
 
 /** プレイヤーのスタートグリッド座標 X */
@@ -19,7 +19,7 @@ const DIRECTIONS_TO_CHECK = [
  */
 export interface StartGameDependencies {
   gameState: GameState;
-  generateMaze: (size: number) => number[][];
+  generateMaze: (size: number) => MazeMap;
   menuElement: HTMLElement;
   resizeCanvas: () => void;
   render: () => void;
