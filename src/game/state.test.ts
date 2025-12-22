@@ -103,9 +103,8 @@ describe('startGame', () => {
 
       startGame(11, deps);
 
-      // 初期方向は通路が開いている方向に設定される
-      expect(gameState.player.dir).toBeGreaterThanOrEqual(0);
-      expect(gameState.player.dir).toBeLessThan(2 * Math.PI);
+      // 初期方向は通路が開いている方向に設定される（createMockMazeで東方向が通路）
+      expect(gameState.player.dir).toBe(0);
     });
   });
 

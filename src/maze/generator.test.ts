@@ -36,36 +36,14 @@ describe('generateMaze', () => {
   });
 
   describe('外周の壁', () => {
-    it('上辺がすべて壁(1)であること', () => {
-      const maze = generateMaze(11);
-      for (let x = 0; x < maze[0].length; x++) {
-        expect(maze[0][x]).toBe(1);
-      }
-    });
-
-    it('下辺がすべて壁(1)であること', () => {
+    it('がすべて壁(1)であること', () => {
       const size = 11;
       const maze = generateMaze(size);
-      const lastRow = size - 1;
-      for (let x = 0; x < maze[lastRow].length; x++) {
-        expect(maze[lastRow][x]).toBe(1);
-      }
-    });
-
-    it('左辺がすべて壁(1)であること', () => {
-      const size = 11;
-      const maze = generateMaze(size);
-      for (let y = 0; y < size; y++) {
-        expect(maze[y][0]).toBe(1);
-      }
-    });
-
-    it('右辺がすべて壁(1)であること', () => {
-      const size = 11;
-      const maze = generateMaze(size);
-      const lastCol = size - 1;
-      for (let y = 0; y < size; y++) {
-        expect(maze[y][lastCol]).toBe(1);
+      for (let i = 0; i < size; i++) {
+        expect(maze[0][i]).toBe(1); // 上辺
+        expect(maze[size - 1][i]).toBe(1); // 下辺
+        expect(maze[i][0]).toBe(1); // 左辺
+        expect(maze[i][size - 1]).toBe(1); // 右辺
       }
     });
   });
