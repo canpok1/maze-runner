@@ -30,6 +30,8 @@ npm run lint:fix
 
 ### 3. テスト
 
+ユニットテストを実行します。
+
 ```bash
 npm test
 ```
