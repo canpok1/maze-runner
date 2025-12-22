@@ -1,6 +1,13 @@
 // --- インポート ---
 
 import { config } from './config';
+import {
+  type StartGameDependencies,
+  startGame as startGameCore,
+  type WinDependencies,
+  win as winCore,
+} from './game/state';
+import { generateMaze } from './maze/generator';
 import type { GameState } from './types';
 
 // --- DOM要素の取得とバリデーション ---
@@ -37,92 +44,17 @@ const gameState: GameState = {
   animationId: 0,
 };
 
-// --- 迷路生成関数 (穴掘り法) ---
-function generateMaze(size: number): number[][] {
-  // サイズが偶数の場合は奇数に調整
-  size = size % 2 === 0 ? size + 1 : size;
-  // 全て壁(1)で初期化
-  const newMap: number[][] = Array.from({ length: size }, () => Array(size).fill(1));
-
-  // 再帰的に通路を掘り進む関数
-  function walk(x: number, y: number): void {
-    newMap[y][x] = 0; // 現在地を通路にする
-    // 掘り進む方向 (東, 西, 南, 北) をランダムにシャッフル
-    const dirs: [number, number][] = [
-      [0, 2],
-      [0, -2],
-      [2, 0],
-      [-2, 0],
-    ];
-    dirs.sort(() => Math.random() - 0.5);
-
-    for (const [dx, dy] of dirs) {
-      const nx = x + dx,
-        ny = y + dy; // 2マス先の座標
-
-      // 2マス先がマップ内でかつ壁(1)であれば
-      if (nx > 0 && nx < size - 1 && ny > 0 && ny < size - 1 && newMap[ny][nx] === 1) {
-        // 間の壁を崩して通路にする
-        newMap[y + dy / 2][x + dx / 2] = 0;
-        // 2マス先に移動して再帰
-        walk(nx, ny);
-      }
-    }
-  }
-
-  walk(1, 1); // スタート地点(1, 1)から掘り始め
-
-  newMap[size - 2][size - 2] = 2; // ゴールを設定
-  return newMap;
-}
-
 // --- ゲーム開始 ---
 function startGame(size: number): void {
-  gameState.mapSize = size;
-  gameState.map = generateMaze(gameState.mapSize); // ランダム迷路生成
-  // 探索済みマップを初期化 (すべて未探索 0)
-  gameState.exploredMap = Array.from({ length: gameState.mapSize }, () =>
-    Array(gameState.mapSize).fill(0)
-  );
-
-  // プレイヤーのマップグリッド座標
-  const startX = 1;
-  const startY = 1;
-  let initialDir = 0; // 初期方向 (デフォルトは東)
-
-  // 方向チェック: (dx, dy, direction_in_radians) [東, 南, 西, 北 の順]
-  const directionsToCheck = [
-    { dx: 1, dy: 0, dir: 0 }, // East (右)
-    { dx: 0, dy: 1, dir: Math.PI / 2 }, // South (下)
-    { dx: -1, dy: 0, dir: Math.PI }, // West (左)
-    { dx: 0, dy: -1, dir: (3 * Math.PI) / 2 }, // North (上)
-  ];
-
-  // 通路が開いている方向を探索
-  for (const { dx, dy, dir } of directionsToCheck) {
-    const checkX = startX + dx;
-    const checkY = startY + dy;
-
-    // 座標がマップ内であり、かつ壁(1)ではないことを確認
-    if (gameState.map[checkY] && gameState.map[checkY][checkX] !== 1) {
-      initialDir = dir;
-      break; // 最初の通路を見つけたら確定
-    }
-  }
-
-  // プレイヤーの初期設定
-  gameState.player = { x: 1.5, y: 1.5, dir: initialDir, speed: 0 };
-
-  // スタート地点を探索済みとしてマーク
-  gameState.exploredMap[startY][startX] = 1;
-
-  menuElement.style.display = 'none';
-  gameState.gameActive = true;
-  gameState.startTime = Date.now();
-
-  resizeCanvas();
-  if (gameState.animationId) cancelAnimationFrame(gameState.animationId);
-  render();
+  const deps: StartGameDependencies = {
+    gameState,
+    generateMaze,
+    menuElement,
+    resizeCanvas,
+    render,
+    cancelAnimationFrame,
+  };
+  startGameCore(size, deps);
 }
 
 // --- レイキャスティング描画ループ ---
@@ -302,16 +234,12 @@ function render(): void {
 
 // --- クリア処理 ---
 function win(): void {
-  gameState.gameActive = false;
-  cancelAnimationFrame(gameState.animationId);
-
-  const score = ((Date.now() - gameState.startTime) / 1000).toFixed(2);
-
-  const lastScoreElement = document.getElementById('last-score');
-  if (lastScoreElement) {
-    lastScoreElement.innerHTML = `<h2>CLEAR! クリアタイム: ${score}秒</h2>`;
-  }
-  menuElement.style.display = 'flex';
+  const deps: WinDependencies = {
+    gameState,
+    menuElement,
+    cancelAnimationFrame,
+  };
+  winCore(deps);
 }
 
 // --- キャンバスサイズ調整 ---
