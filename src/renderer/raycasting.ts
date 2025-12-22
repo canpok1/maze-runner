@@ -1,5 +1,15 @@
 import type { GameConfig, Player } from '../types';
 
+/**
+ * レイキャスティングの定数
+ */
+const RAYCASTING_CONSTANTS = {
+  RAY_COUNT: 320,
+  MAX_RAY_DISTANCE: 30,
+  RAY_STEP: 0.05,
+  SHADOW_DISTANCE_FACTOR: 10,
+};
+
 export interface RaycastingParams {
   ctx: CanvasRenderingContext2D;
   canvas: HTMLCanvasElement;
@@ -28,7 +38,7 @@ export function renderRaycasting(params: RaycastingParams): void {
 
   // レイキャスティングのパラメータ
   const fov = Math.PI / 3;
-  const rayCount = 320;
+  const rayCount = RAYCASTING_CONSTANTS.RAY_COUNT;
   const sliceWidth = cw / rayCount;
   const maxWallHeight = ch * config.maxWallHeightFactor;
 
@@ -39,8 +49,8 @@ export function renderRaycasting(params: RaycastingParams): void {
     let hitType = 0;
 
     // レイを進めて壁との衝突を検出
-    while (distance < 30) {
-      distance += 0.05;
+    while (distance < RAYCASTING_CONSTANTS.MAX_RAY_DISTANCE) {
+      distance += RAYCASTING_CONSTANTS.RAY_STEP;
       const rx = player.x + Math.cos(rayAngle) * distance;
       const ry = player.y + Math.sin(rayAngle) * distance;
 
@@ -73,7 +83,7 @@ export function renderRaycasting(params: RaycastingParams): void {
     wallHeight = Math.min(wallHeight, maxWallHeight);
 
     // 影（距離に応じて暗くする）
-    const darkness = Math.min(1, correctedDistance / 10);
+    const darkness = Math.min(1, correctedDistance / RAYCASTING_CONSTANTS.SHADOW_DISTANCE_FACTOR);
     let colorValue = Math.floor(255 * (1 - darkness));
 
     let wallColor = `rgb(${colorValue}, ${colorValue}, ${colorValue})`;

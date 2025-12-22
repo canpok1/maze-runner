@@ -15,6 +15,56 @@ export interface RenderDependencies {
 }
 
 /**
+ * 指定座標のマップタイルを取得する
+ * @param map マップ配列
+ * @param x X座標
+ * @param y Y座標
+ * @returns タイルの値（範囲外の場合undefined）
+ */
+function getTile(map: number[][], x: number, y: number): number | undefined {
+  const mapY = Math.floor(y);
+  const mapX = Math.floor(x);
+  return map[mapY]?.[mapX];
+}
+
+/**
+ * ゲーム状態を更新する
+ * @param gameState ゲーム状態
+ * @param timerElement タイマー表示要素
+ * @returns ゴールに到達した場合true、それ以外false
+ */
+function update(gameState: GameState, timerElement: HTMLElement): boolean {
+  // 1. タイマー更新
+  timerElement.innerText = ((Date.now() - gameState.startTime) / 1000).toFixed(2);
+
+  // 2. プレイヤーの移動
+  const moveStep = gameState.player.speed;
+
+  const nx = gameState.player.x + Math.cos(gameState.player.dir) * moveStep;
+  const ny = gameState.player.y + Math.sin(gameState.player.dir) * moveStep;
+
+  // 壁衝突判定（マージンを設ける）
+  const margin = 0.2;
+  const checkX = gameState.player.x + Math.cos(gameState.player.dir) * moveStep * (1 + margin);
+  const checkY = gameState.player.y + Math.sin(gameState.player.dir) * moveStep * (1 + margin);
+
+  if (getTile(gameState.map, checkX, checkY) !== 1) {
+    gameState.player.x = nx;
+    gameState.player.y = ny;
+
+    // 探索済みタイルを更新
+    gameState.exploredMap[Math.floor(gameState.player.y)][Math.floor(gameState.player.x)] = 1;
+  }
+
+  // 3. ゴール判定
+  if (getTile(gameState.map, gameState.player.x, gameState.player.y) === 2) {
+    return true; // ゴール到達
+  }
+
+  return false;
+}
+
+/**
  * レンダラーを作成する
  * @param deps レンダリングに必要な依存関係
  * @returns render関数を持つオブジェクト
@@ -29,41 +79,16 @@ export function createRenderer(deps: RenderDependencies) {
   function render(): void {
     if (!gameState.gameActive) return;
 
-    // 1. タイマー更新
-    timerElement.innerText = ((Date.now() - gameState.startTime) / 1000).toFixed(2);
+    // ゲーム状態を更新
+    const reachedGoal = update(gameState, timerElement);
 
-    // 2. プレイヤーの移動
-    const moveStep = gameState.player.speed;
-
-    const nx = gameState.player.x + Math.cos(gameState.player.dir) * moveStep;
-    const ny = gameState.player.y + Math.sin(gameState.player.dir) * moveStep;
-
-    // 壁衝突判定（マージンを設ける）
-    const margin = 0.2;
-    const checkX = gameState.player.x + Math.cos(gameState.player.dir) * moveStep * (1 + margin);
-    const checkY = gameState.player.y + Math.sin(gameState.player.dir) * moveStep * (1 + margin);
-
-    if (
-      gameState.map[Math.floor(checkY)] &&
-      gameState.map[Math.floor(checkY)][Math.floor(checkX)] !== 1
-    ) {
-      gameState.player.x = nx;
-      gameState.player.y = ny;
-
-      // 探索済みタイルを更新
-      gameState.exploredMap[Math.floor(gameState.player.y)][Math.floor(gameState.player.x)] = 1;
-    }
-
-    // 3. ゴール判定
-    if (
-      gameState.map[Math.floor(gameState.player.y)] &&
-      gameState.map[Math.floor(gameState.player.y)][Math.floor(gameState.player.x)] === 2
-    ) {
+    // ゴール到達時は処理を終了
+    if (reachedGoal) {
       win();
       return;
     }
 
-    // 4. レイキャスティング描画
+    // レイキャスティング描画
     renderRaycasting({
       ctx,
       canvas,
@@ -72,7 +97,7 @@ export function createRenderer(deps: RenderDependencies) {
       config,
     });
 
-    // 5. ミニマップ描画
+    // ミニマップ描画
     renderMinimap({
       ctx,
       canvasWidth: canvas.width,
@@ -83,7 +108,7 @@ export function createRenderer(deps: RenderDependencies) {
       config,
     });
 
-    // 6. 次フレーム
+    // 次フレーム
     gameState.animationId = requestAnimationFrame(render);
   }
 
