@@ -2,18 +2,20 @@
 # PRレビュースレッドに返信を投稿するスクリプト
 #
 # 使用方法:
-#   echo "コメント内容" | $0 <スレッドID>
-#   $0 <スレッドID> <<EOF
+#   $0 <スレッドID> "<コメント内容>"        # 引数で指定（推奨）
+#   echo "コメント内容" | $0 <スレッドID>   # パイプで指定
+#   $0 <スレッドID> <<EOF                    # ヒアドキュメントで指定
 #   複数行の
 #   コメント内容
 #   EOF
 #
 # 例:
-#   echo "ご指摘ありがとうございます。修正しました。" | $0 "xxxxxxxxxxxxxxxxxxxx"
+#   $0 "xxxxxxxxxxxxxxxxxxxx" "ご指摘ありがとうございます。修正しました。"
+#   echo "ご指摘ありがとうございます。" | $0 "xxxxxxxxxxxxxxxxxxxx"
 #
 # 注意事項:
 #   - スレッドIDはGitHub GraphQL APIのNode ID形式で指定してください
-#   - コメント本文は標準入力から読み取ります
+#   - コメント本文は引数または標準入力から読み取ります
 
 set -euo pipefail
 
@@ -27,19 +29,19 @@ done
 
 # 使用方法を表示
 usage() {
-    echo "使用方法: echo \"コメント内容\" | $0 <スレッドID>" >&2
+    echo "使用方法:" >&2
+    echo "  $0 <スレッドID> \"<コメント内容>\"  # 引数で指定（推奨）" >&2
+    echo "  echo \"コメント内容\" | $0 <スレッドID>  # パイプで指定" >&2
     echo "" >&2
     echo "例:" >&2
+    echo "  $0 \"xxxxxxxxxxxxxxxxxxxx\" \"ご指摘ありがとうございます。\"" >&2
     echo "  echo \"ご指摘ありがとうございます。\" | $0 \"xxxxxxxxxxxxxxxxxxxx\"" >&2
-    echo "  $0 \"xxxxxxxxxxxxxxxxxxxx\" <<EOF" >&2
-    echo "  複数行のコメント" >&2
-    echo "  EOF" >&2
     exit 1
 }
 
-# 引数チェック
-if [[ $# -ne 1 ]]; then
-    echo "エラー: 引数が不正です。" >&2
+# 引数チェック（スレッドIDは必須）
+if [[ $# -lt 1 ]]; then
+    echo "エラー: スレッドIDを指定してください。" >&2
     usage
 fi
 
@@ -51,8 +53,28 @@ if [[ -z "$THREAD_ID" ]]; then
     exit 1
 fi
 
-# 標準入力からコメント本文を読み取り
-COMMENT_BODY=$(cat)
+# コメント本文の取得（引数優先、なければ標準入力）
+if [[ $# -ge 2 ]]; then
+    # 第2引数以降をすべてコメント本文として結合
+    shift
+    COMMENT_BODY="$*"
+elif [[ ! -t 0 ]]; then
+    # 標準入力がパイプまたはリダイレクトの場合
+    COMMENT_BODY=""
+    while IFS= read -r line || [[ -n "$line" ]]; do
+        if [[ -n "$COMMENT_BODY" ]]; then
+            COMMENT_BODY="${COMMENT_BODY}"$'\n'"${line}"
+        else
+            COMMENT_BODY="${line}"
+        fi
+    done
+else
+    echo "エラー: コメント本文を指定してください。" >&2
+    echo "引数として指定するか、標準入力から入力してください。" >&2
+    usage
+fi
+
+# コメント本文が空でないかチェック
 if [[ -z "$COMMENT_BODY" ]]; then
     echo "エラー: コメント本文が空です。" >&2
     exit 1
