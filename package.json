@@ -2,10 +2,14 @@
   "name": "maze-runner",
   "type": "module",
   "scripts": {
-    "dev": "wrangler dev --ip 0.0.0.0",
-    "deploy": "wrangler deploy"
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "deploy": "npm run build && wrangler deploy"
   },
   "devDependencies": {
+    "typescript": "^5.7.2",
+    "vite": "^6.0.5",
     "wrangler": "^4.4.0"
   }
 }
