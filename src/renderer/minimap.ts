@@ -11,7 +11,7 @@ const MINIMAP_COLORS = {
   UNEXPLORED: '#0d0d1a',
   PLAYER: '#00ff00',
   PLAYER_DIRECTION: '#00ffff',
-};
+} as const;
 
 /**
  * ミニマップ描画のパラメータ
