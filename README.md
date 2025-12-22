@@ -48,7 +48,7 @@ npm run dev
 | `npm run lint` | コードの静的解析・フォーマットチェック |
 | `npm run lint:fix` | 静的解析とフォーマットを自動修正 |
 | `npm run format` | コードフォーマットのみ実行 |
-| `npm run deploy` | Cloudflare Workersへデプロイ |
+| `npm run deploy` | Cloudflare Workersへ手動デプロイ |
 
 ## テスト
 
