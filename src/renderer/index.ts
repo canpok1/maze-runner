@@ -53,6 +53,26 @@ function update(gameState: GameState, timerElement: HTMLElement): boolean {
     gameState.player.x = nx;
     gameState.player.y = ny;
 
+    // 通路中心への補正
+    const cellX = Math.floor(gameState.player.x);
+    const cellY = Math.floor(gameState.player.y);
+
+    // 隣接セルが壁かどうかをチェック
+    const leftWall = getTile(gameState.map, cellX - 1, cellY) === TileType.WALL;
+    const rightWall = getTile(gameState.map, cellX + 1, cellY) === TileType.WALL;
+    const topWall = getTile(gameState.map, cellX, cellY - 1) === TileType.WALL;
+    const bottomWall = getTile(gameState.map, cellX, cellY + 1) === TileType.WALL;
+
+    // 水平通路（上下に壁がある）→ Y軸方向を中心に補正
+    if (topWall && bottomWall) {
+      gameState.player.y = cellY + 0.5;
+    }
+
+    // 垂直通路（左右に壁がある）→ X軸方向を中心に補正
+    if (leftWall && rightWall) {
+      gameState.player.x = cellX + 0.5;
+    }
+
     // 探索済みタイルを更新
     gameState.exploredMap[Math.floor(gameState.player.y)][Math.floor(gameState.player.x)] =
       ExplorationState.EXPLORED;

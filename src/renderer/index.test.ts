@@ -247,5 +247,165 @@ describe('createRenderer', () => {
 
       expect(mockGameState.animationId).toBe(42);
     });
+
+    describe('通路中心への補正', () => {
+      it('水平通路（上下が壁）の場合、Y軸を中心に補正する', () => {
+        // マップを水平通路に設定:
+        // [1, 1, 1, 1, 1],
+        // [1, 0, 0, 0, 1],  <- この行が水平通路（上下が壁、左右が開いている）
+        // [1, 1, 1, 1, 1],
+        mockGameState.map = [
+          [TileType.WALL, TileType.WALL, TileType.WALL, TileType.WALL, TileType.WALL],
+          [TileType.WALL, TileType.FLOOR, TileType.FLOOR, TileType.FLOOR, TileType.WALL],
+          [TileType.WALL, TileType.WALL, TileType.WALL, TileType.WALL, TileType.WALL],
+        ];
+        mockGameState.mapSize = 3;
+        mockGameState.exploredMap = [
+          [
+            ExplorationState.UNEXPLORED,
+            ExplorationState.UNEXPLORED,
+            ExplorationState.UNEXPLORED,
+            ExplorationState.UNEXPLORED,
+            ExplorationState.UNEXPLORED,
+          ],
+          [
+            ExplorationState.UNEXPLORED,
+            ExplorationState.EXPLORED,
+            ExplorationState.UNEXPLORED,
+            ExplorationState.UNEXPLORED,
+            ExplorationState.UNEXPLORED,
+          ],
+          [
+            ExplorationState.UNEXPLORED,
+            ExplorationState.UNEXPLORED,
+            ExplorationState.UNEXPLORED,
+            ExplorationState.UNEXPLORED,
+            ExplorationState.UNEXPLORED,
+          ],
+        ];
+
+        // プレイヤーを水平通路に配置（Y座標が中心からずれている）
+        mockGameState.player.x = 1.5;
+        mockGameState.player.y = 1.3; // 中心(1.5)からずれている
+        mockGameState.player.dir = 0; // 右方向
+        mockGameState.player.speed = 0.05;
+
+        const renderer = createRenderer(deps);
+        renderer.render();
+
+        // Y座標が1.5に補正されている
+        expect(mockGameState.player.y).toBe(1.5);
+        // X座標は移動方向に従って変化している
+        expect(mockGameState.player.x).toBeGreaterThan(1.5);
+      });
+
+      it('垂直通路（左右が壁）の場合、X軸を中心に補正する', () => {
+        // マップを垂直通路に設定:
+        // [1, 1, 1],
+        // [1, 0, 1],  <- この列が垂直通路（左右が壁、上下が開いている）
+        // [1, 0, 1],
+        // [1, 0, 1],
+        // [1, 1, 1],
+        mockGameState.map = [
+          [TileType.WALL, TileType.WALL, TileType.WALL],
+          [TileType.WALL, TileType.FLOOR, TileType.WALL],
+          [TileType.WALL, TileType.FLOOR, TileType.WALL],
+          [TileType.WALL, TileType.FLOOR, TileType.WALL],
+          [TileType.WALL, TileType.WALL, TileType.WALL],
+        ];
+        mockGameState.mapSize = 5;
+        mockGameState.exploredMap = [
+          [ExplorationState.UNEXPLORED, ExplorationState.UNEXPLORED, ExplorationState.UNEXPLORED],
+          [ExplorationState.UNEXPLORED, ExplorationState.EXPLORED, ExplorationState.UNEXPLORED],
+          [ExplorationState.UNEXPLORED, ExplorationState.UNEXPLORED, ExplorationState.UNEXPLORED],
+          [ExplorationState.UNEXPLORED, ExplorationState.UNEXPLORED, ExplorationState.UNEXPLORED],
+          [ExplorationState.UNEXPLORED, ExplorationState.UNEXPLORED, ExplorationState.UNEXPLORED],
+        ];
+
+        // プレイヤーを垂直通路に配置（X座標が中心からずれている）
+        mockGameState.player.x = 1.3; // 中心(1.5)からずれている
+        mockGameState.player.y = 1.5;
+        mockGameState.player.dir = Math.PI / 2; // 下方向
+        mockGameState.player.speed = 0.05;
+
+        const renderer = createRenderer(deps);
+        renderer.render();
+
+        // X座標が1.5に補正されている
+        expect(mockGameState.player.x).toBe(1.5);
+        // Y座標は移動方向に従って変化している
+        expect(mockGameState.player.y).toBeGreaterThan(1.5);
+      });
+
+      it('交差点（4方向が開いている）の場合、補正しない', () => {
+        // マップを交差点に設定:
+        // [1, 1, 1, 1, 1],
+        // [1, 1, 0, 1, 1],
+        // [1, 0, 0, 0, 1],  <- 中心が交差点
+        // [1, 1, 0, 1, 1],
+        // [1, 1, 1, 1, 1],
+        mockGameState.map = [
+          [TileType.WALL, TileType.WALL, TileType.WALL, TileType.WALL, TileType.WALL],
+          [TileType.WALL, TileType.WALL, TileType.FLOOR, TileType.WALL, TileType.WALL],
+          [TileType.WALL, TileType.FLOOR, TileType.FLOOR, TileType.FLOOR, TileType.WALL],
+          [TileType.WALL, TileType.WALL, TileType.FLOOR, TileType.WALL, TileType.WALL],
+          [TileType.WALL, TileType.WALL, TileType.WALL, TileType.WALL, TileType.WALL],
+        ];
+        mockGameState.exploredMap = [
+          [
+            ExplorationState.UNEXPLORED,
+            ExplorationState.UNEXPLORED,
+            ExplorationState.UNEXPLORED,
+            ExplorationState.UNEXPLORED,
+            ExplorationState.UNEXPLORED,
+          ],
+          [
+            ExplorationState.UNEXPLORED,
+            ExplorationState.UNEXPLORED,
+            ExplorationState.UNEXPLORED,
+            ExplorationState.UNEXPLORED,
+            ExplorationState.UNEXPLORED,
+          ],
+          [
+            ExplorationState.UNEXPLORED,
+            ExplorationState.UNEXPLORED,
+            ExplorationState.EXPLORED,
+            ExplorationState.UNEXPLORED,
+            ExplorationState.UNEXPLORED,
+          ],
+          [
+            ExplorationState.UNEXPLORED,
+            ExplorationState.UNEXPLORED,
+            ExplorationState.UNEXPLORED,
+            ExplorationState.UNEXPLORED,
+            ExplorationState.UNEXPLORED,
+          ],
+          [
+            ExplorationState.UNEXPLORED,
+            ExplorationState.UNEXPLORED,
+            ExplorationState.UNEXPLORED,
+            ExplorationState.UNEXPLORED,
+            ExplorationState.UNEXPLORED,
+          ],
+        ];
+
+        // プレイヤーを交差点に配置（中心からずれている）
+        mockGameState.player.x = 2.3;
+        mockGameState.player.y = 2.3;
+        mockGameState.player.dir = 0; // 右方向
+        mockGameState.player.speed = 0.05;
+
+        const initialX = mockGameState.player.x;
+
+        const renderer = createRenderer(deps);
+        renderer.render();
+
+        // 交差点では補正されない（移動方向の変化のみ）
+        expect(mockGameState.player.x).not.toBe(2.5);
+        expect(mockGameState.player.y).not.toBe(2.5);
+        // X座標は右方向に移動している
+        expect(mockGameState.player.x).toBeGreaterThan(initialX);
+      });
+    });
   });
 });
