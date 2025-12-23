@@ -406,6 +406,164 @@ describe('createRenderer', () => {
         // X座標は右方向に移動している
         expect(mockGameState.player.x).toBeGreaterThan(initialX);
       });
+
+      it('T字路（上が壁）で上側に寄った場合、Y座標が補正される', () => {
+        // マップをT字路に設定:
+        // [1, 1, 1, 1, 1],
+        // [1, 0, 0, 0, 1],  <- この行がT字路（上が壁、左右下が開いている）
+        // [1, 1, 0, 1, 1],
+        mockGameState.map = [
+          [TileType.WALL, TileType.WALL, TileType.WALL, TileType.WALL, TileType.WALL],
+          [TileType.WALL, TileType.FLOOR, TileType.FLOOR, TileType.FLOOR, TileType.WALL],
+          [TileType.WALL, TileType.WALL, TileType.FLOOR, TileType.WALL, TileType.WALL],
+        ];
+        mockGameState.mapSize = 3;
+        mockGameState.exploredMap = [
+          [
+            ExplorationState.UNEXPLORED,
+            ExplorationState.UNEXPLORED,
+            ExplorationState.UNEXPLORED,
+            ExplorationState.UNEXPLORED,
+            ExplorationState.UNEXPLORED,
+          ],
+          [
+            ExplorationState.UNEXPLORED,
+            ExplorationState.UNEXPLORED,
+            ExplorationState.EXPLORED,
+            ExplorationState.UNEXPLORED,
+            ExplorationState.UNEXPLORED,
+          ],
+          [
+            ExplorationState.UNEXPLORED,
+            ExplorationState.UNEXPLORED,
+            ExplorationState.UNEXPLORED,
+            ExplorationState.UNEXPLORED,
+            ExplorationState.UNEXPLORED,
+          ],
+        ];
+
+        // プレイヤーをT字路に配置（上側に寄っている: offsetY < 0.5）
+        mockGameState.player.x = 2.5;
+        mockGameState.player.y = 1.3; // セル内位置0.3 < 0.5なので上側に寄っている
+        mockGameState.player.dir = 0; // 右方向
+        mockGameState.player.speed = 0.05;
+
+        const renderer = createRenderer(deps);
+        renderer.render();
+
+        // Y座標が1.5に補正されている
+        expect(mockGameState.player.y).toBe(1.5);
+      });
+
+      it('T字路（上が壁）で下側に寄った場合、Y座標は補正されない', () => {
+        // マップをT字路に設定:
+        // [1, 1, 1, 1, 1],
+        // [1, 0, 0, 0, 1],  <- この行がT字路（上が壁、左右下が開いている）
+        // [1, 1, 0, 1, 1],
+        mockGameState.map = [
+          [TileType.WALL, TileType.WALL, TileType.WALL, TileType.WALL, TileType.WALL],
+          [TileType.WALL, TileType.FLOOR, TileType.FLOOR, TileType.FLOOR, TileType.WALL],
+          [TileType.WALL, TileType.WALL, TileType.FLOOR, TileType.WALL, TileType.WALL],
+        ];
+        mockGameState.mapSize = 3;
+        mockGameState.exploredMap = [
+          [
+            ExplorationState.UNEXPLORED,
+            ExplorationState.UNEXPLORED,
+            ExplorationState.UNEXPLORED,
+            ExplorationState.UNEXPLORED,
+            ExplorationState.UNEXPLORED,
+          ],
+          [
+            ExplorationState.UNEXPLORED,
+            ExplorationState.UNEXPLORED,
+            ExplorationState.EXPLORED,
+            ExplorationState.UNEXPLORED,
+            ExplorationState.UNEXPLORED,
+          ],
+          [
+            ExplorationState.UNEXPLORED,
+            ExplorationState.UNEXPLORED,
+            ExplorationState.UNEXPLORED,
+            ExplorationState.UNEXPLORED,
+            ExplorationState.UNEXPLORED,
+          ],
+        ];
+
+        // プレイヤーをT字路に配置（下側に寄っている: offsetY > 0.5）
+        mockGameState.player.x = 2.5;
+        mockGameState.player.y = 1.7; // セル内位置0.7 > 0.5なので下側に寄っている
+        mockGameState.player.dir = 0; // 右方向
+        mockGameState.player.speed = 0.05;
+
+        const renderer = createRenderer(deps);
+        renderer.render();
+
+        // Y座標は補正されない（移動によって変化する可能性はある）
+        expect(mockGameState.player.y).not.toBe(1.5);
+      });
+
+      it('L字路（左上が壁）で左上に寄った場合、X座標とY座標の両方が補正される', () => {
+        // マップをL字路に設定:
+        // [1, 1, 1],
+        // [1, 0, 0],  <- この位置がL字路（左と上が壁、右と下が開いている）
+        // [1, 0, 1],
+        mockGameState.map = [
+          [TileType.WALL, TileType.WALL, TileType.WALL],
+          [TileType.WALL, TileType.FLOOR, TileType.FLOOR],
+          [TileType.WALL, TileType.FLOOR, TileType.WALL],
+        ];
+        mockGameState.mapSize = 3;
+        mockGameState.exploredMap = [
+          [ExplorationState.UNEXPLORED, ExplorationState.UNEXPLORED, ExplorationState.UNEXPLORED],
+          [ExplorationState.UNEXPLORED, ExplorationState.EXPLORED, ExplorationState.UNEXPLORED],
+          [ExplorationState.UNEXPLORED, ExplorationState.UNEXPLORED, ExplorationState.UNEXPLORED],
+        ];
+
+        // プレイヤーをL字路に配置（左上に寄っている: offsetX < 0.5, offsetY < 0.5）
+        mockGameState.player.x = 1.3; // セル内位置0.3 < 0.5なので左側に寄っている
+        mockGameState.player.y = 1.2; // セル内位置0.2 < 0.5なので上側に寄っている
+        mockGameState.player.dir = 0; // 右方向
+        mockGameState.player.speed = 0.05;
+
+        const renderer = createRenderer(deps);
+        renderer.render();
+
+        // X座標とY座標の両方が1.5に補正されている
+        expect(mockGameState.player.x).toBe(1.5);
+        expect(mockGameState.player.y).toBe(1.5);
+      });
+
+      it('L字路（左上が壁）で右下に寄った場合、補正されない', () => {
+        // マップをL字路に設定:
+        // [1, 1, 1],
+        // [1, 0, 0],  <- この位置がL字路（左と上が壁、右と下が開いている）
+        // [1, 0, 1],
+        mockGameState.map = [
+          [TileType.WALL, TileType.WALL, TileType.WALL],
+          [TileType.WALL, TileType.FLOOR, TileType.FLOOR],
+          [TileType.WALL, TileType.FLOOR, TileType.WALL],
+        ];
+        mockGameState.mapSize = 3;
+        mockGameState.exploredMap = [
+          [ExplorationState.UNEXPLORED, ExplorationState.UNEXPLORED, ExplorationState.UNEXPLORED],
+          [ExplorationState.UNEXPLORED, ExplorationState.EXPLORED, ExplorationState.UNEXPLORED],
+          [ExplorationState.UNEXPLORED, ExplorationState.UNEXPLORED, ExplorationState.UNEXPLORED],
+        ];
+
+        // プレイヤーをL字路に配置（右下に寄っている: offsetX > 0.5, offsetY > 0.5）
+        mockGameState.player.x = 1.7; // セル内位置0.7 > 0.5なので右側に寄っている
+        mockGameState.player.y = 1.8; // セル内位置0.8 > 0.5なので下側に寄っている
+        mockGameState.player.dir = 0; // 右方向
+        mockGameState.player.speed = 0.05;
+
+        const renderer = createRenderer(deps);
+        renderer.render();
+
+        // 補正されない（移動によって変化する可能性はある）
+        expect(mockGameState.player.x).not.toBe(1.5);
+        expect(mockGameState.player.y).not.toBe(1.5);
+      });
     });
   });
 });

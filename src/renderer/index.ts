@@ -56,6 +56,8 @@ function update(gameState: GameState, timerElement: HTMLElement): boolean {
     // 通路中心への補正
     const cellX = Math.floor(gameState.player.x);
     const cellY = Math.floor(gameState.player.y);
+    const offsetX = gameState.player.x - cellX; // セル内のX位置（0.0〜1.0）
+    const offsetY = gameState.player.y - cellY; // セル内のY位置（0.0〜1.0）
 
     // 隣接セルが壁かどうかをチェック
     const leftWall = getTile(gameState.map, cellX - 1, cellY) === TileType.WALL;
@@ -63,14 +65,24 @@ function update(gameState: GameState, timerElement: HTMLElement): boolean {
     const topWall = getTile(gameState.map, cellX, cellY - 1) === TileType.WALL;
     const bottomWall = getTile(gameState.map, cellX, cellY + 1) === TileType.WALL;
 
-    // 水平通路（上下に壁がある）→ Y軸方向を中心に補正
-    if (topWall && bottomWall) {
+    // 左に壁があり、左側に寄りすぎている場合 → X座標を中心に補正
+    if (leftWall && offsetX < 0.5) {
+      gameState.player.x = cellX + 0.5;
+    }
+
+    // 右に壁があり、右側に寄りすぎている場合 → X座標を中心に補正
+    if (rightWall && offsetX > 0.5) {
+      gameState.player.x = cellX + 0.5;
+    }
+
+    // 上に壁があり、上側に寄りすぎている場合 → Y座標を中心に補正
+    if (topWall && offsetY < 0.5) {
       gameState.player.y = cellY + 0.5;
     }
 
-    // 垂直通路（左右に壁がある）→ X軸方向を中心に補正
-    if (leftWall && rightWall) {
-      gameState.player.x = cellX + 0.5;
+    // 下に壁があり、下側に寄りすぎている場合 → Y座標を中心に補正
+    if (bottomWall && offsetY > 0.5) {
+      gameState.player.y = cellY + 0.5;
     }
 
     // 探索済みタイルを更新
