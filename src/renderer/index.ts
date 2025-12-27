@@ -53,6 +53,30 @@ function update(gameState: GameState, timerElement: HTMLElement): boolean {
     gameState.player.x = nx;
     gameState.player.y = ny;
 
+    // 通路中心への補正
+    const cellX = Math.floor(gameState.player.x);
+    const cellY = Math.floor(gameState.player.y);
+    const offsetX = gameState.player.x - cellX; // セル内のX位置（0.0〜1.0）
+    const offsetY = gameState.player.y - cellY; // セル内のY位置（0.0〜1.0）
+
+    // 隣接セルが壁かどうかをチェック
+    const leftWall = getTile(gameState.map, cellX - 1, cellY) === TileType.WALL;
+    const rightWall = getTile(gameState.map, cellX + 1, cellY) === TileType.WALL;
+    const topWall = getTile(gameState.map, cellX, cellY - 1) === TileType.WALL;
+    const bottomWall = getTile(gameState.map, cellX, cellY + 1) === TileType.WALL;
+
+    const CELL_CENTER_OFFSET = 0.5;
+
+    // X座標の補正: 左右に壁があり、壁側に寄りすぎている場合
+    if ((leftWall && offsetX < CELL_CENTER_OFFSET) || (rightWall && offsetX > CELL_CENTER_OFFSET)) {
+      gameState.player.x = cellX + CELL_CENTER_OFFSET;
+    }
+
+    // Y座標の補正: 上下に壁があり、壁側に寄りすぎている場合
+    if ((topWall && offsetY < CELL_CENTER_OFFSET) || (bottomWall && offsetY > CELL_CENTER_OFFSET)) {
+      gameState.player.y = cellY + CELL_CENTER_OFFSET;
+    }
+
     // 探索済みタイルを更新
     gameState.exploredMap[Math.floor(gameState.player.y)][Math.floor(gameState.player.x)] =
       ExplorationState.EXPLORED;
