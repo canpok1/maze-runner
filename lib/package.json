@@ -2,10 +2,19 @@
   "name": "@maze-runner/lib",
   "version": "1.0.0",
   "type": "module",
-  "main": "./types.ts",
-  "types": "./types.ts",
+  "main": "./dist/types.js",
+  "types": "./dist/types.d.ts",
   "exports": {
-    ".": "./types.ts"
+    ".": {
+      "import": "./dist/types.js",
+      "types": "./dist/types.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc"
   },
   "devDependencies": {
     "typescript": "^5.7.2"
