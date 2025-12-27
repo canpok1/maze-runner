@@ -65,24 +65,16 @@ function update(gameState: GameState, timerElement: HTMLElement): boolean {
     const topWall = getTile(gameState.map, cellX, cellY - 1) === TileType.WALL;
     const bottomWall = getTile(gameState.map, cellX, cellY + 1) === TileType.WALL;
 
-    // 左に壁があり、左側に寄りすぎている場合 → X座標を中心に補正
-    if (leftWall && offsetX < 0.5) {
-      gameState.player.x = cellX + 0.5;
+    const CELL_CENTER_OFFSET = 0.5;
+
+    // X座標の補正: 左右に壁があり、壁側に寄りすぎている場合
+    if ((leftWall && offsetX < CELL_CENTER_OFFSET) || (rightWall && offsetX > CELL_CENTER_OFFSET)) {
+      gameState.player.x = cellX + CELL_CENTER_OFFSET;
     }
 
-    // 右に壁があり、右側に寄りすぎている場合 → X座標を中心に補正
-    if (rightWall && offsetX > 0.5) {
-      gameState.player.x = cellX + 0.5;
-    }
-
-    // 上に壁があり、上側に寄りすぎている場合 → Y座標を中心に補正
-    if (topWall && offsetY < 0.5) {
-      gameState.player.y = cellY + 0.5;
-    }
-
-    // 下に壁があり、下側に寄りすぎている場合 → Y座標を中心に補正
-    if (bottomWall && offsetY > 0.5) {
-      gameState.player.y = cellY + 0.5;
+    // Y座標の補正: 上下に壁があり、壁側に寄りすぎている場合
+    if ((topWall && offsetY < CELL_CENTER_OFFSET) || (bottomWall && offsetY > CELL_CENTER_OFFSET)) {
+      gameState.player.y = cellY + CELL_CENTER_OFFSET;
     }
 
     // 探索済みタイルを更新

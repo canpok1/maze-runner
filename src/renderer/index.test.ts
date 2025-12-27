@@ -260,29 +260,11 @@ describe('createRenderer', () => {
           [TileType.WALL, TileType.WALL, TileType.WALL, TileType.WALL, TileType.WALL],
         ];
         mockGameState.mapSize = 3;
-        mockGameState.exploredMap = [
-          [
-            ExplorationState.UNEXPLORED,
-            ExplorationState.UNEXPLORED,
-            ExplorationState.UNEXPLORED,
-            ExplorationState.UNEXPLORED,
-            ExplorationState.UNEXPLORED,
-          ],
-          [
-            ExplorationState.UNEXPLORED,
-            ExplorationState.EXPLORED,
-            ExplorationState.UNEXPLORED,
-            ExplorationState.UNEXPLORED,
-            ExplorationState.UNEXPLORED,
-          ],
-          [
-            ExplorationState.UNEXPLORED,
-            ExplorationState.UNEXPLORED,
-            ExplorationState.UNEXPLORED,
-            ExplorationState.UNEXPLORED,
-            ExplorationState.UNEXPLORED,
-          ],
-        ];
+        mockGameState.exploredMap = (() => {
+          const map = Array.from({ length: 3 }, () => Array(5).fill(ExplorationState.UNEXPLORED));
+          map[1][1] = ExplorationState.EXPLORED;
+          return map;
+        })();
 
         // プレイヤーを水平通路に配置（Y座標が中心からずれている）
         mockGameState.player.x = 1.5;
@@ -314,13 +296,11 @@ describe('createRenderer', () => {
           [TileType.WALL, TileType.WALL, TileType.WALL],
         ];
         mockGameState.mapSize = 5;
-        mockGameState.exploredMap = [
-          [ExplorationState.UNEXPLORED, ExplorationState.UNEXPLORED, ExplorationState.UNEXPLORED],
-          [ExplorationState.UNEXPLORED, ExplorationState.EXPLORED, ExplorationState.UNEXPLORED],
-          [ExplorationState.UNEXPLORED, ExplorationState.UNEXPLORED, ExplorationState.UNEXPLORED],
-          [ExplorationState.UNEXPLORED, ExplorationState.UNEXPLORED, ExplorationState.UNEXPLORED],
-          [ExplorationState.UNEXPLORED, ExplorationState.UNEXPLORED, ExplorationState.UNEXPLORED],
-        ];
+        mockGameState.exploredMap = (() => {
+          const map = Array.from({ length: 5 }, () => Array(3).fill(ExplorationState.UNEXPLORED));
+          map[1][1] = ExplorationState.EXPLORED;
+          return map;
+        })();
 
         // プレイヤーを垂直通路に配置（X座標が中心からずれている）
         mockGameState.player.x = 1.3; // 中心(1.5)からずれている
@@ -351,43 +331,11 @@ describe('createRenderer', () => {
           [TileType.WALL, TileType.WALL, TileType.FLOOR, TileType.WALL, TileType.WALL],
           [TileType.WALL, TileType.WALL, TileType.WALL, TileType.WALL, TileType.WALL],
         ];
-        mockGameState.exploredMap = [
-          [
-            ExplorationState.UNEXPLORED,
-            ExplorationState.UNEXPLORED,
-            ExplorationState.UNEXPLORED,
-            ExplorationState.UNEXPLORED,
-            ExplorationState.UNEXPLORED,
-          ],
-          [
-            ExplorationState.UNEXPLORED,
-            ExplorationState.UNEXPLORED,
-            ExplorationState.UNEXPLORED,
-            ExplorationState.UNEXPLORED,
-            ExplorationState.UNEXPLORED,
-          ],
-          [
-            ExplorationState.UNEXPLORED,
-            ExplorationState.UNEXPLORED,
-            ExplorationState.EXPLORED,
-            ExplorationState.UNEXPLORED,
-            ExplorationState.UNEXPLORED,
-          ],
-          [
-            ExplorationState.UNEXPLORED,
-            ExplorationState.UNEXPLORED,
-            ExplorationState.UNEXPLORED,
-            ExplorationState.UNEXPLORED,
-            ExplorationState.UNEXPLORED,
-          ],
-          [
-            ExplorationState.UNEXPLORED,
-            ExplorationState.UNEXPLORED,
-            ExplorationState.UNEXPLORED,
-            ExplorationState.UNEXPLORED,
-            ExplorationState.UNEXPLORED,
-          ],
-        ];
+        mockGameState.exploredMap = (() => {
+          const map = Array.from({ length: 5 }, () => Array(5).fill(ExplorationState.UNEXPLORED));
+          map[2][2] = ExplorationState.EXPLORED;
+          return map;
+        })();
 
         // プレイヤーを交差点に配置（中心からずれている）
         mockGameState.player.x = 2.3;
@@ -418,29 +366,11 @@ describe('createRenderer', () => {
           [TileType.WALL, TileType.WALL, TileType.FLOOR, TileType.WALL, TileType.WALL],
         ];
         mockGameState.mapSize = 3;
-        mockGameState.exploredMap = [
-          [
-            ExplorationState.UNEXPLORED,
-            ExplorationState.UNEXPLORED,
-            ExplorationState.UNEXPLORED,
-            ExplorationState.UNEXPLORED,
-            ExplorationState.UNEXPLORED,
-          ],
-          [
-            ExplorationState.UNEXPLORED,
-            ExplorationState.UNEXPLORED,
-            ExplorationState.EXPLORED,
-            ExplorationState.UNEXPLORED,
-            ExplorationState.UNEXPLORED,
-          ],
-          [
-            ExplorationState.UNEXPLORED,
-            ExplorationState.UNEXPLORED,
-            ExplorationState.UNEXPLORED,
-            ExplorationState.UNEXPLORED,
-            ExplorationState.UNEXPLORED,
-          ],
-        ];
+        mockGameState.exploredMap = (() => {
+          const map = Array.from({ length: 3 }, () => Array(5).fill(ExplorationState.UNEXPLORED));
+          map[1][2] = ExplorationState.EXPLORED;
+          return map;
+        })();
 
         // プレイヤーをT字路に配置（上側に寄っている: offsetY < 0.5）
         mockGameState.player.x = 2.5;
@@ -466,29 +396,11 @@ describe('createRenderer', () => {
           [TileType.WALL, TileType.WALL, TileType.FLOOR, TileType.WALL, TileType.WALL],
         ];
         mockGameState.mapSize = 3;
-        mockGameState.exploredMap = [
-          [
-            ExplorationState.UNEXPLORED,
-            ExplorationState.UNEXPLORED,
-            ExplorationState.UNEXPLORED,
-            ExplorationState.UNEXPLORED,
-            ExplorationState.UNEXPLORED,
-          ],
-          [
-            ExplorationState.UNEXPLORED,
-            ExplorationState.UNEXPLORED,
-            ExplorationState.EXPLORED,
-            ExplorationState.UNEXPLORED,
-            ExplorationState.UNEXPLORED,
-          ],
-          [
-            ExplorationState.UNEXPLORED,
-            ExplorationState.UNEXPLORED,
-            ExplorationState.UNEXPLORED,
-            ExplorationState.UNEXPLORED,
-            ExplorationState.UNEXPLORED,
-          ],
-        ];
+        mockGameState.exploredMap = (() => {
+          const map = Array.from({ length: 3 }, () => Array(5).fill(ExplorationState.UNEXPLORED));
+          map[1][2] = ExplorationState.EXPLORED;
+          return map;
+        })();
 
         // プレイヤーをT字路に配置（下側に寄っている: offsetY > 0.5）
         mockGameState.player.x = 2.5;
@@ -514,11 +426,11 @@ describe('createRenderer', () => {
           [TileType.WALL, TileType.FLOOR, TileType.WALL],
         ];
         mockGameState.mapSize = 3;
-        mockGameState.exploredMap = [
-          [ExplorationState.UNEXPLORED, ExplorationState.UNEXPLORED, ExplorationState.UNEXPLORED],
-          [ExplorationState.UNEXPLORED, ExplorationState.EXPLORED, ExplorationState.UNEXPLORED],
-          [ExplorationState.UNEXPLORED, ExplorationState.UNEXPLORED, ExplorationState.UNEXPLORED],
-        ];
+        mockGameState.exploredMap = (() => {
+          const map = Array.from({ length: 3 }, () => Array(3).fill(ExplorationState.UNEXPLORED));
+          map[1][1] = ExplorationState.EXPLORED;
+          return map;
+        })();
 
         // プレイヤーをL字路に配置（左上に寄っている: offsetX < 0.5, offsetY < 0.5）
         mockGameState.player.x = 1.3; // セル内位置0.3 < 0.5なので左側に寄っている
@@ -545,11 +457,11 @@ describe('createRenderer', () => {
           [TileType.WALL, TileType.FLOOR, TileType.WALL],
         ];
         mockGameState.mapSize = 3;
-        mockGameState.exploredMap = [
-          [ExplorationState.UNEXPLORED, ExplorationState.UNEXPLORED, ExplorationState.UNEXPLORED],
-          [ExplorationState.UNEXPLORED, ExplorationState.EXPLORED, ExplorationState.UNEXPLORED],
-          [ExplorationState.UNEXPLORED, ExplorationState.UNEXPLORED, ExplorationState.UNEXPLORED],
-        ];
+        mockGameState.exploredMap = (() => {
+          const map = Array.from({ length: 3 }, () => Array(3).fill(ExplorationState.UNEXPLORED));
+          map[1][1] = ExplorationState.EXPLORED;
+          return map;
+        })();
 
         // プレイヤーをL字路に配置（右下に寄っている: offsetX > 0.5, offsetY > 0.5）
         mockGameState.player.x = 1.7; // セル内位置0.7 > 0.5なので右側に寄っている
