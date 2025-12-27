@@ -1,5 +1,5 @@
-import type { GameConfig, MazeMap, Player } from '../types';
-import { TileType } from '../types';
+import type { GameConfig, MazeMap, Player } from '@maze-runner/lib';
+import { TileType } from '@maze-runner/lib';
 
 /**
  * レイキャスティングの定数

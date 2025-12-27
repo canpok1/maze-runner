@@ -1,5 +1,5 @@
-import type { GameState, MazeMap } from '../types';
-import { ExplorationState, TileType } from '../types';
+import type { GameState, MazeMap } from '@maze-runner/lib';
+import { ExplorationState, TileType } from '@maze-runner/lib';
 
 /** プレイヤーのスタートグリッド座標 X */
 const START_GRID_X = 1;

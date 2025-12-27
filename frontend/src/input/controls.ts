@@ -1,5 +1,5 @@
+import type { GameState } from '@maze-runner/lib';
 import { config } from '../config';
-import type { GameState } from '../types';
 
 /**
  * 操作の種類

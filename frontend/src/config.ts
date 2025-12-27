@@ -1,4 +1,4 @@
-import type { GameConfig } from './types';
+import type { GameConfig } from '@maze-runner/lib';
 
 /**
  * ゲームの設定

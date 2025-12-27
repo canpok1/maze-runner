@@ -1,5 +1,5 @@
-import type { GameConfig, GameState, MazeMap } from '../types';
-import { ExplorationState, TileType } from '../types';
+import type { GameConfig, GameState, MazeMap } from '@maze-runner/lib';
+import { ExplorationState, TileType } from '@maze-runner/lib';
 import { renderMinimap } from './minimap';
 import { renderRaycasting } from './raycasting';
 

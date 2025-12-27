@@ -1,6 +1,6 @@
+import type { GameConfig, MazeMap, Player } from '@maze-runner/lib';
+import { TileType } from '@maze-runner/lib';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { GameConfig, MazeMap, Player } from '../types';
-import { TileType } from '../types';
 import type { RaycastingParams } from './raycasting';
 import { renderRaycasting } from './raycasting';
 
