@@ -100,7 +100,7 @@ tests/
 npm test
 
 # ユニットテストのみ実行
-npm test -- --testPathPattern="\.test\.ts$"
+npm test -- --exclude "tests/**"
 
 # インテグレーションテストのみ実行
 npm test -- tests/integration
