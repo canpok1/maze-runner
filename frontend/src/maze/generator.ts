@@ -1,4 +1,4 @@
-import { type MazeMap, TileType } from '../types';
+import { type MazeMap, TileType } from '@maze-runner/lib';
 
 /**
  * 穴掘り法を用いて迷路を生成する純粋関数

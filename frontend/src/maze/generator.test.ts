@@ -1,4 +1,4 @@
-import { TileType } from '../types';
+import { TileType } from '@maze-runner/lib';
 import { generateMaze } from './generator';
 
 describe('generateMaze', () => {

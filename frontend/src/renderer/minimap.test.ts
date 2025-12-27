@@ -1,4 +1,3 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   ExplorationState,
   type ExploredMap,
@@ -6,7 +5,8 @@ import {
   type MazeMap,
   type Player,
   TileType,
-} from '../types';
+} from '@maze-runner/lib';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { type MinimapParams, renderMinimap } from './minimap';
 
 describe('renderMinimap', () => {

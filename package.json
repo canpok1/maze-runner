@@ -1,23 +1,25 @@
 {
   "name": "maze-runner",
   "type": "module",
+  "workspaces": [
+    "frontend",
+    "backend",
+    "lib"
+  ],
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview",
-    "deploy": "npm run build && wrangler deploy",
-    "test": "vitest run",
-    "test:watch": "vitest",
+    "dev": "npm run build -w @maze-runner/lib && npm run dev -w @maze-runner/frontend",
+    "build": "npm run build -w @maze-runner/lib && npm run build -w @maze-runner/frontend",
+    "preview": "npm run preview -w @maze-runner/frontend",
+    "deploy": "npm run build && npm run deploy -w @maze-runner/backend",
+    "test": "npm run build -w @maze-runner/lib && npm run test -w @maze-runner/frontend",
+    "test:watch": "npm run build -w @maze-runner/lib && npm run test:watch -w @maze-runner/frontend",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write ."
   },
   "devDependencies": {
     "@biomejs/biome": "2.3.10",
-    "typescript": "^5.7.2",
-    "vite": "^6.0.5",
-    "vitest": "^3.0.0",
-    "wrangler": "^4.4.0"
+    "typescript": "^5.7.2"
   },
   "engines": {
     "node": "24.x"

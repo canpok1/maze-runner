@@ -1,5 +1,5 @@
-import type { ExploredMap, GameConfig, MazeMap, Player } from '../types';
-import { ExplorationState, TileType } from '../types';
+import type { ExploredMap, GameConfig, MazeMap, Player } from '@maze-runner/lib';
+import { ExplorationState, TileType } from '@maze-runner/lib';
 
 /**
  * ミニマップの色定数

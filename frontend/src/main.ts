@@ -1,5 +1,6 @@
 // --- インポート ---
 
+import type { GameState } from '@maze-runner/lib';
 import { config } from './config';
 import {
   type StartGameDependencies,
@@ -10,7 +11,6 @@ import {
 import { setupControls } from './input/controls';
 import { generateMaze } from './maze/generator';
 import { createRenderer } from './renderer';
-import type { GameState } from './types';
 
 // --- DOM要素の取得とバリデーション ---
 function getRequiredElement<T extends HTMLElement>(id: string, type: new () => T): T {

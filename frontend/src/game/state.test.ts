@@ -1,4 +1,4 @@
-import { ExplorationState, type GameState, type MazeMap, TileType } from '../types';
+import { ExplorationState, type GameState, type MazeMap, TileType } from '@maze-runner/lib';
 import { type StartGameDependencies, startGame } from './state';
 
 describe('startGame', () => {

@@ -3,7 +3,7 @@
   "name": "maze-runner",
   "compatibility_date": "2025-12-21",
   "assets": {
-    "directory": "./dist",
+    "directory": "../frontend/dist",
     "html_handling": "auto-trailing-slash",
     "not_found_handling": "404-page"
   }

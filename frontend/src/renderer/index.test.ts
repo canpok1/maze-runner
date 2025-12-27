@@ -1,5 +1,5 @@
+import { ExplorationState, type GameConfig, type GameState, TileType } from '@maze-runner/lib';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { ExplorationState, type GameConfig, type GameState, TileType } from '../types';
 import type { RenderDependencies } from './index';
 import { createRenderer } from './index';
 
