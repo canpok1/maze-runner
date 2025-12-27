@@ -7,12 +7,12 @@
     "lib"
   ],
   "scripts": {
-    "dev": "npm run dev -w @maze-runner/frontend",
-    "build": "npm run build -w @maze-runner/frontend",
+    "dev": "npm run build -w @maze-runner/lib && npm run dev -w @maze-runner/frontend",
+    "build": "npm run build -w @maze-runner/lib && npm run build -w @maze-runner/frontend",
     "preview": "npm run preview -w @maze-runner/frontend",
     "deploy": "npm run build && npm run deploy -w @maze-runner/backend",
-    "test": "npm run test -w @maze-runner/frontend",
-    "test:watch": "npm run test:watch -w @maze-runner/frontend",
+    "test": "npm run build -w @maze-runner/lib && npm run test -w @maze-runner/frontend",
+    "test:watch": "npm run build -w @maze-runner/lib && npm run test:watch -w @maze-runner/frontend",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write ."
