@@ -8,9 +8,11 @@ import {
   type WinDependencies,
   win as winCore,
 } from './game/state';
+import { getDifficultyFromSize } from './helpers/difficulty';
 import { setupControls } from './input/controls';
 import { generateMaze } from './maze/generator';
 import { createRenderer } from './renderer';
+import { showScoreModal } from './ui/score-modal';
 
 // --- DOM要素の取得とバリデーション ---
 function getRequiredElement<T extends HTMLElement>(id: string, type: new () => T): T {
@@ -75,6 +77,8 @@ function win(): void {
     gameState,
     menuElement,
     cancelAnimationFrame: cancelAnimationFrame.bind(window),
+    showScoreModal,
+    getDifficultyFromSize,
   };
   winCore(deps);
 }

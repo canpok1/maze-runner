@@ -171,3 +171,122 @@ canvas {
   grid-column: 3;
   grid-row: 2;
 }
+
+/* スコア登録モーダル */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal.hidden {
+  display: none;
+}
+
+.modal-content {
+  background: #1a1a2e;
+  border: 2px solid #5267a1;
+  border-radius: 12px;
+  padding: 30px;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+  text-align: center;
+}
+
+.modal-content h2 {
+  color: #ffd700;
+  margin-bottom: 15px;
+  font-size: 1.8rem;
+}
+
+.modal-content p {
+  font-size: 1.2rem;
+  margin-bottom: 20px;
+  color: #e4e6eb;
+}
+
+.name-input-container {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.name-input-container label {
+  font-size: 1rem;
+  margin-bottom: 8px;
+  color: #e4e6eb;
+}
+
+.name-input-container input {
+  padding: 12px;
+  font-size: 1rem;
+  border: 2px solid #5267a1;
+  border-radius: 6px;
+  background: #0f0f1e;
+  color: #e4e6eb;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.name-input-container input:focus {
+  border-color: #3498db;
+}
+
+.error-text {
+  color: #e74c3c;
+  font-size: 0.9rem;
+  margin-top: 5px;
+  min-height: 1.2em;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.modal-buttons .btn {
+  padding: 12px 24px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    transform 0.1s;
+  font-weight: bold;
+  box-shadow: 0 4px rgba(0, 0, 0, 0.3);
+}
+
+.modal-buttons .btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px rgba(0, 0, 0, 0.3);
+}
+
+.submit-btn {
+  background: #3498db;
+  color: white;
+}
+
+.submit-btn:hover {
+  background: #2980b9;
+}
+
+.skip-btn {
+  background: #95a5a6;
+  color: white;
+}
+
+.skip-btn:hover {
+  background: #7f8c8d;
+}

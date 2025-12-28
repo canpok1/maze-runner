@@ -13,6 +13,9 @@ describe('createRenderer', () => {
   let deps: RenderDependencies;
 
   beforeEach(() => {
+    // フェイクタイマーを使用
+    vi.useFakeTimers();
+
     // ゲームステートのモック
     mockGameState = {
       map: [
@@ -124,6 +127,13 @@ describe('createRenderer', () => {
 
     // Date.nowのモック
     vi.spyOn(Date, 'now').mockReturnValue(1000);
+  });
+
+  afterEach(() => {
+    // すべてのタイマーをクリア
+    vi.clearAllTimers();
+    // タイマーをリセット
+    vi.useRealTimers();
   });
 
   it('createRendererはrenderメソッドを持つオブジェクトを返す', () => {
