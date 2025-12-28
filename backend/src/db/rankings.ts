@@ -3,6 +3,10 @@ import type { D1Database } from '@cloudflare/workers-types';
 export const DIFFICULTIES = ['easy', 'normal', 'hard'] as const;
 export type Difficulty = (typeof DIFFICULTIES)[number];
 
+export function isDifficulty(value: unknown): value is Difficulty {
+  return typeof value === 'string' && DIFFICULTIES.includes(value as Difficulty);
+}
+
 interface RankingRow {
   player_name: string;
   clear_time: number;
@@ -66,30 +70,22 @@ export async function addRanking(
   const query = `
     INSERT INTO rankings (player_name, clear_time, difficulty_id)
     SELECT ?, ?, id FROM difficulties WHERE name = ?
+    RETURNING id, created_at
   `;
 
-  const result = await db.prepare(query).bind(playerName, clearTime, difficulty).run();
+  const newRankingInfo = await db
+    .prepare(query)
+    .bind(playerName, clearTime, difficulty)
+    .first<{ id: number; created_at: string }>();
 
-  if (!result.success) {
+  if (!newRankingInfo) {
     throw new Error('Failed to add ranking');
   }
 
-  const id = result.meta.last_row_id;
-  if (id === null) {
-    throw new Error('Failed to retrieve ID of new ranking');
-  }
-
-  const selectQuery = 'SELECT created_at FROM rankings WHERE id = ?';
-  const newRanking = await db.prepare(selectQuery).bind(id).first<{ created_at: string }>();
-
-  if (!newRanking) {
-    throw new Error('Failed to fetch newly created ranking');
-  }
-
   return {
-    id,
+    id: newRankingInfo.id,
     playerName,
     clearTime,
-    createdAt: newRanking.created_at,
+    createdAt: newRankingInfo.created_at,
   };
 }

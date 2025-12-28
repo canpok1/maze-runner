@@ -1,6 +1,6 @@
 import type { D1Database } from '@cloudflare/workers-types';
 import { Hono } from 'hono';
-import { addRanking, DIFFICULTIES, getRankings } from '../db/rankings';
+import { addRanking, getRankings, isDifficulty } from '../db/rankings';
 
 type Env = {
   DB: D1Database;
@@ -14,7 +14,7 @@ app.get('/rankings', async (c) => {
   const limitStr = c.req.query('limit') || '10';
   const limit = Number.parseInt(limitStr, 10);
 
-  if (!difficulty || !DIFFICULTIES.includes(difficulty as (typeof DIFFICULTIES)[number])) {
+  if (!isDifficulty(difficulty)) {
     return c.json(
       { error: "difficulty parameter is required and must be one of 'easy', 'normal', or 'hard'" },
       400
@@ -58,10 +58,7 @@ app.post('/rankings', async (c) => {
     return c.json({ error: 'clearTime is required and must be a positive number' }, 400);
   }
 
-  if (
-    typeof difficulty !== 'string' ||
-    !DIFFICULTIES.includes(difficulty as (typeof DIFFICULTIES)[number])
-  ) {
+  if (!isDifficulty(difficulty)) {
     return c.json(
       { error: "difficulty is required and must be one of 'easy', 'normal', or 'hard'" },
       400
