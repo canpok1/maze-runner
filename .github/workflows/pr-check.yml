@@ -30,6 +30,49 @@ jobs:
       - name: E2E Test
         run: npm run test:e2e
 
+  schema-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate SQL syntax
+        run: |
+          # マイグレーションディレクトリが存在するか確認
+          if [ ! -d "backend/db/migrations" ]; then
+            echo "No migrations directory found"
+            exit 0
+          fi
+
+          # SQLファイルの一覧を取得（ファイル名順にソート）
+          sql_files=$(find backend/db/migrations -name "*.sql" -type f | sort)
+
+          if [ -z "$sql_files" ]; then
+            echo "No SQL files found"
+            exit 0
+          fi
+
+          # 全マイグレーションを順番に適用して検証
+          echo "Validating SQL migration files..."
+
+          # 一時データベースファイルを作成
+          temp_db=$(mktemp)
+          trap "rm -f $temp_db" EXIT
+
+          for file in $sql_files; do
+            echo "Applying $file..."
+            if sqlite3 "$temp_db" < "$file" 2>&1; then
+              echo "✅ $file applied successfully"
+            else
+              echo "❌ Error in $file"
+              echo ""
+              echo "SQL syntax validation failed"
+              exit 1
+            fi
+          done
+
+          echo ""
+          echo "All SQL files are valid"
+
   preview-deploy:
     needs: pr-check
     runs-on: ubuntu-latest
