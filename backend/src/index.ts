@@ -1,8 +1,9 @@
+import type { D1Database } from '@cloudflare/workers-types';
 import { Hono } from 'hono';
+import rankingsRoute from './routes/rankings';
 
 type Env = {
-  // 今後利用する環境変数の型をここに追加します
-  // 例: MY_KV: KVNamespace;
+  DB: D1Database;
 };
 
 const app = new Hono<{ Bindings: Env }>().basePath('/api');
@@ -13,5 +14,7 @@ app.get('/health', (c) => {
     timestamp: new Date().toISOString(),
   });
 });
+
+app.route('/', rankingsRoute);
 
 export default app;
