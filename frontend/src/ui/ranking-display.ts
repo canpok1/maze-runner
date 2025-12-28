@@ -1,0 +1,112 @@
+import { fetchRankings } from '../api-client/rankings';
+import type { Difficulty, Ranking } from '../api-client/types';
+
+/**
+ * ランキング表示を初期化する
+ * @returns 初期化完了を示すPromise
+ * @throws {Error} 必須DOM要素が存在しない場合
+ */
+export async function initRankingDisplay(): Promise<void> {
+  const rankingSection = document.getElementById('ranking-section');
+  const rankingList = document.getElementById('ranking-list');
+  const loadingElement = document.getElementById('ranking-loading');
+  const emptyElement = document.getElementById('ranking-empty');
+  const tabs = document.querySelectorAll('.ranking-tab');
+
+  if (!rankingSection || !rankingList || !loadingElement || !emptyElement || tabs.length === 0) {
+    throw new Error('Required ranking elements not found');
+  }
+
+  // 現在選択中の難易度を追跡（タブ切り替え時の重複リクエスト防止に使用）
+  let currentDifficulty: Difficulty = 'easy';
+
+  /**
+   * 指定された難易度のランキングデータを取得して表示する
+   * @param difficulty - 表示する難易度（'easy' | 'normal' | 'hard'）
+   * @returns ランキング表示完了を示すPromise
+   */
+  const displayRankings = async (difficulty: Difficulty) => {
+    loadingElement.classList.remove('hidden');
+    emptyElement.classList.add('hidden');
+    rankingList.innerHTML = '';
+
+    try {
+      const rankings = await fetchRankings(difficulty, 10);
+      loadingElement.classList.add('hidden');
+
+      if (rankings.length === 0) {
+        emptyElement.classList.remove('hidden');
+        return;
+      }
+
+      rankings.forEach((ranking, index) => {
+        const listItem = createRankingItem(ranking, index + 1);
+        rankingList.appendChild(listItem);
+      });
+    } catch (error) {
+      console.error('Failed to fetch rankings:', error);
+      loadingElement.classList.add('hidden');
+      emptyElement.classList.remove('hidden');
+    }
+  };
+
+  /**
+   * ランキングアイテムのDOM要素を作成する
+   * @param ranking - 表示するランキングデータ
+   * @param rank - 表示する順位（1から始まる）
+   * @returns 構造化されたリストアイテム要素
+   */
+  const createRankingItem = (ranking: Ranking, rank: number): HTMLLIElement => {
+    const listItem = document.createElement('li');
+    listItem.className = 'ranking-item';
+
+    const rankSpan = document.createElement('span');
+    rankSpan.className = `ranking-rank${rank <= 3 ? ` rank-${rank}` : ''}`;
+    rankSpan.textContent = `${rank}`;
+
+    const nameSpan = document.createElement('span');
+    nameSpan.className = 'ranking-name';
+    nameSpan.textContent = ranking.playerName;
+
+    const timeSpan = document.createElement('span');
+    timeSpan.className = 'ranking-time';
+    const timeInSeconds = (ranking.clearTime / 1000).toFixed(2);
+    timeSpan.textContent = `${timeInSeconds}秒`;
+
+    listItem.appendChild(rankSpan);
+    listItem.appendChild(nameSpan);
+    listItem.appendChild(timeSpan);
+
+    return listItem;
+  };
+
+  /**
+   * タブの active 状態を更新する
+   * @param selectedDifficulty - アクティブにする難易度
+   */
+  const updateTabState = (selectedDifficulty: Difficulty) => {
+    tabs.forEach((tab) => {
+      const tabElement = tab as HTMLElement;
+      const tabDifficulty = tabElement.dataset.difficulty;
+      if (tabDifficulty === selectedDifficulty) {
+        tabElement.classList.add('active');
+      } else {
+        tabElement.classList.remove('active');
+      }
+    });
+  };
+
+  tabs.forEach((tab) => {
+    const tabElement = tab as HTMLElement;
+    tabElement.addEventListener('click', async () => {
+      const difficulty = tabElement.dataset.difficulty as Difficulty;
+      if (difficulty && difficulty !== currentDifficulty) {
+        currentDifficulty = difficulty;
+        updateTabState(difficulty);
+        await displayRankings(difficulty);
+      }
+    });
+  });
+
+  await displayRankings(currentDifficulty);
+}

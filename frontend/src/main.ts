@@ -12,6 +12,7 @@ import { getDifficultyFromSize } from './helpers/difficulty';
 import { setupControls } from './input/controls';
 import { generateMaze } from './maze/generator';
 import { createRenderer } from './renderer';
+import { initRankingDisplay } from './ui/ranking-display';
 import { showScoreModal } from './ui/score-modal';
 
 // --- DOM要素の取得とバリデーション ---
@@ -109,4 +110,7 @@ window.addEventListener('load', () => {
   setupDifficultyButtons();
   resizeCanvas();
   window.addEventListener('resize', resizeCanvas);
+  initRankingDisplay().catch((error) => {
+    console.error('Failed to initialize ranking display:', error);
+  });
 });
