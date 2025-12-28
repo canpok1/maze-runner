@@ -1,7 +1,5 @@
 import type { D1Database } from '@cloudflare/workers-types';
-
-export const DIFFICULTIES = ['easy', 'normal', 'hard'] as const;
-export type Difficulty = (typeof DIFFICULTIES)[number];
+import { DIFFICULTIES, type Difficulty, type Ranking, type RankingWithId } from '@maze-runner/lib';
 
 export function isDifficulty(value: unknown): value is Difficulty {
   return typeof value === 'string' && DIFFICULTIES.includes(value as Difficulty);
@@ -11,16 +9,6 @@ interface RankingRow {
   player_name: string;
   clear_time: number;
   created_at: string;
-}
-
-export interface Ranking {
-  playerName: string;
-  clearTime: number;
-  createdAt: string;
-}
-
-export interface RankingWithId extends Ranking {
-  id: number;
 }
 
 /**

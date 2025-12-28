@@ -66,3 +66,29 @@ export type GameConfig = {
   mapPadding: number;
   moveSpeed: number;
 };
+
+/**
+ * ゲームの難易度を表す定数
+ */
+export const DIFFICULTIES = ['easy', 'normal', 'hard'] as const;
+
+/**
+ * ゲームの難易度を表す型
+ */
+export type Difficulty = (typeof DIFFICULTIES)[number];
+
+/**
+ * ランキング情報を表すインターフェース
+ */
+export interface Ranking {
+  playerName: string;
+  clearTime: number;
+  createdAt: string;
+}
+
+/**
+ * ID付きランキング情報を表すインターフェース
+ */
+export interface RankingWithId extends Ranking {
+  id: number;
+}
