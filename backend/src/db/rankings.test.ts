@@ -83,39 +83,60 @@ describe('addRanking', () => {
   });
 
   it('should add a new ranking and return the inserted data', async () => {
-    const mockPrepare = vi.fn().mockReturnValue({
-      bind: vi.fn().mockReturnValue({
-        run: vi.fn().mockResolvedValue({
-          success: true,
-          meta: {
-            last_row_id: 1,
-          },
-        } as D1Result),
-      }),
-    });
+    const mockCreatedAt = '2025-01-01T00:00:00.000Z';
+    const mockPrepare = vi
+      .fn()
+      .mockReturnValueOnce({
+        bind: vi.fn().mockReturnValue({
+          run: vi.fn().mockResolvedValue({
+            success: true,
+            meta: {
+              last_row_id: 1,
+            },
+          } as D1Result),
+        }),
+      })
+      .mockReturnValueOnce({
+        bind: vi.fn().mockReturnValue({
+          first: vi.fn().mockResolvedValue({
+            created_at: mockCreatedAt,
+          }),
+        }),
+      });
 
     mockDb.prepare = mockPrepare;
 
     const result = await addRanking(mockDb, 'TestPlayer', 200, 'easy');
 
     expect(mockPrepare).toHaveBeenCalledWith(expect.stringContaining('INSERT'));
+    expect(mockPrepare).toHaveBeenCalledWith(expect.stringContaining('SELECT'));
     expect(result.id).toBe(1);
     expect(result.playerName).toBe('TestPlayer');
     expect(result.clearTime).toBe(200);
-    expect(result.createdAt).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
+    expect(result.createdAt).toBe(mockCreatedAt);
   });
 
   it('should use the correct difficulty_id based on difficulty name', async () => {
-    const mockPrepare = vi.fn().mockReturnValue({
-      bind: vi.fn().mockReturnValue({
-        run: vi.fn().mockResolvedValue({
-          success: true,
-          meta: {
-            last_row_id: 2,
-          },
-        } as D1Result),
-      }),
-    });
+    const mockCreatedAt = '2025-01-02T00:00:00.000Z';
+    const mockPrepare = vi
+      .fn()
+      .mockReturnValueOnce({
+        bind: vi.fn().mockReturnValue({
+          run: vi.fn().mockResolvedValue({
+            success: true,
+            meta: {
+              last_row_id: 2,
+            },
+          } as D1Result),
+        }),
+      })
+      .mockReturnValueOnce({
+        bind: vi.fn().mockReturnValue({
+          first: vi.fn().mockResolvedValue({
+            created_at: mockCreatedAt,
+          }),
+        }),
+      });
 
     mockDb.prepare = mockPrepare;
 
