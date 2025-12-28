@@ -6,19 +6,19 @@ description: |
   Examples:
   - user: "ユーザー認証機能を実装してください"
     assistant: "ユーザー認証機能の実装ですね。coding-specialistエージェントを使用してTDDで実装を進めます。"
-    <Task tool call to launch coder agent>
+    <Task tool call to launch coding-specialist agent>
 
   - user: "商品一覧を表示するコンポーネントを作成して"
     assistant: "商品一覧コンポーネントの作成を承りました。coding-specialistエージェントでTDDアプローチにより実装します。"
-    <Task tool call to launch coder agent>
+    <Task tool call to launch coding-specialist agent>
 
   - user: "APIからデータを取得する関数が必要です"
     assistant: "API通信関数の実装ですね。coding-specialistエージェントを起動して、まずテストから書いていきます。"
-    <Task tool call to launch coder agent>
+    <Task tool call to launch coding-specialist agent>
 
   - user: "フォームのバリデーションロジックを追加してほしい"
     assistant: "バリデーションロジックの追加ですね。coding-specialistエージェントでTDDにより実装を行います。"
-    <Task tool call to launch coder agent>
+    <Task tool call to launch coding-specialist agent>
 model: sonnet
 ---
 
