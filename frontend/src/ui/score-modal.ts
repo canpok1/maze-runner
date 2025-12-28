@@ -16,8 +16,8 @@ export function showScoreModal(
   const scoreDisplay = document.getElementById('score-display');
   const playerNameInput = document.getElementById('player-name') as HTMLInputElement;
   const nameError = document.getElementById('name-error');
-  const submitBtn = document.getElementById('submit-score-btn');
-  const skipBtn = document.getElementById('skip-score-btn');
+  const submitBtn = document.getElementById('submit-score-btn') as HTMLButtonElement;
+  const skipBtn = document.getElementById('skip-score-btn') as HTMLButtonElement;
 
   if (!modal || !scoreDisplay || !playerNameInput || !nameError || !submitBtn || !skipBtn) {
     throw new Error('Required modal elements not found');
@@ -29,9 +29,11 @@ export function showScoreModal(
   // モーダルを表示
   modal.classList.remove('hidden');
 
-  // 入力をリセット
+  // 入力とボタン状態をリセット
   playerNameInput.value = '';
   nameError.textContent = '';
+  submitBtn.disabled = false;
+  skipBtn.disabled = false;
 
   // 登録ボタンのイベントハンドラ
   const handleSubmit = async () => {
@@ -47,6 +49,10 @@ export function showScoreModal(
       nameError.textContent = 'プレイヤー名は20文字以内で入力してください';
       return;
     }
+
+    // ボタンを無効化（二重クリック防止）
+    submitBtn.disabled = true;
+    skipBtn.disabled = true;
 
     // エラーをクリア
     nameError.textContent = '';
@@ -66,6 +72,9 @@ export function showScoreModal(
 
   // スキップボタンのイベントハンドラ
   const handleSkip = () => {
+    // ボタンを無効化（二重クリック防止）
+    submitBtn.disabled = true;
+    skipBtn.disabled = true;
     closeModal();
   };
 
