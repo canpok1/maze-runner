@@ -1,8 +1,13 @@
 import { Hono } from 'hono';
 
-const app = new Hono();
+type Env = {
+  // 今後利用する環境変数の型をここに追加します
+  // 例: MY_KV: KVNamespace;
+};
 
-app.get('/api/health', (c) => {
+const app = new Hono<{ Bindings: Env }>().basePath('/api');
+
+app.get('/health', (c) => {
   return c.json({
     status: 'ok',
     timestamp: new Date().toISOString(),

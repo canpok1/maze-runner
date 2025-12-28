@@ -41,15 +41,15 @@ src/
 - **対象**: 複数のクラスや関数の統合動作
 - **依存関係**: 実際のコンポーネントを使用（一部モック化も許容）
 - **配置場所**: `tests/integration/`
-- **命名パターン**: `<feature>.integration.test.ts`
+- **命名パターン**: `<feature>.test.ts`
 
 #### 例
 
 ```
 tests/
   integration/
-    maze-navigation.integration.test.ts     # ← Maze + Player の統合テスト
-    game-state.integration.test.ts          # ← ゲーム全体の状態管理テスト
+    maze-navigation.test.ts     # ← Maze + Player の統合テスト
+    game-state.test.ts          # ← ゲーム全体の状態管理テスト
 ```
 
 ### E2Eテスト（End-to-End）
@@ -59,15 +59,15 @@ tests/
 - **対象**: フルスタックの動作（UI操作からバックエンド処理まで）
 - **依存関係**: 実際のシステム全体を使用
 - **配置場所**: `tests/e2e/`
-- **命名パターン**: `<scenario>.e2e.test.ts`
+- **命名パターン**: `<scenario>.test.ts`
 
 #### 例
 
 ```
 tests/
   e2e/
-    game-playthrough.e2e.test.ts           # ← ゲーム開始から終了までのシナリオ
-    maze-completion.e2e.test.ts            # ← 迷路クリアまでの一連の流れ
+    game-playthrough.test.ts           # ← ゲーム開始から終了までのシナリオ
+    maze-completion.test.ts            # ← 迷路クリアまでの一連の流れ
 ```
 
 ## テスト実装の指針
