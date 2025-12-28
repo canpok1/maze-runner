@@ -1,0 +1,51 @@
+name: Schema Check
+
+on:
+  pull_request:
+    paths:
+      - 'backend/db/migrations/**'
+
+jobs:
+  schema-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate SQL syntax
+        run: |
+          # マイグレーションディレクトリが存在するか確認
+          if [ ! -d "backend/db/migrations" ]; then
+            echo "No migrations directory found"
+            exit 0
+          fi
+
+          # SQLファイルの一覧を取得
+          sql_files=$(find backend/db/migrations -name "*.sql" -type f)
+
+          if [ -z "$sql_files" ]; then
+            echo "No SQL files found"
+            exit 0
+          fi
+
+          # 各SQLファイルの構文を検証
+          echo "Validating SQL migration files..."
+          has_error=false
+
+          for file in $sql_files; do
+            echo "Checking $file..."
+            if sqlite3 :memory: < "$file" 2>&1; then
+              echo "✅ $file is valid"
+            else
+              echo "❌ Syntax error in $file"
+              has_error=true
+            fi
+          done
+
+          if [ "$has_error" = true ]; then
+            echo ""
+            echo "SQL syntax validation failed"
+            exit 1
+          fi
+
+          echo ""
+          echo "All SQL files are valid"
