@@ -1,5 +1,5 @@
-import { spawn, execSync, type ChildProcess } from 'child_process';
-import { setTimeout as sleep } from 'timers/promises';
+import { type ChildProcess, execSync, spawn } from 'node:child_process';
+import { setTimeout as sleep } from 'node:timers/promises';
 
 const BASE_URL = 'http://localhost:8787';
 const MAX_WAIT_ATTEMPTS = 30;
