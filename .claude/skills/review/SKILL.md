@@ -33,7 +33,7 @@ description: |
 
 `document-specialist` エージェントに依頼してください。
 
-**参照ドキュメント:** 一般的なドキュメンテーションのベストプラクティス
+**参照ドキュメント:** `docs/documentation-rules.md`
 
 **レビュー観点:**
 - コードコメントの品質と一貫性
