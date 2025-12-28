@@ -1,4 +1,4 @@
-import type { GameState, MazeMap } from '@maze-runner/lib';
+import type { Difficulty, GameState, MazeMap } from '@maze-runner/lib';
 import { ExplorationState, TileType } from '@maze-runner/lib';
 
 /** プレイヤーのスタートグリッド座標 X */
@@ -33,6 +33,8 @@ export interface WinDependencies {
   gameState: GameState;
   menuElement: HTMLElement;
   cancelAnimationFrame: (id: number) => void;
+  showScoreModal: (score: number, difficulty: Difficulty, onComplete: () => void) => void;
+  getDifficultyFromSize: (size: number) => Difficulty;
 }
 
 /**
@@ -95,11 +97,17 @@ export function win(deps: WinDependencies): void {
   deps.gameState.gameActive = false;
   deps.cancelAnimationFrame(deps.gameState.animationId);
 
-  const score = ((Date.now() - deps.gameState.startTime) / 1000).toFixed(2);
+  const score = parseFloat(((Date.now() - deps.gameState.startTime) / 1000).toFixed(2));
+  const difficulty = deps.getDifficultyFromSize(deps.gameState.mapSize);
 
   const lastScoreElement = document.getElementById('last-score');
   if (lastScoreElement) {
-    lastScoreElement.innerHTML = `<h2>CLEAR! クリアタイム: ${score}秒</h2>`;
+    lastScoreElement.innerHTML = `<h2>CLEAR! クリアタイム: ${score.toFixed(2)}秒</h2>`;
   }
-  deps.menuElement.style.display = 'flex';
+
+  // スコア登録モーダルを表示
+  deps.showScoreModal(score, difficulty, () => {
+    // モーダル完了後にメニュー画面を表示
+    deps.menuElement.style.display = 'flex';
+  });
 }

@@ -13,6 +13,7 @@
     "@maze-runner/lib": "*"
   },
   "devDependencies": {
+    "happy-dom": "^20.0.11",
     "typescript": "^5.7.2",
     "vite": "^6.0.5",
     "vitest": "^3.0.0"
