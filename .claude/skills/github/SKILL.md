@@ -42,6 +42,16 @@ PRを作成:
 - PRタイトルにissue番号を含めない
 - 本文には `fixed #<issue番号>` を含める
 
+### 現在のブランチのPR番号取得
+
+現在の作業ブランチに対応するPRの番号を取得:
+
+```bash
+gh pr view --json number --jq '.number'
+```
+
+**補足**: `gh pr view`は引数なしで現在のブランチのPRを参照する
+
 ### CI状態取得
 
 PRのCI状態を取得:
