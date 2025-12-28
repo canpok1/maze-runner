@@ -8,7 +8,8 @@ import { ApiError, type Difficulty, type Ranking, type RankingWithId } from './t
  * @throws {ApiError} APIリクエストが失敗した場合
  */
 export async function fetchRankings(difficulty: Difficulty, limit: number): Promise<Ranking[]> {
-  const url = `/api/rankings?difficulty=${difficulty}&limit=${limit}`;
+  const params = new URLSearchParams({ difficulty, limit: String(limit) });
+  const url = `/api/rankings?${params.toString()}`;
 
   const response = await fetch(url);
 

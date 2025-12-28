@@ -35,10 +35,16 @@ describe('rankings API client', () => {
         statusText: 'Internal Server Error',
       });
 
-      await expect(fetchRankings('easy', 10)).rejects.toThrow(ApiError);
-      await expect(fetchRankings('easy', 10)).rejects.toThrow(
-        'Failed to fetch rankings: Internal Server Error'
-      );
+      try {
+        await fetchRankings('easy', 10);
+        expect.fail('Expected fetchRankings to throw, but it did not.');
+      } catch (error) {
+        expect(error).toBeInstanceOf(ApiError);
+        if (error instanceof ApiError) {
+          expect(error.status).toBe(500);
+          expect(error.message).toBe('Failed to fetch rankings: Internal Server Error');
+        }
+      }
     });
 
     it('異常系: fetch自体が失敗した場合、エラーをスローする', async () => {
@@ -86,10 +92,16 @@ describe('rankings API client', () => {
         statusText: 'Bad Request',
       });
 
-      await expect(submitScore('TestPlayer', 150, 'normal')).rejects.toThrow(ApiError);
-      await expect(submitScore('TestPlayer', 150, 'normal')).rejects.toThrow(
-        'Failed to submit score: Bad Request'
-      );
+      try {
+        await submitScore('TestPlayer', 150, 'normal');
+        expect.fail('Expected submitScore to throw, but it did not.');
+      } catch (error) {
+        expect(error).toBeInstanceOf(ApiError);
+        if (error instanceof ApiError) {
+          expect(error.status).toBe(400);
+          expect(error.message).toBe('Failed to submit score: Bad Request');
+        }
+      }
     });
 
     it('異常系: fetch自体が失敗した場合、エラーをスローする', async () => {
