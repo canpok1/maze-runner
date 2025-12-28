@@ -12,7 +12,7 @@
     {
       "binding": "DB",
       "database_name": "maze-runner-db",
-      "database_id": "",
+      "database_id": "7e9856f0-a39d-4ad6-9860-e189aad0193a",
       "migrations_dir": "db/migrations"
     }
   ]
