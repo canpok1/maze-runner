@@ -237,4 +237,105 @@ describe('showScoreModal', () => {
     expect(submitScoreMock).toHaveBeenCalled();
     expect(onComplete).toHaveBeenCalled();
   });
+
+  it('必須DOM要素が存在しない場合、エラーをthrowする', () => {
+    document.body.innerHTML = '<div></div>';
+    expect(() => {
+      showScoreModal(100, 'normal', () => {});
+    }).toThrow('Required modal elements not found');
+  });
+
+  it('プレイヤー名の前後の空白は自動的に削除される', async () => {
+    const onComplete = vi.fn();
+    const submitScoreMock = vi.spyOn(rankingsApi, 'submitScore').mockResolvedValue({
+      id: 1,
+      playerName: 'TestPlayer',
+      clearTime: 100000,
+      createdAt: '2025-12-28T00:00:00Z',
+    });
+
+    showScoreModal(100, 'normal', onComplete);
+
+    const submitBtn = document.getElementById('submit-score-btn') as HTMLButtonElement;
+    const playerNameInput = document.getElementById('player-name') as HTMLInputElement;
+
+    // 前後に空白を含む名前を入力
+    playerNameInput.value = '  TestPlayer  ';
+    submitBtn.click();
+
+    // 少し待つ（非同期処理）
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    // trim されて送信されることを確認
+    expect(submitScoreMock).toHaveBeenCalledWith('TestPlayer', 100000, 'normal');
+    expect(onComplete).toHaveBeenCalled();
+  });
+
+  it('スコアを秒からミリ秒に正しく変換して送信する', async () => {
+    const onComplete = vi.fn();
+    const submitScoreMock = vi.spyOn(rankingsApi, 'submitScore').mockResolvedValue({
+      id: 1,
+      playerName: 'TestPlayer',
+      clearTime: 123456,
+      createdAt: '2025-12-28T00:00:00Z',
+    });
+
+    // 123.456秒を渡す
+    showScoreModal(123.456, 'normal', onComplete);
+
+    const submitBtn = document.getElementById('submit-score-btn') as HTMLButtonElement;
+    const playerNameInput = document.getElementById('player-name') as HTMLInputElement;
+
+    playerNameInput.value = 'TestPlayer';
+    submitBtn.click();
+
+    // 少し待つ（非同期処理）
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    // 123456ミリ秒に変換されて送信されることを確認
+    expect(submitScoreMock).toHaveBeenCalledWith('TestPlayer', 123456, 'normal');
+    expect(onComplete).toHaveBeenCalled();
+  });
+
+  it('登録後にモーダルが非表示になる', async () => {
+    const onComplete = vi.fn();
+    vi.spyOn(rankingsApi, 'submitScore').mockResolvedValue({
+      id: 1,
+      playerName: 'TestPlayer',
+      clearTime: 100000,
+      createdAt: '2025-12-28T00:00:00Z',
+    });
+
+    showScoreModal(100, 'normal', onComplete);
+
+    const modal = document.getElementById('score-modal');
+    const submitBtn = document.getElementById('submit-score-btn') as HTMLButtonElement;
+    const playerNameInput = document.getElementById('player-name') as HTMLInputElement;
+
+    playerNameInput.value = 'TestPlayer';
+    submitBtn.click();
+
+    // 少し待つ（非同期処理）
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    // hiddenクラスが追加されることを確認
+    expect(modal?.classList.contains('hidden')).toBe(true);
+  });
+
+  it('スキップ後にモーダルが非表示になる', async () => {
+    const onComplete = vi.fn();
+
+    showScoreModal(100, 'normal', onComplete);
+
+    const modal = document.getElementById('score-modal');
+    const skipBtn = document.getElementById('skip-score-btn') as HTMLButtonElement;
+
+    skipBtn.click();
+
+    // 少し待つ（非同期処理）
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    // hiddenクラスが追加されることを確認
+    expect(modal?.classList.contains('hidden')).toBe(true);
+  });
 });

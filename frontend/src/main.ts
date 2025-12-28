@@ -2,13 +2,13 @@
 
 import type { GameState } from '@maze-runner/lib';
 import { config } from './config';
-import { getDifficultyFromSize } from './constants/difficulty';
 import {
   type StartGameDependencies,
   startGame as startGameCore,
   type WinDependencies,
   win as winCore,
 } from './game/state';
+import { getDifficultyFromSize } from './helpers/difficulty';
 import { setupControls } from './input/controls';
 import { generateMaze } from './maze/generator';
 import { createRenderer } from './renderer';
