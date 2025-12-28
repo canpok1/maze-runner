@@ -42,6 +42,16 @@ PRを作成:
 - PRタイトルにissue番号を含めない
 - 本文には `fixed #<issue番号>` を含める
 
+### 現在のブランチのPR番号取得
+
+現在の作業ブランチに対応するPRの番号を取得:
+
+```bash
+gh pr view --json number --jq '.number'
+```
+
+**補足**: `gh pr view`は引数なしで現在のブランチのPRを参照する
+
 ### CI状態取得
 
 PRのCI状態を取得:
@@ -82,7 +92,7 @@ PRの未解決レビューコメントを取得:
 レビュースレッドに返信を投稿:
 
 ```bash
-echo "コメント内容" | ./.claude/skills/github/scripts/thread-reply.sh <スレッドID>
+./.claude/skills/github/scripts/thread-reply.sh <スレッドID> "コメント内容"
 ```
 
 **注意**: 返信先の対象者には `@ユーザー名` 形式でメンションを付与すること
