@@ -3,7 +3,8 @@ name: github
 description: |
   GitHub操作の統合スキル。issue作成、PR作成、レビュースレッド操作を提供。
   使用ケース:（1）issue作成、（2）PR作成（事前チェック統合）、
-  （3）レビューコメント取得、（4）スレッド返信、（5）スレッド解決
+  （3）レビューコメント取得、（4）スレッド返信、（5）スレッド解決、
+  （6）PRのCI状態取得、（7）ワークフローのログ取得
 ---
 
 # GitHub操作スキル
@@ -40,6 +41,14 @@ PRを作成:
 - mainブランチからは実行不可
 - PRタイトルにissue番号を含めない
 - 本文には `fixed #<issue番号>` を含める
+
+### CI状態取得
+
+PRのCI状態を取得:
+
+```bash
+gh pr checks <PR番号>
+```
 
 ## Thread操作
 
@@ -84,4 +93,15 @@ echo "コメント内容" | ./.claude/skills/github/scripts/thread-reply.sh <ス
 
 ```bash
 ./.claude/skills/github/scripts/thread-resolve.sh <スレッドID>
+```
+
+## ワークフロー操作
+
+### ログ取得
+
+ワークフローの実行ログを取得:
+`gh pr checks` で表示されるURLから `<run-id>` を取得して使用します。
+
+```bash
+gh run view <run-id>
 ```
