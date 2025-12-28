@@ -1,6 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "maze-runner",
+  "main": "src/index.ts",
   "compatibility_date": "2025-12-21",
   "assets": {
     "directory": "../frontend/dist",
