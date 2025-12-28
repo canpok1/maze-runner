@@ -82,7 +82,7 @@ PRの未解決レビューコメントを取得:
 レビュースレッドに返信を投稿:
 
 ```bash
-echo "コメント内容" | ./.claude/skills/github/scripts/thread-reply.sh <スレッドID>
+./.claude/skills/github/scripts/thread-reply.sh <スレッドID> "コメント内容"
 ```
 
 **注意**: 返信先の対象者には `@ユーザー名` 形式でメンションを付与すること
