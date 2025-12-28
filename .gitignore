@@ -32,6 +32,5 @@ lerna-debug.log*
 # misc
 .DS_Store
 
-# Git worktrees directory (ignore all contents except .gitkeep)
-worktrees/**
-!worktrees/.gitkeep
+# Git worktrees directory (ignore all subdirectories)
+worktrees/*/
