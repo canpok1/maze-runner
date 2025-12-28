@@ -100,6 +100,7 @@ echo "コメント内容" | ./.claude/skills/github/scripts/thread-reply.sh <ス
 ### ログ取得
 
 ワークフローの実行ログを取得:
+`gh pr checks` で表示されるURLから `<run-id>` を取得して使用します。
 
 ```bash
 gh run view <run-id>
