@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "wrangler dev --ip 0.0.0.0",
+    "dev": "wrangler dev --ip 0.0.0.0 --port 8787 --local",
     "deploy": "wrangler deploy",
-    "test": "vitest"
+    "test": "vitest",
+    "migrate": "wrangler d1 migrations apply maze-runner-db --local"
   },
   "dependencies": {
     "hono": "^4.6.14"

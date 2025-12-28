@@ -1,43 +1,13 @@
-import type { D1Database } from '@cloudflare/workers-types';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import app from '../../../backend/src/index';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { apiRequest, resetDatabase } from '../setup/testUtils';
 
 describe('GET /api/rankings', () => {
-  let mockDb: D1Database;
-
-  beforeEach(() => {
-    mockDb = {
-      prepare: vi.fn(),
-    } as unknown as D1Database;
+  beforeEach(async () => {
+    await resetDatabase();
   });
 
   it('should return rankings with valid difficulty parameter', async () => {
-    const mockRows = [
-      {
-        player_name: 'Player1',
-        clear_time: 100,
-        created_at: '2025-01-01T00:00:00.000Z',
-      },
-    ];
-
-    const mockPrepare = vi.fn().mockReturnValue({
-      bind: vi.fn().mockReturnValue({
-        all: vi.fn().mockResolvedValue({
-          results: mockRows,
-          success: true,
-        }),
-      }),
-    });
-
-    mockDb.prepare = mockPrepare;
-
-    const res = await app.request(
-      '/api/rankings?difficulty=easy',
-      {
-        method: 'GET',
-      },
-      { DB: mockDb }
-    );
+    const res = await apiRequest('/rankings?difficulty=easy');
 
     expect(res.status).toBe(200);
 
@@ -47,13 +17,7 @@ describe('GET /api/rankings', () => {
   });
 
   it('should return 400 without difficulty parameter', async () => {
-    const res = await app.request(
-      '/api/rankings',
-      {
-        method: 'GET',
-      },
-      { DB: mockDb }
-    );
+    const res = await apiRequest('/rankings');
 
     expect(res.status).toBe(400);
 
@@ -63,24 +27,7 @@ describe('GET /api/rankings', () => {
   });
 
   it('should return rankings with limit parameter', async () => {
-    const mockPrepare = vi.fn().mockReturnValue({
-      bind: vi.fn().mockReturnValue({
-        all: vi.fn().mockResolvedValue({
-          results: [],
-          success: true,
-        }),
-      }),
-    });
-
-    mockDb.prepare = mockPrepare;
-
-    const res = await app.request(
-      '/api/rankings?difficulty=normal&limit=5',
-      {
-        method: 'GET',
-      },
-      { DB: mockDb }
-    );
+    const res = await apiRequest('/rankings?difficulty=normal&limit=5');
 
     expect(res.status).toBe(200);
 
@@ -90,13 +37,7 @@ describe('GET /api/rankings', () => {
   });
 
   it('should return 400 with invalid limit parameter', async () => {
-    const res = await app.request(
-      '/api/rankings?difficulty=easy&limit=0',
-      {
-        method: 'GET',
-      },
-      { DB: mockDb }
-    );
+    const res = await apiRequest('/rankings?difficulty=easy&limit=0');
 
     expect(res.status).toBe(400);
 
@@ -106,13 +47,7 @@ describe('GET /api/rankings', () => {
   });
 
   it('should return 400 when difficulty value is invalid', async () => {
-    const res = await app.request(
-      '/api/rankings?difficulty=invalid',
-      {
-        method: 'GET',
-      },
-      { DB: mockDb }
-    );
+    const res = await apiRequest('/rankings?difficulty=invalid');
 
     expect(res.status).toBe(400);
 
@@ -123,53 +58,20 @@ describe('GET /api/rankings', () => {
 });
 
 describe('POST /api/rankings', () => {
-  let mockDb: D1Database;
-
-  beforeEach(() => {
-    mockDb = {
-      prepare: vi.fn(),
-    } as unknown as D1Database;
+  beforeEach(async () => {
+    await resetDatabase();
   });
 
   it('should add a new ranking with valid body', async () => {
-    const mockCreatedAt = '2025-01-01T00:00:00.000Z';
-    const mockPrepare = vi
-      .fn()
-      .mockReturnValueOnce({
-        bind: vi.fn().mockReturnValue({
-          run: vi.fn().mockResolvedValue({
-            success: true,
-            meta: {
-              last_row_id: 1,
-            },
-          }),
-        }),
-      })
-      .mockReturnValueOnce({
-        bind: vi.fn().mockReturnValue({
-          first: vi.fn().mockResolvedValue({
-            created_at: mockCreatedAt,
-          }),
-        }),
-      });
-
-    mockDb.prepare = mockPrepare;
-
-    const res = await app.request(
-      '/api/rankings',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          playerName: 'TestPlayer',
-          clearTime: 120,
-          difficulty: 'easy',
-        }),
-      },
-      { DB: mockDb }
-    );
+    const res = await apiRequest('/rankings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        playerName: 'TestPlayer',
+        clearTime: 120,
+        difficulty: 'easy',
+      }),
+    });
 
     expect(res.status).toBe(201);
 
@@ -178,25 +80,19 @@ describe('POST /api/rankings', () => {
     expect(data).toHaveProperty('ranking');
     expect(data.ranking).toHaveProperty('playerName', 'TestPlayer');
     expect(data.ranking).toHaveProperty('clearTime', 120);
-    expect(data.ranking).toHaveProperty('id', 1);
-    expect(data.ranking).toHaveProperty('createdAt', mockCreatedAt);
+    expect(data.ranking).toHaveProperty('id');
+    expect(data.ranking).toHaveProperty('createdAt');
   });
 
   it('should return 400 when playerName is missing', async () => {
-    const res = await app.request(
-      '/api/rankings',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          clearTime: 120,
-          difficulty: 'easy',
-        }),
-      },
-      { DB: mockDb }
-    );
+    const res = await apiRequest('/rankings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        clearTime: 120,
+        difficulty: 'easy',
+      }),
+    });
 
     expect(res.status).toBe(400);
 
@@ -206,20 +102,14 @@ describe('POST /api/rankings', () => {
   });
 
   it('should return 400 when clearTime is missing', async () => {
-    const res = await app.request(
-      '/api/rankings',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          playerName: 'TestPlayer',
-          difficulty: 'easy',
-        }),
-      },
-      { DB: mockDb }
-    );
+    const res = await apiRequest('/rankings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        playerName: 'TestPlayer',
+        difficulty: 'easy',
+      }),
+    });
 
     expect(res.status).toBe(400);
 
@@ -229,20 +119,14 @@ describe('POST /api/rankings', () => {
   });
 
   it('should return 400 when difficulty is missing', async () => {
-    const res = await app.request(
-      '/api/rankings',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          playerName: 'TestPlayer',
-          clearTime: 120,
-        }),
-      },
-      { DB: mockDb }
-    );
+    const res = await apiRequest('/rankings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        playerName: 'TestPlayer',
+        clearTime: 120,
+      }),
+    });
 
     expect(res.status).toBe(400);
 
@@ -252,21 +136,15 @@ describe('POST /api/rankings', () => {
   });
 
   it('should return 400 when clearTime is not a number', async () => {
-    const res = await app.request(
-      '/api/rankings',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          playerName: 'TestPlayer',
-          clearTime: 'invalid',
-          difficulty: 'easy',
-        }),
-      },
-      { DB: mockDb }
-    );
+    const res = await apiRequest('/rankings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        playerName: 'TestPlayer',
+        clearTime: 'invalid',
+        difficulty: 'easy',
+      }),
+    });
 
     expect(res.status).toBe(400);
 
@@ -276,21 +154,15 @@ describe('POST /api/rankings', () => {
   });
 
   it('should return 400 when playerName is empty string', async () => {
-    const res = await app.request(
-      '/api/rankings',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          playerName: '',
-          clearTime: 120,
-          difficulty: 'easy',
-        }),
-      },
-      { DB: mockDb }
-    );
+    const res = await apiRequest('/rankings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        playerName: '',
+        clearTime: 120,
+        difficulty: 'easy',
+      }),
+    });
 
     expect(res.status).toBe(400);
 
@@ -300,21 +172,15 @@ describe('POST /api/rankings', () => {
   });
 
   it('should return 400 when clearTime is negative', async () => {
-    const res = await app.request(
-      '/api/rankings',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          playerName: 'TestPlayer',
-          clearTime: -10,
-          difficulty: 'easy',
-        }),
-      },
-      { DB: mockDb }
-    );
+    const res = await apiRequest('/rankings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        playerName: 'TestPlayer',
+        clearTime: -10,
+        difficulty: 'easy',
+      }),
+    });
 
     expect(res.status).toBe(400);
 
@@ -324,17 +190,11 @@ describe('POST /api/rankings', () => {
   });
 
   it('should return 400 with invalid JSON body', async () => {
-    const res = await app.request(
-      '/api/rankings',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: 'invalid json',
-      },
-      { DB: mockDb }
-    );
+    const res = await apiRequest('/rankings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: 'invalid json',
+    });
 
     expect(res.status).toBe(400);
 
@@ -344,21 +204,15 @@ describe('POST /api/rankings', () => {
   });
 
   it('should return 400 when difficulty value is invalid', async () => {
-    const res = await app.request(
-      '/api/rankings',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          playerName: 'TestPlayer',
-          clearTime: 120,
-          difficulty: 'invalid',
-        }),
-      },
-      { DB: mockDb }
-    );
+    const res = await apiRequest('/rankings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        playerName: 'TestPlayer',
+        clearTime: 120,
+        difficulty: 'invalid',
+      }),
+    });
 
     expect(res.status).toBe(400);
 
