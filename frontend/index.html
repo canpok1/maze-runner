@@ -66,6 +66,30 @@
   </div>
 </div>
 
+<!-- ランキング詳細モーダル -->
+<div id="ranking-detail-modal" class="modal hidden">
+  <div class="modal-content">
+    <h2>ランキング詳細</h2>
+    <div class="detail-item">
+      <span class="detail-label">順位</span>
+      <span id="detail-rank" class="detail-value"></span>
+    </div>
+    <div class="detail-item">
+      <span class="detail-label">プレイヤー名</span>
+      <span id="detail-player-name" class="detail-value"></span>
+    </div>
+    <div class="detail-item">
+      <span class="detail-label">クリアタイム</span>
+      <span id="detail-clear-time" class="detail-value"></span>
+    </div>
+    <div class="detail-item">
+      <span class="detail-label">登録日時</span>
+      <span id="detail-created-at" class="detail-value"></span>
+    </div>
+    <button id="detail-close-btn" class="detail-close-btn">閉じる</button>
+  </div>
+</div>
+
 <script type="module" src="/src/main.ts"></script>
 </body>
 </html>
