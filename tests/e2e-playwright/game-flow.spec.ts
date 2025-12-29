@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test.describe
   .serial('ゲームクリアフロー', () => {
-    test('固定迷路でゲームをクリアし、スコア登録してランキングに表示される', async ({ page }) => {
+    test('固定迷路でゲームをクリアし、スコア登録後にランキングが自動更新される', async ({ page }) => {
       // テスト用固定迷路でゲームを開始
       await page.goto('/?testMaze=simple');
 
@@ -43,12 +43,8 @@ test.describe
       const rankingSection = page.locator('#ranking-section');
       await expect(rankingSection).toBeVisible();
 
-      // ページをリロードしてランキングデータを再取得
-      await page.reload();
-      await expect(page.locator('#menu')).toBeVisible();
-
+      // スコア登録後、自動でランキングが更新されることを確認（リロード不要）
       // ランキングリストに登録した名前が表示されることを確認
-      // 名前はテスト実行ごとにユニークなため、実際に登録した名前を検索
       await expect(page.locator('#ranking-list')).toContainText(testPlayerName, { timeout: 10000 });
     });
 

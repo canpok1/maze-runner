@@ -3,10 +3,10 @@ import type { Difficulty, Ranking } from '../api-client/types';
 
 /**
  * ランキング表示を初期化する
- * @returns 初期化完了を示すPromise
+ * @returns refresh関数を持つオブジェクト。refresh()で現在の難易度のランキングを再取得する
  * @throws {Error} 必須DOM要素が存在しない場合
  */
-export async function initRankingDisplay(): Promise<void> {
+export async function initRankingDisplay(): Promise<{ refresh: () => Promise<void> }> {
   const rankingSection = document.getElementById('ranking-section');
   const rankingList = document.getElementById('ranking-list');
   const loadingElement = document.getElementById('ranking-loading');
@@ -132,4 +132,8 @@ export async function initRankingDisplay(): Promise<void> {
   });
 
   await displayRankings(currentDifficulty);
+
+  return {
+    refresh: () => displayRankings(currentDifficulty),
+  };
 }

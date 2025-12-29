@@ -11,7 +11,9 @@ export async function fetchRankings(difficulty: Difficulty, limit: number): Prom
   const params = new URLSearchParams({ difficulty, limit: String(limit) });
   const url = `/api/rankings?${params.toString()}`;
 
-  const response = await fetch(url);
+  const response = await fetch(url, {
+    cache: 'no-store',
+  });
 
   if (!response.ok) {
     throw new ApiError(response.status, `Failed to fetch rankings: ${response.statusText}`);
