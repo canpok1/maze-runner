@@ -348,8 +348,18 @@ canvas {
 }
 
 #ranking-loading.hidden,
-#ranking-empty.hidden {
+#ranking-empty.hidden,
+#ranking-error.hidden {
   display: none;
+}
+
+.error-message {
+  text-align: center;
+  padding: 20px;
+  color: #e74c3c;
+  background: rgba(231, 76, 60, 0.1);
+  border-radius: 6px;
+  margin: 10px 0;
 }
 
 #ranking-list {

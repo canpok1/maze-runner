@@ -16,10 +16,19 @@ export function showScoreModal(
   const scoreDisplay = document.getElementById('score-display');
   const playerNameInput = document.getElementById('player-name') as HTMLInputElement;
   const nameError = document.getElementById('name-error');
+  const submitError = document.getElementById('submit-error');
   const submitBtn = document.getElementById('submit-score-btn') as HTMLButtonElement;
   const skipBtn = document.getElementById('skip-score-btn') as HTMLButtonElement;
 
-  if (!modal || !scoreDisplay || !playerNameInput || !nameError || !submitBtn || !skipBtn) {
+  if (
+    !modal ||
+    !scoreDisplay ||
+    !playerNameInput ||
+    !nameError ||
+    !submitError ||
+    !submitBtn ||
+    !skipBtn
+  ) {
     throw new Error('Required modal elements not found');
   }
 
@@ -32,6 +41,8 @@ export function showScoreModal(
   // 入力とボタン状態をリセット
   playerNameInput.value = '';
   nameError.textContent = '';
+  submitError.textContent = '';
+  submitError.classList.add('hidden');
   submitBtn.disabled = false;
   skipBtn.disabled = false;
 
@@ -54,19 +65,39 @@ export function showScoreModal(
     submitBtn.disabled = true;
     skipBtn.disabled = true;
 
+    // ボタンテキストを「送信中...」に変更
+    const originalButtonText = submitBtn.textContent || '登録';
+    submitBtn.textContent = '送信中...';
+
     // エラーをクリア
     nameError.textContent = '';
+    submitError.textContent = '';
+    submitError.classList.add('hidden');
+
+    // オフライン検出
+    if (!navigator.onLine) {
+      submitError.textContent = 'オフラインです。後で再試行してください';
+      submitError.classList.remove('hidden');
+      submitBtn.disabled = false;
+      skipBtn.disabled = false;
+      submitBtn.textContent = originalButtonText;
+      return;
+    }
 
     try {
       // スコアを秒からミリ秒に変換
       const clearTimeMs = Math.round(score * 1000);
       await submitScore(playerName, clearTimeMs, difficulty);
-    } catch (error) {
-      // エラーが発生してもモーダルを閉じる
-      console.error('Failed to submit score:', error);
-    } finally {
-      // モーダルを閉じる
+      // 成功時のみモーダルを閉じる
       closeModal();
+    } catch (error) {
+      // エラーが発生した場合、エラーメッセージを表示してモーダルを閉じない
+      console.error('Failed to submit score:', error);
+      submitError.textContent = 'スコアの登録に失敗しました';
+      submitError.classList.remove('hidden');
+      submitBtn.disabled = false;
+      skipBtn.disabled = false;
+      submitBtn.textContent = originalButtonText;
     }
   };
 
