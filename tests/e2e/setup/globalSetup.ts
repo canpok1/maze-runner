@@ -19,7 +19,7 @@ export default async function globalSetup(): Promise<() => Promise<void>> {
 
   // 2. 開発サーバーを起動（フロントエンドビルド + wrangler dev）
   console.log('Starting dev server...');
-  serverProcess = spawn('npm', ['run', 'dev'], {
+  serverProcess = spawn('npm', ['run', 'dev:server'], {
     stdio: 'pipe',
     detached: true,
   });
