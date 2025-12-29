@@ -68,7 +68,6 @@ export async function initRankingDisplay(): Promise<void> {
       console.error('Failed to fetch rankings:', error);
       loadingElement.classList.add('hidden');
 
-      // オフライン状態を検出して適切なメッセージを表示
       if (!navigator.onLine) {
         errorElement.textContent = 'オフラインです';
       } else {

@@ -65,16 +65,13 @@ export function showScoreModal(
     submitBtn.disabled = true;
     skipBtn.disabled = true;
 
-    // ボタンテキストを「送信中...」に変更
     const originalButtonText = submitBtn.textContent || '登録';
     submitBtn.textContent = '送信中...';
 
-    // エラーをクリア
     nameError.textContent = '';
     submitError.textContent = '';
     submitError.classList.add('hidden');
 
-    // オフライン検出
     if (!navigator.onLine) {
       submitError.textContent = 'オフラインです。後で再試行してください';
       submitError.classList.remove('hidden');
@@ -88,10 +85,8 @@ export function showScoreModal(
       // スコアを秒からミリ秒に変換
       const clearTimeMs = Math.round(score * 1000);
       await submitScore(playerName, clearTimeMs, difficulty);
-      // 成功時のみモーダルを閉じる
       closeModal();
     } catch (error) {
-      // エラーが発生した場合、エラーメッセージを表示してモーダルを閉じない
       console.error('Failed to submit score:', error);
       submitError.textContent = 'スコアの登録に失敗しました';
       submitError.classList.remove('hidden');
