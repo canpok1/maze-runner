@@ -14,7 +14,7 @@ describe('initRankingDisplay', () => {
         </div>
         <div id="ranking-loading" class="hidden">読み込み中...</div>
         <div id="ranking-empty" class="hidden">ランキングデータがありません</div>
-        <div id="ranking-error" class="hidden error-message">データの取得に失敗しました</div>
+        <div id="ranking-error" class="hidden ranking__error">データの取得に失敗しました</div>
         <ol id="ranking-list"></ol>
       </section>
     `;
