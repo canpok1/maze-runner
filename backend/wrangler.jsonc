@@ -15,5 +15,20 @@
       "preview_database_id": "a649135b-d9f9-4293-a00a-85725d3a0a5d",
       "migrations_dir": "db/migrations"
     }
-  ]
+  ],
+  // wrangler versions upload --preview-alias (CI/CD) ではトップレベルの preview_database_id が適用されないため、
+  // env.preview セクションでプレビュー用DBを明示的に指定。
+  // 注意: ここの database_id は、ローカル開発 (wrangler dev) で使用されるトップレベルの preview_database_id と同期させる必要あり。
+  "env": {
+    "preview": {
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "maze-runner-db-preview",
+          "database_id": "a649135b-d9f9-4293-a00a-85725d3a0a5d",
+          "migrations_dir": "db/migrations"
+        }
+      ]
+    }
+  }
 }

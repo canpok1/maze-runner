@@ -101,7 +101,8 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: "4.21.0"
           workingDirectory: backend
-          command: versions upload --preview-alias pr-${{ github.event.pull_request.number }}
+          # --env preview で wrangler.jsonc の env.preview セクションを適用
+          command: versions upload --env preview --preview-alias pr-${{ github.event.pull_request.number }}
 
       - name: Comment PR with preview URL
         uses: actions/github-script@v7
