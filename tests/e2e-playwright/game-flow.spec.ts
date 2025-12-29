@@ -1,6 +1,11 @@
 import { expect, test } from '@playwright/test';
+import { resetDatabase } from './helpers/testUtils';
 
 test.describe('ゲームクリアフロー', () => {
+  test.beforeEach(() => {
+    resetDatabase();
+  });
+
   test('固定迷路でゲームをクリアし、スコア登録してランキングに表示される', async ({ page }) => {
     // テスト用固定迷路でゲームを開始
     await page.goto('/?testMaze=simple');
