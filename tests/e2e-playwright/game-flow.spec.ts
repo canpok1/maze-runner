@@ -1,11 +1,6 @@
 import { expect, test } from '@playwright/test';
-import { resetDatabase } from './helpers/testUtils';
 
-test.describe('ゲームクリアフロー', () => {
-  test.beforeEach(() => {
-    resetDatabase();
-  });
-
+test.describe.serial('ゲームクリアフロー', () => {
   test('固定迷路でゲームをクリアし、スコア登録してランキングに表示される', async ({ page }) => {
     // テスト用固定迷路でゲームを開始
     await page.goto('/?testMaze=simple');
@@ -32,8 +27,8 @@ test.describe('ゲームクリアフロー', () => {
     // スコア登録モーダルが表示されていることを確認
     await expect(page.locator('#score-modal')).toBeVisible();
 
-    // 名前を入力
-    const testPlayerName = `TestPlayer_${Date.now()}`;
+    // 名前を入力（20文字制限があるため短い名前を使用）
+    const testPlayerName = `TP_${Date.now()}`;
     await page.locator('#player-name').fill(testPlayerName);
 
     // 登録ボタンをクリック
