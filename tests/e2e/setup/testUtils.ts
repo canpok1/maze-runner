@@ -7,13 +7,9 @@ export const BASE_URL = 'http://localhost:8787';
  * rankingsテーブルのデータを削除し、シーケンスもリセットする
  */
 export async function resetDatabase(): Promise<void> {
-  execSync(
-    'npx wrangler d1 execute maze-runner-db --local --command="DELETE FROM rankings; DELETE FROM sqlite_sequence WHERE name=\'rankings\';"',
-    {
-      cwd: 'backend',
-      stdio: 'pipe',
-    }
-  );
+  execSync('npm run test:e2e:reset-db', {
+    stdio: 'pipe',
+  });
 }
 
 /**

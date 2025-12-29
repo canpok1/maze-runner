@@ -17,6 +17,7 @@
     "test:e2e:vitest": "vitest run --config vitest.e2e.config.ts",
     "test:e2e:playwright": "playwright test",
     "test:e2e:setup": "playwright install --with-deps",
+    "test:e2e:reset-db": "wrangler d1 execute maze-runner-db --local --command=\"DELETE FROM rankings; DELETE FROM sqlite_sequence WHERE name='rankings';\" --config backend/wrangler.jsonc",
     "test:e2e:report": "playwright show-report --host 0.0.0.0",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
