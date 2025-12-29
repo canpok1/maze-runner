@@ -108,7 +108,7 @@ describe('initRankingDisplay', () => {
     normalTab.click();
 
     // 少し待つ（非同期処理）
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(fetchRankingsMock).toHaveBeenCalledWith('normal', 10);
   });
@@ -129,7 +129,7 @@ describe('initRankingDisplay', () => {
 
     // 中級タブをクリック
     normalTab.click();
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(easyTab.classList.contains('active')).toBe(false);
     expect(normalTab.classList.contains('active')).toBe(true);
@@ -137,7 +137,7 @@ describe('initRankingDisplay', () => {
 
     // 上級タブをクリック
     hardTab.click();
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(easyTab.classList.contains('active')).toBe(false);
     expect(normalTab.classList.contains('active')).toBe(false);
