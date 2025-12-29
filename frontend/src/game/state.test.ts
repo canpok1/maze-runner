@@ -1,4 +1,5 @@
 import { ExplorationState, type GameState, type MazeMap, TileType } from '@maze-runner/lib';
+import type { TestMazeData } from '../maze/fixtures';
 import { type StartGameDependencies, startGame } from './state';
 
 describe('startGame', () => {
@@ -194,6 +195,54 @@ describe('startGame', () => {
       startGame(11, deps);
 
       expect(deps.cancelAnimationFrame).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('固定迷路の使用', () => {
+    it('固定迷路が渡された場合、generateMazeを呼ばずにその迷路を使用すること', () => {
+      const gameState = createMockGameState();
+      const deps = createMockDependencies(gameState);
+
+      // 固定迷路データを作成
+      const fixedMaze: TestMazeData = {
+        size: 5,
+        tiles: [
+          [TileType.WALL, TileType.WALL, TileType.WALL, TileType.WALL, TileType.WALL],
+          [TileType.WALL, TileType.FLOOR, TileType.FLOOR, TileType.GOAL, TileType.WALL],
+          [TileType.WALL, TileType.WALL, TileType.WALL, TileType.WALL, TileType.WALL],
+          [TileType.WALL, TileType.WALL, TileType.WALL, TileType.WALL, TileType.WALL],
+          [TileType.WALL, TileType.WALL, TileType.WALL, TileType.WALL, TileType.WALL],
+        ],
+        start: { x: 1, y: 1 },
+        goal: { x: 3, y: 1 },
+      };
+
+      // 固定迷路を渡す
+      deps.maze = fixedMaze;
+
+      startGame(11, deps); // sizeは無視される
+
+      // generateMazeが呼ばれていないことを確認
+      expect(deps.generateMaze).not.toHaveBeenCalled();
+
+      // 固定迷路のデータが使用されていることを確認
+      expect(gameState.mapSize).toBe(5);
+      expect(gameState.map).toBe(fixedMaze.tiles);
+    });
+
+    it('固定迷路が渡されない場合、generateMazeを呼び出すこと', () => {
+      const gameState = createMockGameState();
+      const deps = createMockDependencies(gameState);
+      const size = 11;
+
+      // mazeを指定しない
+      deps.maze = undefined;
+
+      startGame(size, deps);
+
+      // generateMazeが呼ばれることを確認
+      expect(deps.generateMaze).toHaveBeenCalledWith(size);
+      expect(deps.generateMaze).toHaveBeenCalledTimes(1);
     });
   });
 });

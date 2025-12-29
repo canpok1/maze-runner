@@ -1,5 +1,3 @@
-// --- インポート ---
-
 import type { GameState } from '@maze-runner/lib';
 import { config } from './config';
 import {
@@ -10,12 +8,20 @@ import {
 } from './game/state';
 import { getDifficultyFromSize } from './helpers/difficulty';
 import { setupControls } from './input/controls';
+import { getTestMaze } from './maze/fixtures';
 import { generateMaze } from './maze/generator';
 import { createRenderer } from './renderer';
 import { initRankingDisplay } from './ui/ranking-display';
 import { showScoreModal } from './ui/score-modal';
 
-// --- DOM要素の取得とバリデーション ---
+/**
+ * 指定されたIDの要素を取得し、型チェックを行う
+ *
+ * @param id - 要素のID
+ * @param type - 期待する要素の型
+ * @returns 指定された型の要素
+ * @throws 要素が見つからないか、型が一致しない場合
+ */
 function getRequiredElement<T extends HTMLElement>(id: string, type: new () => T): T {
   const element = document.getElementById(id);
   if (!(element instanceof type)) {
@@ -24,6 +30,13 @@ function getRequiredElement<T extends HTMLElement>(id: string, type: new () => T
   return element;
 }
 
+/**
+ * Canvasの2D描画コンテキストを取得する
+ *
+ * @param canvas - 対象のCanvas要素
+ * @returns 2D描画コンテキスト
+ * @throws コンテキストの取得に失敗した場合
+ */
 function getRequired2DContext(canvas: HTMLCanvasElement): CanvasRenderingContext2D {
   const ctx = canvas.getContext('2d');
   if (!ctx) {
@@ -32,24 +45,36 @@ function getRequired2DContext(canvas: HTMLCanvasElement): CanvasRenderingContext
   return ctx;
 }
 
-// --- ゲーム定数と変数 ---
 const canvas = getRequiredElement('gameCanvas', HTMLCanvasElement);
 const ctx = getRequired2DContext(canvas);
 const timerElement = getRequiredElement('timer', HTMLElement);
 const menuElement = getRequiredElement('menu', HTMLElement);
 
-// ゲームの状態
 const gameState: GameState = {
-  map: [], // 迷路データ (1: 壁, 0: 通路, 2: ゴール)
-  exploredMap: [], // 探索済みデータ (0: 未探索, 1: 探索済み)
+  map: [],
+  exploredMap: [],
   mapSize: 11,
-  player: { x: 1.5, y: 1.5, dir: 0, speed: 0 }, // プレイヤー位置, 向き, 移動速度
+  player: { x: 1.5, y: 1.5, dir: 0, speed: 0 },
   gameActive: false,
   startTime: 0,
   animationId: 0,
 };
 
-// --- ゲーム開始 ---
+/**
+ * URLパラメータからテスト用迷路名を取得する
+ *
+ * @returns テスト迷路名、未指定の場合はnull
+ */
+function getTestMazeParam(): string | null {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get('testMaze');
+}
+
+/**
+ * ゲームを開始する
+ *
+ * @param size - 迷路のサイズ
+ */
 function startGame(size: number): void {
   // レンダラーを作成
   const { render } = createRenderer({
@@ -61,6 +86,10 @@ function startGame(size: number): void {
     win,
   });
 
+  // テスト迷路のチェック
+  const testMazeName = getTestMazeParam();
+  const testMaze = testMazeName ? getTestMaze(testMazeName) : undefined;
+
   const deps: StartGameDependencies = {
     gameState,
     generateMaze,
@@ -68,11 +97,14 @@ function startGame(size: number): void {
     resizeCanvas,
     render,
     cancelAnimationFrame: cancelAnimationFrame.bind(window),
+    maze: testMaze, // テスト迷路がある場合は渡す
   };
   startGameCore(size, deps);
 }
 
-// --- クリア処理 ---
+/**
+ * ゲームクリア処理を実行する
+ */
 function win(): void {
   const deps: WinDependencies = {
     gameState,
@@ -84,7 +116,11 @@ function win(): void {
   winCore(deps);
 }
 
-// --- キャンバスサイズ調整 ---
+/**
+ * Canvasのサイズを親要素に合わせて調整する
+ *
+ * @throws 親要素が見つからない場合
+ */
 function resizeCanvas(): void {
   if (!canvas.parentElement) {
     throw new Error('Canvas parent element not found.');
@@ -93,7 +129,9 @@ function resizeCanvas(): void {
   canvas.height = canvas.parentElement.clientHeight;
 }
 
-// --- 難易度ボタンのイベント設定 ---
+/**
+ * 難易度選択ボタンのクリックイベントを設定する
+ */
 function setupDifficultyButtons(): void {
   const buttons = document.querySelectorAll('.diff-btn');
   buttons.forEach((btn) => {
@@ -104,7 +142,6 @@ function setupDifficultyButtons(): void {
   });
 }
 
-// --- 初期化 ---
 window.addEventListener('load', () => {
   setupControls(gameState);
   setupDifficultyButtons();

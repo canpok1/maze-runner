@@ -58,16 +58,23 @@ tests/
 
 - **対象**: フルスタックの動作（UI操作からバックエンド処理まで）
 - **依存関係**: 実際のシステム全体を使用
-- **配置場所**: `tests/e2e/`
-- **命名パターン**: `<scenario>.test.ts`
+- **配置場所**:
+  - Vitest: `tests/e2e/`
+  - Playwright: `tests/e2e-playwright/`
+- **命名パターン**:
+  - Vitest: `<scenario>.test.ts`
+  - Playwright: `<scenario>.spec.ts`
 
 #### 例
 
 ```
 tests/
   e2e/
-    game-playthrough.test.ts           # ← ゲーム開始から終了までのシナリオ
-    maze-completion.test.ts            # ← 迷路クリアまでの一連の流れ
+    api/
+      health.test.ts                   # ← Vitest API E2Eテスト
+      rankings.test.ts                 # ← Vitest API E2Eテスト
+  e2e-playwright/
+    game-flow.spec.ts                  # ← Playwright ブラウザE2Eテスト
 ```
 
 ## テスト実装の指針
@@ -105,8 +112,11 @@ npm test -- --exclude "tests/**"
 # インテグレーションテストのみ実行
 npm test -- tests/integration
 
-# E2Eテストのみ実行
-npm test -- tests/e2e
+# E2Eテストのみ実行（Vitest）
+npm run test:e2e
+
+# E2Eテストのみ実行（Playwright）
+npm run test:e2e:playwright
 
 # カバレッジレポート生成
 npm test -- --coverage

@@ -14,12 +14,14 @@
     "test": "npm run build -w @maze-runner/lib && npm run test -w @maze-runner/frontend",
     "test:watch": "npm run build -w @maze-runner/lib && npm run test:watch -w @maze-runner/frontend",
     "test:e2e": "vitest run --config vitest.e2e.config.ts",
+    "test:e2e:playwright": "playwright test",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write ."
   },
   "devDependencies": {
     "@biomejs/biome": "2.3.10",
+    "@playwright/test": "^1.49.1",
     "typescript": "^5.7.2",
     "vitest": "^2.1.8"
   },
