@@ -14,6 +14,7 @@ describe('initRankingDisplay', () => {
         </div>
         <div id="ranking-loading" class="hidden">読み込み中...</div>
         <div id="ranking-empty" class="hidden">ランキングデータがありません</div>
+        <div id="ranking-error" class="hidden ranking__error">データの取得に失敗しました</div>
         <ol id="ranking-list"></ol>
       </section>
     `;
@@ -144,7 +145,7 @@ describe('initRankingDisplay', () => {
     expect(hardTab.classList.contains('active')).toBe(true);
   });
 
-  it('APIエラー時にエラーハンドリングをする', async () => {
+  it('APIエラー時にエラーメッセージを表示する', async () => {
     const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     vi.spyOn(rankingsApi, 'fetchRankings').mockRejectedValue(new Error('API Error'));
 
@@ -152,9 +153,49 @@ describe('initRankingDisplay', () => {
 
     expect(consoleErrorSpy).toHaveBeenCalled();
 
-    // エラー時も空状態を表示
+    // エラー時はエラーメッセージを表示
+    const errorMessage = document.getElementById('ranking-error');
     const emptyMessage = document.getElementById('ranking-empty');
-    expect(emptyMessage?.classList.contains('hidden')).toBe(false);
+    expect(errorMessage?.classList.contains('hidden')).toBe(false);
+    expect(errorMessage?.textContent).toBe('データの取得に失敗しました');
+    expect(emptyMessage?.classList.contains('hidden')).toBe(true);
+  });
+
+  it('オフライン時に専用のエラーメッセージを表示する', async () => {
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(rankingsApi, 'fetchRankings').mockRejectedValue(new Error('Network Error'));
+
+    // navigator.onLineをモック
+    Object.defineProperty(navigator, 'onLine', {
+      writable: true,
+      value: false,
+    });
+
+    await initRankingDisplay();
+
+    expect(consoleErrorSpy).toHaveBeenCalled();
+
+    // オフライン時は専用のメッセージを表示
+    const errorMessage = document.getElementById('ranking-error');
+    expect(errorMessage?.classList.contains('hidden')).toBe(false);
+    expect(errorMessage?.textContent).toBe('オフラインです');
+
+    // navigator.onLineを元に戻す
+    Object.defineProperty(navigator, 'onLine', {
+      writable: true,
+      value: true,
+    });
+  });
+
+  it('データ取得成功時にエラーメッセージを非表示にする', async () => {
+    vi.spyOn(rankingsApi, 'fetchRankings').mockResolvedValue([
+      { playerName: 'Player1', clearTime: 10000, createdAt: '2025-12-28T00:00:00Z' },
+    ]);
+
+    await initRankingDisplay();
+
+    const errorMessage = document.getElementById('ranking-error');
+    expect(errorMessage?.classList.contains('hidden')).toBe(true);
   });
 
   it('必須DOM要素が存在しない場合、エラーをthrowする', async () => {

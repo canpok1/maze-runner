@@ -3,6 +3,8 @@
   --color-rank-1: #ffd700;
   --color-rank-2: #c0c0c0;
   --color-rank-3: #cd7f32;
+  --color-error: #e74c3c;
+  --color-error-bg: rgba(231, 76, 60, 0.1);
 }
 
 /* グローバルスタイリング */
@@ -348,8 +350,18 @@ canvas {
 }
 
 #ranking-loading.hidden,
-#ranking-empty.hidden {
+#ranking-empty.hidden,
+#ranking-error.hidden {
   display: none;
+}
+
+.ranking__error {
+  text-align: center;
+  padding: 20px;
+  color: var(--color-error);
+  background: var(--color-error-bg);
+  border-radius: 6px;
+  margin: 10px 0;
 }
 
 #ranking-list {

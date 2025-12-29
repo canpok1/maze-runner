@@ -14,6 +14,7 @@ describe('showScoreModal', () => {
             <label for="player-name">プレイヤー名</label>
             <input type="text" id="player-name" maxlength="20" placeholder="名前を入力">
             <span id="name-error" class="error-text"></span>
+            <span id="submit-error" class="error-text hidden"></span>
           </div>
           <div class="modal-buttons">
             <button id="submit-score-btn" class="btn submit-btn">登録</button>
@@ -74,8 +75,8 @@ describe('showScoreModal', () => {
     playerNameInput.value = 'A';
     submitBtn.click();
 
-    // 少し待つ（非同期処理）
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    // 非同期処理の完了を待つ
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(submitScoreMock).toHaveBeenCalledWith('A', 100000, 'normal');
     expect(onComplete).toHaveBeenCalled();
@@ -98,8 +99,8 @@ describe('showScoreModal', () => {
     playerNameInput.value = '12345678901234567890';
     submitBtn.click();
 
-    // 少し待つ（非同期処理）
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    // 非同期処理の完了を待つ
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(submitScoreMock).toHaveBeenCalledWith('12345678901234567890', 100000, 'normal');
     expect(onComplete).toHaveBeenCalled();
@@ -140,8 +141,8 @@ describe('showScoreModal', () => {
     playerNameInput.value = 'TestPlayer';
     submitBtn.click();
 
-    // 少し待つ（非同期処理）
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    // 非同期処理の完了を待つ
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(submitScoreMock).toHaveBeenCalledWith('TestPlayer', 50000, 'hard');
     expect(onComplete).toHaveBeenCalled();
@@ -157,8 +158,8 @@ describe('showScoreModal', () => {
 
     skipBtn.click();
 
-    // 少し待つ（非同期処理）
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    // 非同期処理の完了を待つ
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(submitScoreMock).not.toHaveBeenCalled();
     expect(onComplete).toHaveBeenCalled();
@@ -182,7 +183,7 @@ describe('showScoreModal', () => {
     playerNameInput.value = 'TestPlayer';
     submitBtn.click();
 
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(onComplete).toHaveBeenCalledTimes(1);
 
@@ -197,6 +198,7 @@ describe('showScoreModal', () => {
             <label for="player-name">プレイヤー名</label>
             <input type="text" id="player-name" maxlength="20" placeholder="名前を入力">
             <span id="name-error" class="error-text"></span>
+            <span id="submit-error" class="error-text hidden"></span>
           </div>
           <div class="modal-buttons">
             <button id="submit-score-btn" class="btn submit-btn">登録</button>
@@ -212,12 +214,12 @@ describe('showScoreModal', () => {
     const skipBtn = document.getElementById('skip-score-btn') as HTMLButtonElement;
     skipBtn.click();
 
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(onComplete).toHaveBeenCalledTimes(1);
   });
 
-  it('APIエラー時もモーダルを閉じてonCompleteを呼ぶ', async () => {
+  it('APIエラー時にエラーメッセージを表示してモーダルを閉じない', async () => {
     const onComplete = vi.fn();
     const submitScoreMock = vi
       .spyOn(rankingsApi, 'submitScore')
@@ -225,17 +227,27 @@ describe('showScoreModal', () => {
 
     showScoreModal(50, 'hard', onComplete);
 
+    const modal = document.getElementById('score-modal');
     const submitBtn = document.getElementById('submit-score-btn') as HTMLButtonElement;
     const playerNameInput = document.getElementById('player-name') as HTMLInputElement;
+    const submitError = document.getElementById('submit-error');
 
     playerNameInput.value = 'TestPlayer';
     submitBtn.click();
 
-    // 少し待つ（非同期処理）
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    // 非同期処理の完了を待つ
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(submitScoreMock).toHaveBeenCalled();
-    expect(onComplete).toHaveBeenCalled();
+    // エラーメッセージが表示される
+    expect(submitError?.textContent).toBe('スコアの登録に失敗しました');
+    expect(submitError?.classList.contains('hidden')).toBe(false);
+    // モーダルは閉じない
+    expect(modal?.classList.contains('hidden')).toBe(false);
+    // onCompleteは呼ばれない
+    expect(onComplete).not.toHaveBeenCalled();
+    // ボタンが再度有効になる
+    expect(submitBtn.disabled).toBe(false);
   });
 
   it('必須DOM要素が存在しない場合、エラーをthrowする', () => {
@@ -263,8 +275,8 @@ describe('showScoreModal', () => {
     playerNameInput.value = '  TestPlayer  ';
     submitBtn.click();
 
-    // 少し待つ（非同期処理）
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    // 非同期処理の完了を待つ
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     // trim されて送信されることを確認
     expect(submitScoreMock).toHaveBeenCalledWith('TestPlayer', 100000, 'normal');
@@ -289,8 +301,8 @@ describe('showScoreModal', () => {
     playerNameInput.value = 'TestPlayer';
     submitBtn.click();
 
-    // 少し待つ（非同期処理）
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    // 非同期処理の完了を待つ
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     // 123456ミリ秒に変換されて送信されることを確認
     expect(submitScoreMock).toHaveBeenCalledWith('TestPlayer', 123456, 'normal');
@@ -315,8 +327,8 @@ describe('showScoreModal', () => {
     playerNameInput.value = 'TestPlayer';
     submitBtn.click();
 
-    // 少し待つ（非同期処理）
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    // 非同期処理の完了を待つ
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     // hiddenクラスが追加されることを確認
     expect(modal?.classList.contains('hidden')).toBe(true);
@@ -332,10 +344,126 @@ describe('showScoreModal', () => {
 
     skipBtn.click();
 
-    // 少し待つ（非同期処理）
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    // 非同期処理の完了を待つ
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     // hiddenクラスが追加されることを確認
     expect(modal?.classList.contains('hidden')).toBe(true);
+  });
+
+  it('送信中はボタンテキストが「送信中...」に変更される', async () => {
+    vi.useFakeTimers();
+    const onComplete = vi.fn();
+    // 非同期処理を遅延させる
+    const submitScoreMock = vi.spyOn(rankingsApi, 'submitScore').mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          setTimeout(() => {
+            resolve({
+              id: 1,
+              playerName: 'TestPlayer',
+              clearTime: 100000,
+              createdAt: '2025-12-28T00:00:00Z',
+            });
+          }, 200);
+        })
+    );
+
+    showScoreModal(100, 'normal', onComplete);
+
+    const submitBtn = document.getElementById('submit-score-btn') as HTMLButtonElement;
+    const playerNameInput = document.getElementById('player-name') as HTMLInputElement;
+
+    playerNameInput.value = 'TestPlayer';
+    submitBtn.click();
+
+    // ボタンテキストが「送信中...」に変更されている
+    expect(submitBtn.textContent).toBe('送信中...');
+    // ボタンが無効化されている
+    expect(submitBtn.disabled).toBe(true);
+
+    // 仮想タイマーを進めて完了まで待つ
+    await vi.advanceTimersByTimeAsync(200);
+
+    expect(submitScoreMock).toHaveBeenCalled();
+    expect(onComplete).toHaveBeenCalled();
+
+    vi.useRealTimers();
+  });
+
+  it('オフライン時にエラーメッセージを表示してモーダルを閉じない', async () => {
+    const onComplete = vi.fn();
+    const originalOnLine = Object.getOwnPropertyDescriptor(Navigator.prototype, 'onLine');
+
+    // オフライン状態をシミュレート
+    Object.defineProperty(Navigator.prototype, 'onLine', {
+      configurable: true,
+      get: () => false,
+    });
+
+    showScoreModal(100, 'normal', onComplete);
+
+    const modal = document.getElementById('score-modal');
+    const submitBtn = document.getElementById('submit-score-btn') as HTMLButtonElement;
+    const playerNameInput = document.getElementById('player-name') as HTMLInputElement;
+    const submitError = document.getElementById('submit-error');
+
+    playerNameInput.value = 'TestPlayer';
+    submitBtn.click();
+
+    // エラーメッセージが表示される
+    expect(submitError?.textContent).toBe('オフラインです。後で再試行してください');
+    expect(submitError?.classList.contains('hidden')).toBe(false);
+    // モーダルは閉じない
+    expect(modal?.classList.contains('hidden')).toBe(false);
+    // onCompleteは呼ばれない
+    expect(onComplete).not.toHaveBeenCalled();
+    // ボタンが再度有効になる
+    expect(submitBtn.disabled).toBe(false);
+
+    // オンライン状態を復元
+    if (originalOnLine) {
+      Object.defineProperty(Navigator.prototype, 'onLine', originalOnLine);
+    }
+  });
+
+  it('エラー後に再試行できる', async () => {
+    const onComplete = vi.fn();
+    const submitScoreMock = vi
+      .spyOn(rankingsApi, 'submitScore')
+      .mockRejectedValueOnce(new Error('API Error'))
+      .mockResolvedValueOnce({
+        id: 1,
+        playerName: 'TestPlayer',
+        clearTime: 100000,
+        createdAt: '2025-12-28T00:00:00Z',
+      });
+
+    showScoreModal(100, 'normal', onComplete);
+
+    const modal = document.getElementById('score-modal');
+    const submitBtn = document.getElementById('submit-score-btn') as HTMLButtonElement;
+    const playerNameInput = document.getElementById('player-name') as HTMLInputElement;
+    const submitError = document.getElementById('submit-error');
+
+    playerNameInput.value = 'TestPlayer';
+
+    // 1回目：エラー
+    submitBtn.click();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(submitScoreMock).toHaveBeenCalledTimes(1);
+    expect(submitError?.textContent).toBe('スコアの登録に失敗しました');
+    expect(modal?.classList.contains('hidden')).toBe(false);
+    expect(onComplete).not.toHaveBeenCalled();
+    expect(submitBtn.disabled).toBe(false);
+
+    // 2回目：成功
+    submitBtn.click();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(submitScoreMock).toHaveBeenCalledTimes(2);
+    expect(modal?.classList.contains('hidden')).toBe(true);
+    expect(onComplete).toHaveBeenCalled();
   });
 });

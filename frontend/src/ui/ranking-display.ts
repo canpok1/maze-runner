@@ -11,9 +11,17 @@ export async function initRankingDisplay(): Promise<void> {
   const rankingList = document.getElementById('ranking-list');
   const loadingElement = document.getElementById('ranking-loading');
   const emptyElement = document.getElementById('ranking-empty');
+  const errorElement = document.getElementById('ranking-error');
   const tabs = document.querySelectorAll('.ranking-tab');
 
-  if (!rankingSection || !rankingList || !loadingElement || !emptyElement || tabs.length === 0) {
+  if (
+    !rankingSection ||
+    !rankingList ||
+    !loadingElement ||
+    !emptyElement ||
+    !errorElement ||
+    tabs.length === 0
+  ) {
     throw new Error('Required ranking elements not found');
   }
 
@@ -28,6 +36,7 @@ export async function initRankingDisplay(): Promise<void> {
   const displayRankings = async (difficulty: Difficulty) => {
     loadingElement.classList.remove('hidden');
     emptyElement.classList.add('hidden');
+    errorElement.classList.add('hidden');
     rankingList.innerHTML = '';
 
     try {
@@ -58,7 +67,13 @@ export async function initRankingDisplay(): Promise<void> {
       }
       console.error('Failed to fetch rankings:', error);
       loadingElement.classList.add('hidden');
-      emptyElement.classList.remove('hidden');
+
+      if (!navigator.onLine) {
+        errorElement.textContent = 'オフラインです';
+      } else {
+        errorElement.textContent = 'データの取得に失敗しました';
+      }
+      errorElement.classList.remove('hidden');
     }
   };
 
