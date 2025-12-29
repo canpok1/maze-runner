@@ -1,3 +1,10 @@
+/* CSS変数定義 */
+:root {
+  --color-rank-1: #ffd700;
+  --color-rank-2: #c0c0c0;
+  --color-rank-3: #cd7f32;
+}
+
 /* グローバルスタイリング */
 body {
   margin: 0;
@@ -289,4 +296,102 @@ canvas {
 
 .skip-btn:hover {
   background: #7f8c8d;
+}
+
+/* ランキング表示 */
+#ranking-section {
+  margin-top: 30px;
+  width: 100%;
+  max-width: 400px;
+}
+
+#ranking-section h3 {
+  font-size: 1.3rem;
+  color: #3498db;
+  margin-bottom: 15px;
+}
+
+.ranking-tabs {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+
+.ranking-tab {
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  border: 2px solid #5267a1;
+  border-radius: 6px;
+  background: transparent;
+  color: #e4e6eb;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    border-color 0.2s;
+}
+
+.ranking-tab:hover {
+  background: rgba(82, 103, 161, 0.3);
+}
+
+.ranking-tab.active {
+  background: #5267a1;
+  border-color: #6b7fb5;
+}
+
+#ranking-loading,
+#ranking-empty {
+  text-align: center;
+  padding: 20px;
+  color: #95a5a6;
+}
+
+#ranking-loading.hidden,
+#ranking-empty.hidden {
+  display: none;
+}
+
+#ranking-list {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.ranking-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ranking-item:last-child {
+  border-bottom: none;
+}
+
+.ranking-rank {
+  width: 32px;
+  font-weight: bold;
+  color: var(--color-rank-1);
+}
+
+.ranking-rank.rank-2 {
+  color: var(--color-rank-2);
+}
+
+.ranking-rank.rank-3 {
+  color: var(--color-rank-3);
+}
+
+.ranking-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ranking-time {
+  margin-left: 12px;
+  color: #3498db;
+  font-weight: bold;
 }
