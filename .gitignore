@@ -34,3 +34,5 @@ lerna-debug.log*
 
 # Git worktrees directory (ignore all subdirectories)
 worktrees/*/
+playwright-report/
+test-results/

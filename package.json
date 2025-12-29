@@ -7,19 +7,26 @@
     "lib"
   ],
   "scripts": {
-    "dev": "npm run build -w @maze-runner/lib && npm run dev -w @maze-runner/frontend",
+    "dev": "npm run dev -w @maze-runner/frontend",
+    "dev:server": "npm run build && npm run dev -w @maze-runner/backend",
     "build": "npm run build -w @maze-runner/lib && npm run build -w @maze-runner/frontend",
     "preview": "npm run preview -w @maze-runner/frontend",
     "deploy": "npm run build && npm run deploy -w @maze-runner/backend",
     "test": "npm run build -w @maze-runner/lib && npm run test -w @maze-runner/frontend",
     "test:watch": "npm run build -w @maze-runner/lib && npm run test:watch -w @maze-runner/frontend",
-    "test:e2e": "vitest run --config vitest.e2e.config.ts",
+    "test:e2e": "npm run test:e2e:vitest && npm run test:e2e:playwright",
+    "test:e2e:vitest": "vitest run --config vitest.e2e.config.ts",
+    "test:e2e:playwright": "playwright test",
+    "test:e2e:setup": "playwright install --with-deps",
+    "test:e2e:reset-db": "wrangler d1 execute maze-runner-db --local --command=\"DELETE FROM rankings; DELETE FROM sqlite_sequence WHERE name='rankings';\" --config backend/wrangler.jsonc",
+    "test:e2e:report": "playwright show-report --host 0.0.0.0",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write ."
   },
   "devDependencies": {
     "@biomejs/biome": "2.3.10",
+    "@playwright/test": "^1.49.1",
     "typescript": "^5.7.2",
     "vitest": "^2.1.8"
   },

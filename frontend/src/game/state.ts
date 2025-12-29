@@ -1,9 +1,8 @@
 import type { Difficulty, GameState, MazeMap } from '@maze-runner/lib';
 import { ExplorationState, TileType } from '@maze-runner/lib';
+import type { TestMazeData } from '../maze/fixtures';
 
-/** プレイヤーのスタートグリッド座標 X */
 const START_GRID_X = 1;
-/** プレイヤーのスタートグリッド座標 Y */
 const START_GRID_Y = 1;
 
 /** 方向チェック用の定数配列 [東, 南, 西, 北] */
@@ -24,6 +23,8 @@ export interface StartGameDependencies {
   resizeCanvas: () => void;
   render: () => void;
   cancelAnimationFrame: (id: number) => void;
+  /** 固定迷路データ（テスト用） */
+  maze?: TestMazeData;
 }
 
 /**
@@ -44,16 +45,23 @@ export interface WinDependencies {
  * @param deps - 依存関係
  */
 export function startGame(size: number, deps: StartGameDependencies): void {
-  deps.gameState.mapSize = size;
-  deps.gameState.map = deps.generateMaze(deps.gameState.mapSize); // ランダム迷路生成
+  // 固定迷路が指定されていれば使用、なければ生成
+  if (deps.maze) {
+    deps.gameState.map = deps.maze.tiles;
+    deps.gameState.mapSize = deps.maze.size;
+  } else {
+    deps.gameState.mapSize = size;
+    deps.gameState.map = deps.generateMaze(deps.gameState.mapSize); // ランダム迷路生成
+  }
+
   // 探索済みマップを初期化 (すべて未探索 0)
   deps.gameState.exploredMap = Array.from({ length: deps.gameState.mapSize }, () =>
     Array(deps.gameState.mapSize).fill(ExplorationState.UNEXPLORED)
   );
 
   // プレイヤーのマップグリッド座標
-  const startX = START_GRID_X;
-  const startY = START_GRID_Y;
+  const startX = deps.maze ? deps.maze.start.x : START_GRID_X;
+  const startY = deps.maze ? deps.maze.start.y : START_GRID_Y;
   let initialDir = 0; // 初期方向 (デフォルトは東)
 
   // 通路が開いている方向を探索
@@ -70,8 +78,8 @@ export function startGame(size: number, deps: StartGameDependencies): void {
 
   // プレイヤーの初期設定
   deps.gameState.player = {
-    x: START_GRID_X + 0.5,
-    y: START_GRID_Y + 0.5,
+    x: startX + 0.5,
+    y: startY + 0.5,
     dir: initialDir,
     speed: 0,
   };

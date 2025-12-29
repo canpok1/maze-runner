@@ -40,17 +40,26 @@ npm run dev
 
 | スクリプト | 説明 |
 |-----------|------|
-| `npm run dev` | ローカル開発サーバーを起動 |
+| `npm run dev` | フロントエンド開発サーバー起動（Vite HMR） |
+| `npm run dev:server` | フロントエンドビルド + バックエンド開発サーバー起動 |
 | `npm run build` | TypeScriptコンパイル + Viteビルド |
 | `npm run preview` | ビルド結果をプレビュー |
 | `npm run test` | Vitestでユニットテスト実行 |
 | `npm run test:watch` | Vitestウォッチモード |
+| `npm run test:e2e` | E2Eテスト全実行（vitest + playwright） |
+| `npm run test:e2e:vitest` | E2Eテスト（APIテスト・vitest） |
+| `npm run test:e2e:playwright` | E2Eテスト（ブラウザテスト・playwright） |
+| `npm run test:e2e:setup` | Playwright環境セットアップ |
+| `npm run test:e2e:reset-db` | テスト用DBリセット |
+| `npm run test:e2e:report` | Playwrightレポート閲覧 |
 | `npm run lint` | コードの静的解析・フォーマットチェック |
 | `npm run lint:fix` | 静的解析とフォーマットを自動修正 |
 | `npm run format` | コードフォーマットのみ実行 |
 | `npm run deploy` | Cloudflare Workersへ手動デプロイ |
 
 ## テスト
+
+### ユニットテスト
 
 ```bash
 # 全テスト実行
@@ -60,11 +69,25 @@ npm run test
 npm run test:watch
 ```
 
+### E2Eテスト
+
+```bash
+# Playwright環境セットアップ（初回のみ）
+npm run test:e2e:setup
+
+# E2Eテスト全実行
+npm run test:e2e
+
+# Playwrightレポート確認
+npm run test:e2e:report
+```
+
 ## 技術スタック
 
 - **TypeScript**: 型安全な開発環境
 - **Vite**: 高速ビルドツール
 - **Vitest**: ユニットテストフレームワーク
+- **Playwright**: E2Eテストフレームワーク
 - **Biome**: リンター・フォーマッター
 - **Canvas 2D API**: グラフィックス描画
 - **Cloudflare Workers**: 本番環境デプロイ先
