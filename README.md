@@ -2,7 +2,7 @@
 
 3D一人称視点で迷路を探索するWebベースのゲームです。Cloudflare Workers上で動作します。
 
-**🎮 プレイはこちら: [maze-runner.6isstrong.workers.dev](https://maze-runner.6isstrong.workers.dev/)**
+**🎮 [プレイはこちら](https://maze-runner.6isstrong.workers.dev/)**
 
 ## ゲーム概要
 
