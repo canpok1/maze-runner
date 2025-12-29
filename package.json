@@ -16,6 +16,7 @@
     "test:e2e": "vitest run --config vitest.e2e.config.ts",
     "test:e2e:setup": "playwright install --with-deps",
     "test:e2e:playwright": "playwright test",
+    "test:e2e:report": "playwright show-report --host 0.0.0.0",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write ."
