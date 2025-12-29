@@ -38,13 +38,17 @@ test.describe('ゲームクリアフロー', () => {
     // スキップか登録後、メニューに戻るまで待機
     await expect(page.locator('#menu')).toBeVisible({ timeout: 10000 });
 
-    // ランキングセクションにスコアが表示されていることを確認
-    // ランキングリストに登録した名前が表示されるまで待機
-    await expect(page.locator('#ranking-list')).toContainText(testPlayerName, { timeout: 10000 });
-
-    // ランキングリストが表示されていることを確認
+    // ランキングセクションが表示されていることを確認
     const rankingSection = page.locator('#ranking-section');
     await expect(rankingSection).toBeVisible();
+
+    // ページをリロードしてランキングデータを再取得
+    await page.reload();
+    await expect(page.locator('#menu')).toBeVisible();
+
+    // ランキングリストに登録した名前が表示されることを確認
+    // 名前はテスト実行ごとにユニークなため、実際に登録した名前を検索
+    await expect(page.locator('#ranking-list')).toContainText(testPlayerName, { timeout: 10000 });
   });
 
   test('スコア登録をスキップしてもメニューに戻れる', async ({ page }) => {
