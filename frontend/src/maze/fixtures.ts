@@ -38,7 +38,7 @@ export interface TestMazeData {
  * W W W W W
  * W W W W W
  */
-export const TEST_MAZES: Record<string, TestMazeData> = {
+export const TEST_MAZES = {
   simple: {
     size: 5,
     tiles: [
@@ -51,7 +51,7 @@ export const TEST_MAZES: Record<string, TestMazeData> = {
     start: { x: 1, y: 1 },
     goal: { x: 3, y: 1 },
   },
-};
+} as const satisfies Record<string, TestMazeData>;
 
 /**
  * テスト用迷路を取得
@@ -59,5 +59,8 @@ export const TEST_MAZES: Record<string, TestMazeData> = {
  * @returns 迷路データ、見つからない場合はundefined
  */
 export function getTestMaze(name: string): TestMazeData | undefined {
-  return TEST_MAZES[name];
+  if (name in TEST_MAZES) {
+    return TEST_MAZES[name as keyof typeof TEST_MAZES];
+  }
+  return undefined;
 }

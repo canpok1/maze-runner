@@ -21,5 +21,6 @@
 - `npm run test:e2e:reset-db` - テスト用DBリセット
 
 ### 開発
-- `npm run dev` - フロントエンドビルド + バックエンド開発サーバー起動
+- `npm run dev` - フロントエンド開発サーバー起動（Vite HMR）
+- `npm run dev:server` - フロントエンドビルド + バックエンド開発サーバー起動
 - `npm run build` - TypeScriptコンパイル + Viteビルド

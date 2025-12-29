@@ -53,8 +53,8 @@ const menuElement = getRequiredElement('menu', HTMLElement);
 const gameState: GameState = {
   map: [],
   exploredMap: [],
-  mapSize: 11,
-  player: { x: 1.5, y: 1.5, dir: 0, speed: 0 },
+  mapSize: 0,
+  player: { x: 0, y: 0, dir: 0, speed: 0 },
   gameActive: false,
   startTime: 0,
   animationId: 0,

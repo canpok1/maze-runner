@@ -40,7 +40,8 @@ npm run dev
 
 | スクリプト | 説明 |
 |-----------|------|
-| `npm run dev` | フロントエンドビルド + バックエンド開発サーバー起動 |
+| `npm run dev` | フロントエンド開発サーバー起動（Vite HMR） |
+| `npm run dev:server` | フロントエンドビルド + バックエンド開発サーバー起動 |
 | `npm run build` | TypeScriptコンパイル + Viteビルド |
 | `npm run preview` | ビルド結果をプレビュー |
 | `npm run test` | Vitestでユニットテスト実行 |

@@ -7,7 +7,8 @@
     "lib"
   ],
   "scripts": {
-    "dev": "npm run build && npm run dev -w @maze-runner/backend",
+    "dev": "npm run dev -w @maze-runner/frontend",
+    "dev:server": "npm run build && npm run dev -w @maze-runner/backend",
     "build": "npm run build -w @maze-runner/lib && npm run build -w @maze-runner/frontend",
     "preview": "npm run preview -w @maze-runner/frontend",
     "deploy": "npm run build && npm run deploy -w @maze-runner/backend",
