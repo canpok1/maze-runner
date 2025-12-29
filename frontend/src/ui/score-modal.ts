@@ -72,12 +72,17 @@ export function showScoreModal(
     submitError.textContent = '';
     submitError.classList.add('hidden');
 
-    if (!navigator.onLine) {
-      submitError.textContent = 'オフラインです。後で再試行してください';
+    // エラー処理のヘルパー関数
+    const handleSubmissionError = (message: string) => {
+      submitError.textContent = message;
       submitError.classList.remove('hidden');
       submitBtn.disabled = false;
       skipBtn.disabled = false;
       submitBtn.textContent = originalButtonText;
+    };
+
+    if (!navigator.onLine) {
+      handleSubmissionError('オフラインです。後で再試行してください');
       return;
     }
 
@@ -88,11 +93,7 @@ export function showScoreModal(
       closeModal();
     } catch (error) {
       console.error('Failed to submit score:', error);
-      submitError.textContent = 'スコアの登録に失敗しました';
-      submitError.classList.remove('hidden');
-      submitBtn.disabled = false;
-      skipBtn.disabled = false;
-      submitBtn.textContent = originalButtonText;
+      handleSubmissionError('スコアの登録に失敗しました');
     }
   };
 
