@@ -16,6 +16,9 @@
       "migrations_dir": "db/migrations"
     }
   ],
+  // wrangler versions upload --preview-alias では
+  // トップレベルの preview_database_id が適用されないため
+  // env.preview セクションで明示的にプレビュー用DBを指定
   "env": {
     "preview": {
       "d1_databases": [

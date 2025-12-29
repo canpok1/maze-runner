@@ -103,6 +103,7 @@ jobs:
           workingDirectory: backend
           command: versions upload --preview-alias pr-${{ github.event.pull_request.number }}
         env:
+          # wrangler.jsonc の env.preview セクションを適用するための環境変数
           CLOUDFLARE_ENV: preview
 
       - name: Comment PR with preview URL
