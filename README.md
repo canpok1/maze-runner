@@ -2,6 +2,8 @@
 
 3D一人称視点で迷路を探索するWebベースのゲームです。Cloudflare Workers上で動作します。
 
+**🎮 [プレイはこちら](https://maze-runner.6isstrong.workers.dev/)**
+
 ## ゲーム概要
 
 - **3D描画**: レイキャスティング技術による一人称視点の3D迷路
