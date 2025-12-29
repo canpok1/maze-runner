@@ -102,6 +102,8 @@ jobs:
           wranglerVersion: "4.21.0"
           workingDirectory: backend
           command: versions upload --preview-alias pr-${{ github.event.pull_request.number }}
+        env:
+          CLOUDFLARE_ENV: preview
 
       - name: Comment PR with preview URL
         uses: actions/github-script@v7
