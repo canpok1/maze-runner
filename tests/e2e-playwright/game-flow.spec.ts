@@ -15,14 +15,14 @@ test.describe('ゲームクリアフロー', () => {
     await expect(page.locator('#menu')).toBeHidden();
     await expect(page.locator('#gameCanvas')).toBeVisible();
 
-    // 右キーを押して2マス移動（固定迷路は右に2マスでゴール）
-    // キーボードで移動（ArrowRightを押しっぱなし）
-    await page.keyboard.down('ArrowRight');
+    // 前進キーを押して2マス移動（固定迷路は右に2マスでゴール、プレイヤーは東向きでスタート）
+    // キーボードで移動（ArrowUpを押しっぱなし）
+    await page.keyboard.down('ArrowUp');
 
     // ゴールに到達するまで待機（最大10秒）
     await expect(page.locator('#score-modal')).toBeVisible({ timeout: 10000 });
 
-    await page.keyboard.up('ArrowRight');
+    await page.keyboard.up('ArrowUp');
 
     // スコア登録モーダルが表示されていることを確認
     await expect(page.locator('#score-modal')).toBeVisible();
@@ -53,10 +53,10 @@ test.describe('ゲームクリアフロー', () => {
     // ゲーム開始
     await page.click('.diff-btn[data-size="11"]');
 
-    // 右キーを押してゴール到達
-    await page.keyboard.down('ArrowRight');
+    // 前進キーを押してゴール到達（プレイヤーは東向きでスタート）
+    await page.keyboard.down('ArrowUp');
     await expect(page.locator('#score-modal')).toBeVisible({ timeout: 10000 });
-    await page.keyboard.up('ArrowRight');
+    await page.keyboard.up('ArrowUp');
 
     // スキップボタンをクリック
     await page.click('#skip-score-btn');
