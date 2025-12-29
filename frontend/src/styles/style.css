@@ -1,3 +1,10 @@
+/* CSS変数定義 */
+:root {
+  --color-rank-1: #ffd700;
+  --color-rank-2: #c0c0c0;
+  --color-rank-3: #cd7f32;
+}
+
 /* グローバルスタイリング */
 body {
   margin: 0;
@@ -365,19 +372,15 @@ canvas {
 .ranking-rank {
   width: 32px;
   font-weight: bold;
-  color: #ffd700;
-}
-
-.ranking-rank.rank-1 {
-  color: #ffd700;
+  color: var(--color-rank-1);
 }
 
 .ranking-rank.rank-2 {
-  color: #c0c0c0;
+  color: var(--color-rank-2);
 }
 
 .ranking-rank.rank-3 {
-  color: #cd7f32;
+  color: var(--color-rank-3);
 }
 
 .ranking-name {

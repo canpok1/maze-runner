@@ -32,6 +32,12 @@ export async function initRankingDisplay(): Promise<void> {
 
     try {
       const rankings = await fetchRankings(difficulty, 10);
+
+      // リクエスト中に別のタブが選択された場合は、結果を破棄してUIの不整合を防ぐ
+      if (difficulty !== currentDifficulty) {
+        return;
+      }
+
       loadingElement.classList.add('hidden');
 
       if (rankings.length === 0) {
@@ -39,11 +45,17 @@ export async function initRankingDisplay(): Promise<void> {
         return;
       }
 
+      const fragment = document.createDocumentFragment();
       rankings.forEach((ranking, index) => {
         const listItem = createRankingItem(ranking, index + 1);
-        rankingList.appendChild(listItem);
+        fragment.appendChild(listItem);
       });
+      rankingList.appendChild(fragment);
     } catch (error) {
+      // 古いリクエストからのエラーは無視する
+      if (difficulty !== currentDifficulty) {
+        return;
+      }
       console.error('Failed to fetch rankings:', error);
       loadingElement.classList.add('hidden');
       emptyElement.classList.remove('hidden');
@@ -88,11 +100,7 @@ export async function initRankingDisplay(): Promise<void> {
     tabs.forEach((tab) => {
       const tabElement = tab as HTMLElement;
       const tabDifficulty = tabElement.dataset.difficulty;
-      if (tabDifficulty === selectedDifficulty) {
-        tabElement.classList.add('active');
-      } else {
-        tabElement.classList.remove('active');
-      }
+      tabElement.classList.toggle('active', tabDifficulty === selectedDifficulty);
     });
   };
 
