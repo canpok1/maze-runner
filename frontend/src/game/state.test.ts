@@ -1,5 +1,5 @@
 import { ExplorationState, type GameState, type MazeMap, TileType } from '@maze-runner/lib';
-import type { TestMazeData } from '../maze/fixtures';
+import { TEST_MAZES, type TestMazeData } from '../maze/fixtures';
 import { type StartGameDependencies, startGame } from './state';
 
 describe('startGame', () => {
@@ -203,19 +203,8 @@ describe('startGame', () => {
       const gameState = createMockGameState();
       const deps = createMockDependencies(gameState);
 
-      // 固定迷路データを作成
-      const fixedMaze: TestMazeData = {
-        size: 5,
-        tiles: [
-          [TileType.WALL, TileType.WALL, TileType.WALL, TileType.WALL, TileType.WALL],
-          [TileType.WALL, TileType.FLOOR, TileType.FLOOR, TileType.GOAL, TileType.WALL],
-          [TileType.WALL, TileType.WALL, TileType.WALL, TileType.WALL, TileType.WALL],
-          [TileType.WALL, TileType.WALL, TileType.WALL, TileType.WALL, TileType.WALL],
-          [TileType.WALL, TileType.WALL, TileType.WALL, TileType.WALL, TileType.WALL],
-        ],
-        start: { x: 1, y: 1 },
-        goal: { x: 3, y: 1 },
-      };
+      // 固定迷路データはfixturesからインポートして使用
+      const fixedMaze: TestMazeData = TEST_MAZES.simple;
 
       // 固定迷路を渡す
       deps.maze = fixedMaze;

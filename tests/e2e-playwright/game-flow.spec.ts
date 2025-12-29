@@ -39,8 +39,8 @@ test.describe('ゲームクリアフロー', () => {
     await expect(page.locator('#menu')).toBeVisible({ timeout: 10000 });
 
     // ランキングセクションにスコアが表示されていることを確認
-    // ランキング表示の更新を待つ
-    await page.waitForTimeout(2000);
+    // ランキングリストに登録した名前が表示されるまで待機
+    await expect(page.locator('#ranking-list')).toContainText(testPlayerName, { timeout: 10000 });
 
     // ランキングリストが表示されていることを確認
     const rankingSection = page.locator('#ranking-section');

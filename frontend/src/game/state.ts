@@ -60,8 +60,8 @@ export function startGame(size: number, deps: StartGameDependencies): void {
   );
 
   // プレイヤーのマップグリッド座標
-  const startX = START_GRID_X;
-  const startY = START_GRID_Y;
+  const startX = deps.maze ? deps.maze.start.x : START_GRID_X;
+  const startY = deps.maze ? deps.maze.start.y : START_GRID_Y;
   let initialDir = 0; // 初期方向 (デフォルトは東)
 
   // 通路が開いている方向を探索
@@ -78,8 +78,8 @@ export function startGame(size: number, deps: StartGameDependencies): void {
 
   // プレイヤーの初期設定
   deps.gameState.player = {
-    x: START_GRID_X + 0.5,
-    y: START_GRID_Y + 0.5,
+    x: startX + 0.5,
+    y: startY + 0.5,
     dir: initialDir,
     speed: 0,
   };

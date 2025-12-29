@@ -1,13 +1,13 @@
-import type { TileType } from '@maze-runner/lib';
+import { TileType } from '@maze-runner/lib';
 
 /**
  * テスト用の固定迷路データを定義
  * 各迷路はURLパラメータ `?testMaze=<name>` で使用可能
  */
 
-const F: TileType = 0;
-const W: TileType = 1;
-const G: TileType = 2;
+const F = TileType.FLOOR;
+const W = TileType.WALL;
+const G = TileType.GOAL;
 
 /**
  * テスト用迷路データの型
