@@ -20,7 +20,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'npm run dev -w @maze-runner/backend',
+    command: 'npm run dev',
     url: 'http://localhost:8787',
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,

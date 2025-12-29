@@ -17,10 +17,9 @@ export default async function globalSetup(): Promise<() => Promise<void>> {
     stdio: 'inherit',
   });
 
-  // 2. wrangler dev --local を起動
-  console.log('Starting wrangler dev server...');
+  // 2. 開発サーバーを起動（フロントエンドビルド + wrangler dev）
+  console.log('Starting dev server...');
   serverProcess = spawn('npm', ['run', 'dev'], {
-    cwd: 'backend',
     stdio: 'pipe',
     detached: true,
   });
