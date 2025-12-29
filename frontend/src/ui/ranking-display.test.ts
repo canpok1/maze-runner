@@ -205,9 +205,11 @@ describe('initRankingDisplay', () => {
   });
 
   it('refresh関数を返し、呼び出すと現在の難易度のランキングを再取得する', async () => {
-    const fetchRankingsMock = vi.spyOn(rankingsApi, 'fetchRankings').mockResolvedValue([
-      { playerName: 'Player1', clearTime: 10000, createdAt: '2025-12-28T00:00:00Z' },
-    ]);
+    const fetchRankingsMock = vi
+      .spyOn(rankingsApi, 'fetchRankings')
+      .mockResolvedValue([
+        { playerName: 'Player1', clearTime: 10000, createdAt: '2025-12-28T00:00:00Z' },
+      ]);
 
     const result = await initRankingDisplay();
 

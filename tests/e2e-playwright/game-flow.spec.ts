@@ -2,7 +2,9 @@ import { expect, test } from '@playwright/test';
 
 test.describe
   .serial('ゲームクリアフロー', () => {
-    test('固定迷路でゲームをクリアし、スコア登録後にランキングが自動更新される', async ({ page }) => {
+    test('固定迷路でゲームをクリアし、スコア登録後にランキングが自動更新される', async ({
+      page,
+    }) => {
       // テスト用固定迷路でゲームを開始
       await page.goto('/?testMaze=simple');
 
