@@ -113,6 +113,9 @@ body {
   border-radius: 5px;
   min-height: 40px;
 }
+#last-score:empty {
+  display: none;
+}
 #last-score h2 {
   font-size: 1.5rem;
   color: #3498db; /* ブルー */
