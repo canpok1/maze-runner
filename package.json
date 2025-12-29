@@ -7,6 +7,7 @@
     "lib"
   ],
   "scripts": {
+    "setup": "npm ci && playwright install --with-deps",
     "dev": "npm run dev -w @maze-runner/frontend",
     "dev:server": "npm run build && npm run dev -w @maze-runner/backend",
     "build": "npm run build -w @maze-runner/lib && npm run build -w @maze-runner/frontend",
@@ -17,7 +18,6 @@
     "test:e2e": "npm run test:e2e:vitest && npm run test:e2e:playwright",
     "test:e2e:vitest": "vitest run --config vitest.e2e.config.ts",
     "test:e2e:playwright": "playwright test",
-    "test:e2e:setup": "playwright install --with-deps",
     "test:e2e:reset-db": "wrangler d1 execute maze-runner-db --local --command=\"DELETE FROM rankings; DELETE FROM sqlite_sequence WHERE name='rankings';\" --config backend/wrangler.jsonc",
     "test:e2e:report": "playwright show-report --host 0.0.0.0",
     "lint": "biome check .",

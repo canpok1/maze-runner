@@ -51,7 +51,7 @@ npm run dev
 | `npm run test:e2e` | E2Eテスト全実行（vitest + playwright） |
 | `npm run test:e2e:vitest` | E2Eテスト（APIテスト・vitest） |
 | `npm run test:e2e:playwright` | E2Eテスト（ブラウザテスト・playwright） |
-| `npm run test:e2e:setup` | Playwright環境セットアップ |
+| `npm run setup` | 依存関係 + Playwright環境セットアップ |
 | `npm run test:e2e:reset-db` | テスト用DBリセット |
 | `npm run test:e2e:report` | Playwrightレポート閲覧 |
 | `npm run lint` | コードの静的解析・フォーマットチェック |
@@ -75,7 +75,7 @@ npm run test:watch
 
 ```bash
 # Playwright環境セットアップ（初回のみ）
-npm run test:e2e:setup
+npm run setup
 
 # E2Eテスト全実行
 npm run test:e2e

@@ -57,7 +57,8 @@
       "Skill(quality)",
       "Skill(review)",
       "Skill(run)",
-      "WebSearch"
+      "WebSearch",
+      "mcp__playwright"
     ],
     "deny": [
       "Bash(git add --all)",
@@ -73,5 +74,8 @@
       "Write(.env)"
     ]
   },
-  "enableAllProjectMcpServers": true
+  "enableAllProjectMcpServers": true,
+  "enabledPlugins": {
+    "typescript-lsp@claude-plugins-official": true
+  }
 }
