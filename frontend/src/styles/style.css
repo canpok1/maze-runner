@@ -5,6 +5,9 @@
   --color-rank-3: #cd7f32;
   --color-error: #e74c3c;
   --color-error-bg: rgba(231, 76, 60, 0.1);
+  --color-text-secondary: #95a5a6;
+  --color-primary: #5267a1;
+  --color-primary-hover: #6b7fb5;
 }
 
 /* グローバルスタイリング */
@@ -435,7 +438,7 @@ canvas {
 }
 
 .detail-label {
-  color: #95a5a6;
+  color: var(--color-text-secondary);
   font-size: 0.9rem;
 }
 
@@ -466,7 +469,7 @@ canvas {
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  background: #5267a1;
+  background: var(--color-primary);
   color: white;
   font-weight: bold;
   box-shadow: 0 4px rgba(0, 0, 0, 0.3);
@@ -477,7 +480,7 @@ canvas {
 }
 
 .detail-close-btn:hover {
-  background: #6b7fb5;
+  background: var(--color-primary-hover);
 }
 
 .detail-close-btn:active {

@@ -1,5 +1,8 @@
 import type { Ranking } from '../api-client/types';
 
+// モーダル表示中のAbortControllerを保持
+let currentAbortController: AbortController | null = null;
+
 /**
  * ランキング詳細モーダルを表示する
  * @param ranking ランキング情報
@@ -25,6 +28,15 @@ export function showRankingDetailModal(ranking: Ranking, rank: number): void {
     throw new Error('Required modal elements not found');
   }
 
+  // 既存のイベントリスナーをクリーンアップ
+  if (currentAbortController) {
+    currentAbortController.abort();
+  }
+
+  // 新しいAbortControllerを作成
+  currentAbortController = new AbortController();
+  const { signal } = currentAbortController;
+
   rankDisplay.textContent = `${rank}位`;
   playerNameDisplay.textContent = ranking.playerName;
   clearTimeDisplay.textContent = `${(ranking.clearTime / 1000).toFixed(2)}秒`;
@@ -34,9 +46,10 @@ export function showRankingDetailModal(ranking: Ranking, rank: number): void {
 
   const closeModal = () => {
     modal.classList.add('hidden');
-    closeBtn.removeEventListener('click', handleCloseBtn);
-    modal.removeEventListener('click', handleBackgroundClick);
-    document.removeEventListener('keydown', handleEscKey);
+    if (currentAbortController) {
+      currentAbortController.abort();
+      currentAbortController = null;
+    }
   };
 
   const handleCloseBtn = () => {
@@ -56,7 +69,7 @@ export function showRankingDetailModal(ranking: Ranking, rank: number): void {
     }
   };
 
-  closeBtn.addEventListener('click', handleCloseBtn);
-  modal.addEventListener('click', handleBackgroundClick);
-  document.addEventListener('keydown', handleEscKey);
+  closeBtn.addEventListener('click', handleCloseBtn, { signal });
+  modal.addEventListener('click', handleBackgroundClick, { signal });
+  document.addEventListener('keydown', handleEscKey, { signal });
 }

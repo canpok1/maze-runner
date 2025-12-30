@@ -3,6 +3,12 @@ import type { Ranking } from '../api-client/types';
 import { showRankingDetailModal } from './ranking-detail-modal';
 
 describe('showRankingDetailModal', () => {
+  const defaultRanking: Ranking = {
+    playerName: 'TestPlayer',
+    clearTime: 123450,
+    createdAt: '2025-12-28T10:30:00Z',
+  };
+
   beforeEach(() => {
     // DOM環境をリセット
     document.body.innerHTML = `
@@ -32,65 +38,35 @@ describe('showRankingDetailModal', () => {
   });
 
   it('モーダルが正しく表示される', () => {
-    const ranking: Ranking = {
-      playerName: 'TestPlayer',
-      clearTime: 123450,
-      createdAt: '2025-12-28T10:30:00Z',
-    };
-
-    showRankingDetailModal(ranking, 1);
+    showRankingDetailModal(defaultRanking, 1);
 
     const modal = document.getElementById('ranking-detail-modal');
     expect(modal?.classList.contains('hidden')).toBe(false);
   });
 
   it('1位が正しく表示される', () => {
-    const ranking: Ranking = {
-      playerName: 'TestPlayer',
-      clearTime: 123450,
-      createdAt: '2025-12-28T10:30:00Z',
-    };
-
-    showRankingDetailModal(ranking, 1);
+    showRankingDetailModal(defaultRanking, 1);
 
     const rankDisplay = document.getElementById('detail-rank');
     expect(rankDisplay?.textContent).toBe('1位');
   });
 
   it('2位が正しく表示される', () => {
-    const ranking: Ranking = {
-      playerName: 'TestPlayer',
-      clearTime: 123450,
-      createdAt: '2025-12-28T10:30:00Z',
-    };
-
-    showRankingDetailModal(ranking, 2);
+    showRankingDetailModal(defaultRanking, 2);
 
     const rankDisplay = document.getElementById('detail-rank');
     expect(rankDisplay?.textContent).toBe('2位');
   });
 
   it('3位が正しく表示される', () => {
-    const ranking: Ranking = {
-      playerName: 'TestPlayer',
-      clearTime: 123450,
-      createdAt: '2025-12-28T10:30:00Z',
-    };
-
-    showRankingDetailModal(ranking, 3);
+    showRankingDetailModal(defaultRanking, 3);
 
     const rankDisplay = document.getElementById('detail-rank');
     expect(rankDisplay?.textContent).toBe('3位');
   });
 
   it('4位以降が正しく表示される', () => {
-    const ranking: Ranking = {
-      playerName: 'TestPlayer',
-      clearTime: 123450,
-      createdAt: '2025-12-28T10:30:00Z',
-    };
-
-    showRankingDetailModal(ranking, 10);
+    showRankingDetailModal(defaultRanking, 10);
 
     const rankDisplay = document.getElementById('detail-rank');
     expect(rankDisplay?.textContent).toBe('10位');
@@ -98,9 +74,8 @@ describe('showRankingDetailModal', () => {
 
   it('プレイヤー名が正しく表示される（省略なし）', () => {
     const ranking: Ranking = {
+      ...defaultRanking,
       playerName: 'VeryLongPlayerName1234',
-      clearTime: 123450,
-      createdAt: '2025-12-28T10:30:00Z',
     };
 
     showRankingDetailModal(ranking, 1);
@@ -111,9 +86,8 @@ describe('showRankingDetailModal', () => {
 
   it('クリアタイムが秒単位で正しく表示される', () => {
     const ranking: Ranking = {
-      playerName: 'TestPlayer',
+      ...defaultRanking,
       clearTime: 123456, // 123.456秒
-      createdAt: '2025-12-28T10:30:00Z',
     };
 
     showRankingDetailModal(ranking, 1);
@@ -124,8 +98,7 @@ describe('showRankingDetailModal', () => {
 
   it('登録日時が日本語形式で正しく表示される', () => {
     const ranking: Ranking = {
-      playerName: 'TestPlayer',
-      clearTime: 123450,
+      ...defaultRanking,
       createdAt: '2025-12-28T10:30:00.000Z',
     };
 
@@ -137,13 +110,7 @@ describe('showRankingDetailModal', () => {
   });
 
   it('閉じるボタンでモーダルが閉じる', () => {
-    const ranking: Ranking = {
-      playerName: 'TestPlayer',
-      clearTime: 123450,
-      createdAt: '2025-12-28T10:30:00Z',
-    };
-
-    showRankingDetailModal(ranking, 1);
+    showRankingDetailModal(defaultRanking, 1);
 
     const modal = document.getElementById('ranking-detail-modal');
     const closeBtn = document.getElementById('detail-close-btn') as HTMLButtonElement;
@@ -154,13 +121,7 @@ describe('showRankingDetailModal', () => {
   });
 
   it('背景クリックでモーダルが閉じる', () => {
-    const ranking: Ranking = {
-      playerName: 'TestPlayer',
-      clearTime: 123450,
-      createdAt: '2025-12-28T10:30:00Z',
-    };
-
-    showRankingDetailModal(ranking, 1);
+    showRankingDetailModal(defaultRanking, 1);
 
     const modal = document.getElementById('ranking-detail-modal') as HTMLElement;
 
@@ -179,13 +140,7 @@ describe('showRankingDetailModal', () => {
   });
 
   it('モーダルコンテンツクリックではモーダルが閉じない', () => {
-    const ranking: Ranking = {
-      playerName: 'TestPlayer',
-      clearTime: 123450,
-      createdAt: '2025-12-28T10:30:00Z',
-    };
-
-    showRankingDetailModal(ranking, 1);
+    showRankingDetailModal(defaultRanking, 1);
 
     const modal = document.getElementById('ranking-detail-modal') as HTMLElement;
     const modalContent = modal.querySelector('.modal-content') as HTMLElement;
@@ -205,13 +160,7 @@ describe('showRankingDetailModal', () => {
   });
 
   it('ESCキーでモーダルが閉じる', () => {
-    const ranking: Ranking = {
-      playerName: 'TestPlayer',
-      clearTime: 123450,
-      createdAt: '2025-12-28T10:30:00Z',
-    };
-
-    showRankingDetailModal(ranking, 1);
+    showRankingDetailModal(defaultRanking, 1);
 
     const modal = document.getElementById('ranking-detail-modal');
 
@@ -229,14 +178,42 @@ describe('showRankingDetailModal', () => {
   it('必須DOM要素が存在しない場合、エラーをthrowする', () => {
     document.body.innerHTML = '<div></div>';
 
-    const ranking: Ranking = {
-      playerName: 'TestPlayer',
-      clearTime: 123450,
-      createdAt: '2025-12-28T10:30:00Z',
-    };
-
     expect(() => {
-      showRankingDetailModal(ranking, 1);
+      showRankingDetailModal(defaultRanking, 1);
     }).toThrow('Required modal elements not found');
+  });
+
+  it('複数回モーダルを開いた場合、古いイベントリスナーが削除される', () => {
+    // 1回目のモーダル表示
+    showRankingDetailModal(defaultRanking, 1);
+    const modal = document.getElementById('ranking-detail-modal') as HTMLElement;
+
+    // 1回目のESCキーでモーダルが閉じることを確認
+    const escEvent1 = new KeyboardEvent('keydown', {
+      key: 'Escape',
+      bubbles: true,
+      cancelable: true,
+    });
+    document.dispatchEvent(escEvent1);
+    expect(modal.classList.contains('hidden')).toBe(true);
+
+    // 2回目のモーダル表示（新しいAbortControllerが作成される）
+    const ranking2: Ranking = {
+      playerName: 'AnotherPlayer',
+      clearTime: 234560,
+      createdAt: '2025-12-29T12:00:00Z',
+    };
+    showRankingDetailModal(ranking2, 2);
+    expect(modal.classList.contains('hidden')).toBe(false);
+
+    // 1回目のESCキーイベントハンドラーが削除されていることを確認
+    // 2回目のESCキーでモーダルが閉じることを確認（古いハンドラーは削除済み）
+    const escEvent2 = new KeyboardEvent('keydown', {
+      key: 'Escape',
+      bubbles: true,
+      cancelable: true,
+    });
+    document.dispatchEvent(escEvent2);
+    expect(modal.classList.contains('hidden')).toBe(true);
   });
 });
