@@ -117,9 +117,7 @@ function win(): void {
       showScoreModal(score, difficulty, () => {
         onComplete();
         // スコア登録後にランキングを再取得
-        refreshRankings?.().catch((error) => {
-          console.error('Failed to refresh rankings:', error);
-        });
+        refreshRankings?.();
       });
     },
     getDifficultyFromSize,
