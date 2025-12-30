@@ -25,7 +25,9 @@ describe('rankings API client', () => {
       const result = await fetchRankings('easy', 10);
 
       expect(result).toEqual(mockRankings);
-      expect(globalThis.fetch).toHaveBeenCalledWith('/api/rankings?difficulty=easy&limit=10');
+      expect(globalThis.fetch).toHaveBeenCalledWith('/api/rankings?difficulty=easy&limit=10', {
+        cache: 'no-store',
+      });
     });
 
     it('異常系: ネットワークエラーの場合、ApiErrorをスローする', async () => {

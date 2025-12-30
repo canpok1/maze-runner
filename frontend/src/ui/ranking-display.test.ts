@@ -203,4 +203,49 @@ describe('initRankingDisplay', () => {
 
     await expect(initRankingDisplay()).rejects.toThrow('Required ranking elements not found');
   });
+
+  it('refresh関数を返し、呼び出すと現在の難易度のランキングを再取得する', async () => {
+    const fetchRankingsMock = vi
+      .spyOn(rankingsApi, 'fetchRankings')
+      .mockResolvedValue([
+        { playerName: 'Player1', clearTime: 10000, createdAt: '2025-12-28T00:00:00Z' },
+      ]);
+
+    const result = await initRankingDisplay();
+
+    // initRankingDisplayがrefresh関数を持つオブジェクトを返すことを確認
+    expect(result).toHaveProperty('refresh');
+    expect(typeof result.refresh).toBe('function');
+
+    // 初期表示で1回呼ばれている
+    expect(fetchRankingsMock).toHaveBeenCalledTimes(1);
+
+    // refresh関数を呼び出す
+    await result.refresh();
+
+    // 再度fetchRankingsが呼ばれる
+    expect(fetchRankingsMock).toHaveBeenCalledTimes(2);
+    expect(fetchRankingsMock).toHaveBeenLastCalledWith('easy', 10);
+  });
+
+  it('refresh関数はタブ切り替え後も現在の難易度のランキングを再取得する', async () => {
+    const fetchRankingsMock = vi.spyOn(rankingsApi, 'fetchRankings').mockResolvedValue([]);
+
+    const result = await initRankingDisplay();
+
+    // normalタブに切り替え
+    const normalTab = document.querySelector('[data-difficulty="normal"]') as HTMLButtonElement;
+    normalTab.click();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    // refresh前の呼び出し回数を記録
+    const callCountBeforeRefresh = fetchRankingsMock.mock.calls.length;
+
+    // refresh関数を呼び出す
+    await result.refresh();
+
+    // normalの難易度でfetchRankingsが呼ばれることを確認
+    expect(fetchRankingsMock).toHaveBeenCalledTimes(callCountBeforeRefresh + 1);
+    expect(fetchRankingsMock).toHaveBeenLastCalledWith('normal', 10);
+  });
 });

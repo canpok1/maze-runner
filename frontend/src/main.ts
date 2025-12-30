@@ -60,6 +60,9 @@ const gameState: GameState = {
   animationId: 0,
 };
 
+/** ランキングを再取得する関数（初期化後に設定される） */
+let refreshRankings: (() => Promise<void>) | null = null;
+
 /**
  * URLパラメータからテスト用迷路名を取得する
  *
@@ -110,7 +113,13 @@ function win(): void {
     gameState,
     menuElement,
     cancelAnimationFrame: cancelAnimationFrame.bind(window),
-    showScoreModal,
+    showScoreModal: (score, difficulty, onComplete) => {
+      showScoreModal(score, difficulty, () => {
+        onComplete();
+        // スコア登録後にランキングを再取得
+        refreshRankings?.();
+      });
+    },
     getDifficultyFromSize,
   };
   winCore(deps);
@@ -147,7 +156,11 @@ window.addEventListener('load', () => {
   setupDifficultyButtons();
   resizeCanvas();
   window.addEventListener('resize', resizeCanvas);
-  initRankingDisplay().catch((error) => {
-    console.error('Failed to initialize ranking display:', error);
-  });
+  initRankingDisplay()
+    .then((result) => {
+      refreshRankings = result.refresh;
+    })
+    .catch((error) => {
+      console.error('Failed to initialize ranking display:', error);
+    });
 });
