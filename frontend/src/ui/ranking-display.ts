@@ -1,5 +1,6 @@
 import { fetchRankings } from '../api-client/rankings';
 import type { Difficulty, Ranking } from '../api-client/types';
+import { showRankingDetailModal } from './ranking-detail-modal';
 
 /**
  * ランキング表示を初期化する
@@ -103,6 +104,11 @@ export async function initRankingDisplay(): Promise<{ refresh: () => Promise<voi
     listItem.appendChild(rankSpan);
     listItem.appendChild(nameSpan);
     listItem.appendChild(timeSpan);
+
+    // クリックで詳細モーダルを表示
+    listItem.addEventListener('click', () => {
+      showRankingDetailModal(ranking, rank);
+    });
 
     return listItem;
   };
