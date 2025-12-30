@@ -1,6 +1,6 @@
 import type { D1Database, D1Result } from '@cloudflare/workers-types';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { addRanking, getRankings } from './rankings';
+import { addRanking, checkRankEligibility, getRankings } from './rankings';
 
 describe('getRankings', () => {
   let mockDb: D1Database;
@@ -159,5 +159,128 @@ describe('addRanking', () => {
     mockDb.prepare = mockPrepare;
 
     await expect(addRanking(mockDb, 'Player', 100, 'easy')).rejects.toThrow();
+  });
+});
+
+describe('checkRankEligibility', () => {
+  let mockDb: D1Database;
+
+  beforeEach(() => {
+    mockDb = {
+      prepare: vi.fn(),
+    } as unknown as D1Database;
+  });
+
+  it('should return isTopTen: true and rank: 1 when no rankings exist', async () => {
+    const mockPrepare = vi.fn().mockReturnValue({
+      bind: vi.fn().mockReturnValue({
+        all: vi.fn().mockResolvedValue({
+          results: [],
+          success: true,
+        } as D1Result),
+      }),
+    });
+
+    mockDb.prepare = mockPrepare;
+
+    const result = await checkRankEligibility(mockDb, 'easy', 1000);
+
+    expect(result.isTopTen).toBe(true);
+    expect(result.rank).toBe(1);
+  });
+
+  it('should return isTopTen: true when rankings have less than 10 entries', async () => {
+    const mockRows = [
+      { player_name: 'Player1', clear_time: 100, created_at: '2025-01-01T00:00:00.000Z' },
+      { player_name: 'Player2', clear_time: 200, created_at: '2025-01-01T01:00:00.000Z' },
+      { player_name: 'Player3', clear_time: 300, created_at: '2025-01-01T02:00:00.000Z' },
+    ];
+
+    const mockPrepare = vi.fn().mockReturnValue({
+      bind: vi.fn().mockReturnValue({
+        all: vi.fn().mockResolvedValue({
+          results: mockRows,
+          success: true,
+        } as D1Result),
+      }),
+    });
+
+    mockDb.prepare = mockPrepare;
+
+    const result = await checkRankEligibility(mockDb, 'easy', 250);
+
+    expect(result.isTopTen).toBe(true);
+    expect(result.rank).toBe(3);
+  });
+
+  it('should return isTopTen: true and correct rank when clear time beats 10th place', async () => {
+    const mockRows = Array.from({ length: 10 }, (_, i) => ({
+      player_name: `Player${i + 1}`,
+      clear_time: (i + 1) * 100,
+      created_at: '2025-01-01T00:00:00.000Z',
+    }));
+
+    const mockPrepare = vi.fn().mockReturnValue({
+      bind: vi.fn().mockReturnValue({
+        all: vi.fn().mockResolvedValue({
+          results: mockRows,
+          success: true,
+        } as D1Result),
+      }),
+    });
+
+    mockDb.prepare = mockPrepare;
+
+    const result = await checkRankEligibility(mockDb, 'easy', 550);
+
+    expect(result.isTopTen).toBe(true);
+    expect(result.rank).toBe(6);
+  });
+
+  it('should return isTopTen: false when clear time does not beat 10th place', async () => {
+    const mockRows = Array.from({ length: 10 }, (_, i) => ({
+      player_name: `Player${i + 1}`,
+      clear_time: (i + 1) * 100,
+      created_at: '2025-01-01T00:00:00.000Z',
+    }));
+
+    const mockPrepare = vi.fn().mockReturnValue({
+      bind: vi.fn().mockReturnValue({
+        all: vi.fn().mockResolvedValue({
+          results: mockRows,
+          success: true,
+        } as D1Result),
+      }),
+    });
+
+    mockDb.prepare = mockPrepare;
+
+    const result = await checkRankEligibility(mockDb, 'easy', 1100);
+
+    expect(result.isTopTen).toBe(false);
+    expect(result.rank).toBeUndefined();
+  });
+
+  it('should return rank: 1 when clear time is faster than all existing rankings', async () => {
+    const mockRows = [
+      { player_name: 'Player1', clear_time: 100, created_at: '2025-01-01T00:00:00.000Z' },
+      { player_name: 'Player2', clear_time: 200, created_at: '2025-01-01T01:00:00.000Z' },
+    ];
+
+    const mockPrepare = vi.fn().mockReturnValue({
+      bind: vi.fn().mockReturnValue({
+        all: vi.fn().mockResolvedValue({
+          results: mockRows,
+          success: true,
+        } as D1Result),
+      }),
+    });
+
+    mockDb.prepare = mockPrepare;
+
+    const result = await checkRankEligibility(mockDb, 'easy', 50);
+
+    expect(result.isTopTen).toBe(true);
+    expect(result.rank).toBe(1);
   });
 });

@@ -354,3 +354,152 @@ describe('POST /rankings', () => {
     expect(data).toHaveProperty('error');
   });
 });
+
+describe('GET /rankings/check', () => {
+  let app: Hono<{ Bindings: Env }>;
+  let mockDb: D1Database;
+
+  beforeEach(() => {
+    app = new Hono<{ Bindings: Env }>();
+    mockDb = {
+      prepare: vi.fn(),
+    } as unknown as D1Database;
+
+    app.route('/', rankingsRoute);
+  });
+
+  it('should return rank eligibility when parameters are valid', async () => {
+    const mockRows = [
+      { player_name: 'Player1', clear_time: 100, created_at: '2025-01-01T00:00:00.000Z' },
+      { player_name: 'Player2', clear_time: 200, created_at: '2025-01-01T01:00:00.000Z' },
+    ];
+
+    const mockPrepare = vi.fn().mockReturnValue({
+      bind: vi.fn().mockReturnValue({
+        all: vi.fn().mockResolvedValue({
+          results: mockRows,
+          success: true,
+        }),
+      }),
+    });
+
+    mockDb.prepare = mockPrepare;
+
+    const res = await app.request(
+      '/rankings/check?difficulty=easy&clearTime=150',
+      {
+        method: 'GET',
+      },
+      { DB: mockDb }
+    );
+
+    expect(res.status).toBe(200);
+
+    const data = await res.json();
+    expect(data).toHaveProperty('isTopTen', true);
+    expect(data).toHaveProperty('rank', 2);
+  });
+
+  it('should return 400 when difficulty parameter is missing', async () => {
+    const res = await app.request(
+      '/rankings/check?clearTime=150',
+      {
+        method: 'GET',
+      },
+      { DB: mockDb }
+    );
+
+    expect(res.status).toBe(400);
+
+    const data = await res.json();
+    expect(data).toHaveProperty('error');
+    expect(data.error).toContain('difficulty');
+  });
+
+  it('should return 400 when difficulty value is invalid', async () => {
+    const res = await app.request(
+      '/rankings/check?difficulty=invalid&clearTime=150',
+      {
+        method: 'GET',
+      },
+      { DB: mockDb }
+    );
+
+    expect(res.status).toBe(400);
+
+    const data = await res.json();
+    expect(data).toHaveProperty('error');
+    expect(data.error).toContain('difficulty');
+  });
+
+  it('should return 400 when clearTime parameter is missing', async () => {
+    const res = await app.request(
+      '/rankings/check?difficulty=easy',
+      {
+        method: 'GET',
+      },
+      { DB: mockDb }
+    );
+
+    expect(res.status).toBe(400);
+
+    const data = await res.json();
+    expect(data).toHaveProperty('error');
+    expect(data.error).toContain('clearTime');
+  });
+
+  it('should return 400 when clearTime is not a number', async () => {
+    const res = await app.request(
+      '/rankings/check?difficulty=easy&clearTime=invalid',
+      {
+        method: 'GET',
+      },
+      { DB: mockDb }
+    );
+
+    expect(res.status).toBe(400);
+
+    const data = await res.json();
+    expect(data).toHaveProperty('error');
+    expect(data.error).toContain('clearTime');
+  });
+
+  it('should return 400 when clearTime is not positive', async () => {
+    const res = await app.request(
+      '/rankings/check?difficulty=easy&clearTime=-100',
+      {
+        method: 'GET',
+      },
+      { DB: mockDb }
+    );
+
+    expect(res.status).toBe(400);
+
+    const data = await res.json();
+    expect(data).toHaveProperty('error');
+    expect(data.error).toContain('clearTime');
+  });
+
+  it('should return 500 when database operation fails', async () => {
+    const mockPrepare = vi.fn().mockReturnValue({
+      bind: vi.fn().mockReturnValue({
+        all: vi.fn().mockRejectedValue(new Error('Database error')),
+      }),
+    });
+
+    mockDb.prepare = mockPrepare;
+
+    const res = await app.request(
+      '/rankings/check?difficulty=easy&clearTime=150',
+      {
+        method: 'GET',
+      },
+      { DB: mockDb }
+    );
+
+    expect(res.status).toBe(500);
+
+    const data = await res.json();
+    expect(data).toHaveProperty('error');
+  });
+});

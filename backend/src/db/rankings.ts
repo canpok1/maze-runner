@@ -77,3 +77,39 @@ export async function addRanking(
     createdAt: newRankingInfo.created_at,
   };
 }
+
+/**
+ * 指定されたクリアタイムがランキングのトップ10に入るかどうかを判定する
+ * @param db D1データベースインスタンス
+ * @param difficulty 難易度名（'easy', 'normal', 'hard'）
+ * @param clearTime クリアタイム（ミリ秒）
+ * @returns ランクイン判定結果（isTopTen: ランクインするか, rank: 何位になるか）
+ */
+export async function checkRankEligibility(
+  db: D1Database,
+  difficulty: Difficulty,
+  clearTime: number
+): Promise<{ isTopTen: boolean; rank?: number }> {
+  // 既存のトップ10ランキングを取得
+  const rankings = await getRankings(db, difficulty, 10);
+
+  // ランキングが10件未満の場合は無条件でランクイン対象
+  if (rankings.length < 10) {
+    // 何位になるかを計算
+    const rank = rankings.filter((r) => r.clearTime < clearTime).length + 1;
+    return { isTopTen: true, rank };
+  }
+
+  // 10位のタイムと比較
+  const tenthPlaceTime = rankings[9].clearTime;
+
+  // クリアタイムが10位のタイムより速い場合はランクイン対象
+  if (clearTime < tenthPlaceTime) {
+    // 何位になるかを計算
+    const rank = rankings.filter((r) => r.clearTime < clearTime).length + 1;
+    return { isTopTen: true, rank };
+  }
+
+  // ランクイン対象外
+  return { isTopTen: false };
+}
