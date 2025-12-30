@@ -10,15 +10,21 @@ describe('showScoreModal', () => {
         <div class="modal-content">
           <h2>クリアおめでとう！</h2>
           <p id="score-display"></p>
-          <div class="name-input-container">
-            <label for="player-name">プレイヤー名</label>
-            <input type="text" id="player-name" maxlength="20" placeholder="名前を入力">
-            <span id="name-error" class="error-text"></span>
-            <span id="submit-error" class="error-text hidden"></span>
-          </div>
-          <div class="modal-buttons">
-            <button id="submit-score-btn" class="btn submit-btn">登録</button>
-            <button id="skip-score-btn" class="btn skip-btn">スキップ</button>
+          <p id="rank-message" class="rank-message hidden"></p>
+          <p id="not-ranked-message" class="not-ranked hidden">
+            トップ10にランクインできませんでした
+          </p>
+          <div id="registration-form">
+            <div class="name-input-container">
+              <label for="player-name">プレイヤー名</label>
+              <input type="text" id="player-name" maxlength="20" placeholder="名前を入力">
+              <span id="name-error" class="error-text"></span>
+              <span id="submit-error" class="error-text hidden"></span>
+            </div>
+            <div class="modal-buttons">
+              <button id="submit-score-btn" class="btn submit-btn">登録</button>
+              <button id="skip-score-btn" class="btn skip-btn">スキップ</button>
+            </div>
           </div>
         </div>
       </div>
@@ -194,15 +200,21 @@ describe('showScoreModal', () => {
         <div class="modal-content">
           <h2>クリアおめでとう！</h2>
           <p id="score-display"></p>
-          <div class="name-input-container">
-            <label for="player-name">プレイヤー名</label>
-            <input type="text" id="player-name" maxlength="20" placeholder="名前を入力">
-            <span id="name-error" class="error-text"></span>
-            <span id="submit-error" class="error-text hidden"></span>
-          </div>
-          <div class="modal-buttons">
-            <button id="submit-score-btn" class="btn submit-btn">登録</button>
-            <button id="skip-score-btn" class="btn skip-btn">スキップ</button>
+          <p id="rank-message" class="rank-message hidden"></p>
+          <p id="not-ranked-message" class="not-ranked hidden">
+            トップ10にランクインできませんでした
+          </p>
+          <div id="registration-form">
+            <div class="name-input-container">
+              <label for="player-name">プレイヤー名</label>
+              <input type="text" id="player-name" maxlength="20" placeholder="名前を入力">
+              <span id="name-error" class="error-text"></span>
+              <span id="submit-error" class="error-text hidden"></span>
+            </div>
+            <div class="modal-buttons">
+              <button id="submit-score-btn" class="btn submit-btn">登録</button>
+              <button id="skip-score-btn" class="btn skip-btn">スキップ</button>
+            </div>
           </div>
         </div>
       </div>
@@ -465,5 +477,115 @@ describe('showScoreModal', () => {
     expect(submitScoreMock).toHaveBeenCalledTimes(2);
     expect(modal?.classList.contains('hidden')).toBe(true);
     expect(onComplete).toHaveBeenCalled();
+  });
+
+  describe('ランクイン判定機能', () => {
+    it('ランクイン時（isTopTen: true）に登録フォームとランクインメッセージが表示される', async () => {
+      const onComplete = vi.fn();
+      const checkRankMock = vi.spyOn(rankingsApi, 'checkRankEligibility').mockResolvedValue({
+        isTopTen: true,
+        rank: 3,
+      });
+
+      showScoreModal(123.45, 'easy', onComplete);
+
+      // 非同期処理の完了を待つ
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(checkRankMock).toHaveBeenCalledWith('easy', 123450);
+
+      const rankMessage = document.getElementById('rank-message');
+      const notRankedMessage = document.getElementById('not-ranked-message');
+      const registrationForm = document.getElementById('registration-form');
+      const skipBtn = document.getElementById('skip-score-btn') as HTMLButtonElement;
+
+      // ランクインメッセージが表示される
+      expect(rankMessage?.classList.contains('hidden')).toBe(false);
+      expect(rankMessage?.textContent).toBe('3位にランクイン！');
+
+      // ランク外メッセージは非表示
+      expect(notRankedMessage?.classList.contains('hidden')).toBe(true);
+
+      // 登録フォームが表示される
+      expect(registrationForm?.classList.contains('hidden')).toBe(false);
+
+      // スキップボタンのテキストは「スキップ」のまま
+      expect(skipBtn.textContent).toBe('スキップ');
+    });
+
+    it('ランク外時（isTopTen: false）に登録フォームが非表示になり、ランク外メッセージが表示される', async () => {
+      const onComplete = vi.fn();
+      const checkRankMock = vi.spyOn(rankingsApi, 'checkRankEligibility').mockResolvedValue({
+        isTopTen: false,
+      });
+
+      showScoreModal(999.99, 'normal', onComplete);
+
+      // 非同期処理の完了を待つ
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(checkRankMock).toHaveBeenCalledWith('normal', 999990);
+
+      const rankMessage = document.getElementById('rank-message');
+      const notRankedMessage = document.getElementById('not-ranked-message');
+      const registrationForm = document.getElementById('registration-form');
+
+      // ランクインメッセージは非表示
+      expect(rankMessage?.classList.contains('hidden')).toBe(true);
+
+      // ランク外メッセージが表示される
+      expect(notRankedMessage?.classList.contains('hidden')).toBe(false);
+
+      // 登録フォームが非表示
+      expect(registrationForm?.classList.contains('hidden')).toBe(true);
+    });
+
+    it('ランク外時にスキップボタンのテキストが「閉じる」になる', async () => {
+      const onComplete = vi.fn();
+      vi.spyOn(rankingsApi, 'checkRankEligibility').mockResolvedValue({
+        isTopTen: false,
+      });
+
+      showScoreModal(999.99, 'hard', onComplete);
+
+      // 非同期処理の完了を待つ
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      const skipBtn = document.getElementById('skip-score-btn') as HTMLButtonElement;
+
+      // スキップボタンのテキストが「閉じる」になる
+      expect(skipBtn.textContent).toBe('閉じる');
+    });
+
+    it('checkRankEligibility APIエラー時は従来どおり登録フォームを表示（フォールバック）', async () => {
+      const onComplete = vi.fn();
+      const checkRankMock = vi
+        .spyOn(rankingsApi, 'checkRankEligibility')
+        .mockRejectedValue(new Error('API Error'));
+
+      showScoreModal(123.45, 'easy', onComplete);
+
+      // 非同期処理の完了を待つ
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(checkRankMock).toHaveBeenCalledWith('easy', 123450);
+
+      const rankMessage = document.getElementById('rank-message');
+      const notRankedMessage = document.getElementById('not-ranked-message');
+      const registrationForm = document.getElementById('registration-form');
+      const skipBtn = document.getElementById('skip-score-btn') as HTMLButtonElement;
+
+      // ランクインメッセージは非表示
+      expect(rankMessage?.classList.contains('hidden')).toBe(true);
+
+      // ランク外メッセージは非表示
+      expect(notRankedMessage?.classList.contains('hidden')).toBe(true);
+
+      // 登録フォームが表示される（フォールバック）
+      expect(registrationForm?.classList.contains('hidden')).toBe(false);
+
+      // スキップボタンのテキストは「スキップ」のまま
+      expect(skipBtn.textContent).toBe('スキップ');
+    });
   });
 });

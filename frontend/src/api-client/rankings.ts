@@ -55,3 +55,29 @@ export async function submitScore(
   const data = await response.json();
   return data.ranking;
 }
+
+/**
+ * クリアタイムがランキングのトップ10に入るかどうかを判定する
+ * @param difficulty 難易度
+ * @param clearTime クリアタイム（ミリ秒）
+ * @returns ランクイン判定結果（isTopTen: ランクインするか, rank: 何位になるか）
+ * @throws {ApiError} APIリクエストが失敗した場合
+ */
+export async function checkRankEligibility(
+  difficulty: Difficulty,
+  clearTime: number
+): Promise<{ isTopTen: boolean; rank?: number }> {
+  const params = new URLSearchParams({ difficulty, clearTime: String(clearTime) });
+  const url = `/api/rankings/check?${params.toString()}`;
+
+  const response = await fetch(url, {
+    cache: 'no-store',
+  });
+
+  if (!response.ok) {
+    throw new ApiError(response.status, `Failed to check rank eligibility: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  return data;
+}

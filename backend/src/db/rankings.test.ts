@@ -84,32 +84,20 @@ describe('addRanking', () => {
 
   it('should add a new ranking and return the inserted data', async () => {
     const mockCreatedAt = '2025-01-01T00:00:00.000Z';
-    const mockPrepare = vi
-      .fn()
-      .mockReturnValueOnce({
-        bind: vi.fn().mockReturnValue({
-          run: vi.fn().mockResolvedValue({
-            success: true,
-            meta: {
-              last_row_id: 1,
-            },
-          } as D1Result),
+    const mockPrepare = vi.fn().mockReturnValue({
+      bind: vi.fn().mockReturnValue({
+        first: vi.fn().mockResolvedValue({
+          id: 1,
+          created_at: mockCreatedAt,
         }),
-      })
-      .mockReturnValueOnce({
-        bind: vi.fn().mockReturnValue({
-          first: vi.fn().mockResolvedValue({
-            created_at: mockCreatedAt,
-          }),
-        }),
-      });
+      }),
+    });
 
     mockDb.prepare = mockPrepare;
 
     const result = await addRanking(mockDb, 'TestPlayer', 200, 'easy');
 
     expect(mockPrepare).toHaveBeenCalledWith(expect.stringContaining('INSERT'));
-    expect(mockPrepare).toHaveBeenCalledWith(expect.stringContaining('SELECT'));
     expect(result.id).toBe(1);
     expect(result.playerName).toBe('TestPlayer');
     expect(result.clearTime).toBe(200);
@@ -118,25 +106,14 @@ describe('addRanking', () => {
 
   it('should use the correct difficulty_id based on difficulty name', async () => {
     const mockCreatedAt = '2025-01-02T00:00:00.000Z';
-    const mockPrepare = vi
-      .fn()
-      .mockReturnValueOnce({
-        bind: vi.fn().mockReturnValue({
-          run: vi.fn().mockResolvedValue({
-            success: true,
-            meta: {
-              last_row_id: 2,
-            },
-          } as D1Result),
+    const mockPrepare = vi.fn().mockReturnValue({
+      bind: vi.fn().mockReturnValue({
+        first: vi.fn().mockResolvedValue({
+          id: 2,
+          created_at: mockCreatedAt,
         }),
-      })
-      .mockReturnValueOnce({
-        bind: vi.fn().mockReturnValue({
-          first: vi.fn().mockResolvedValue({
-            created_at: mockCreatedAt,
-          }),
-        }),
-      });
+      }),
+    });
 
     mockDb.prepare = mockPrepare;
 

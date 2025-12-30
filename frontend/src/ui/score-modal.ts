@@ -1,5 +1,5 @@
 import type { Difficulty } from '@maze-runner/lib';
-import { submitScore } from '../api-client/rankings';
+import { checkRankEligibility, submitScore } from '../api-client/rankings';
 
 /**
  * スコア登録モーダルを表示する
@@ -19,6 +19,9 @@ export function showScoreModal(
   const submitError = document.getElementById('submit-error');
   const submitBtn = document.getElementById('submit-score-btn') as HTMLButtonElement;
   const skipBtn = document.getElementById('skip-score-btn') as HTMLButtonElement;
+  const rankMessage = document.getElementById('rank-message');
+  const notRankedMessage = document.getElementById('not-ranked-message');
+  const registrationForm = document.getElementById('registration-form');
 
   if (
     !modal ||
@@ -27,7 +30,10 @@ export function showScoreModal(
     !nameError ||
     !submitError ||
     !submitBtn ||
-    !skipBtn
+    !skipBtn ||
+    !rankMessage ||
+    !notRankedMessage ||
+    !registrationForm
   ) {
     throw new Error('Required modal elements not found');
   }
@@ -45,6 +51,32 @@ export function showScoreModal(
   submitError.classList.add('hidden');
   submitBtn.disabled = false;
   skipBtn.disabled = false;
+
+  // ランクイン判定関連要素を初期化
+  rankMessage.classList.add('hidden');
+  rankMessage.textContent = '';
+  notRankedMessage.classList.add('hidden');
+  registrationForm.classList.remove('hidden');
+  skipBtn.textContent = 'スキップ';
+
+  // ランクイン判定を実行
+  const clearTimeMs = Math.round(score * 1000);
+  (async () => {
+    try {
+      const result = await checkRankEligibility(difficulty, clearTimeMs);
+      if (result.isTopTen) {
+        rankMessage.textContent = `${result.rank}位にランクイン！`;
+        rankMessage.classList.remove('hidden');
+      } else {
+        notRankedMessage.classList.remove('hidden');
+        registrationForm.classList.add('hidden');
+        skipBtn.textContent = '閉じる';
+      }
+    } catch (error) {
+      // エラー時は従来どおり登録フォームを表示（フォールバック）
+      console.error('Failed to check rank eligibility:', error);
+    }
+  })();
 
   // 登録ボタンのイベントハンドラ
   const handleSubmit = async () => {

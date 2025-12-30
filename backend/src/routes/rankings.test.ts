@@ -155,25 +155,14 @@ describe('POST /rankings', () => {
 
   it('should add a new ranking and return success response', async () => {
     const mockCreatedAt = '2025-01-01T00:00:00.000Z';
-    const mockPrepare = vi
-      .fn()
-      .mockReturnValueOnce({
-        bind: vi.fn().mockReturnValue({
-          run: vi.fn().mockResolvedValue({
-            success: true,
-            meta: {
-              last_row_id: 1,
-            },
-          }),
+    const mockPrepare = vi.fn().mockReturnValue({
+      bind: vi.fn().mockReturnValue({
+        first: vi.fn().mockResolvedValue({
+          id: 1,
+          created_at: mockCreatedAt,
         }),
-      })
-      .mockReturnValueOnce({
-        bind: vi.fn().mockReturnValue({
-          first: vi.fn().mockResolvedValue({
-            created_at: mockCreatedAt,
-          }),
-        }),
-      });
+      }),
+    });
 
     mockDb.prepare = mockPrepare;
 
@@ -323,10 +312,7 @@ describe('POST /rankings', () => {
   it('should return 500 when database operation fails', async () => {
     const mockPrepare = vi.fn().mockReturnValue({
       bind: vi.fn().mockReturnValue({
-        run: vi.fn().mockResolvedValue({
-          success: false,
-          error: 'Database error',
-        }),
+        first: vi.fn().mockRejectedValue(new Error('Database error')),
       }),
     });
 
