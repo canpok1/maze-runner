@@ -29,10 +29,95 @@ describe('generateMaze', () => {
       expect(maze[1][1]).toBe(TileType.FLOOR);
     });
 
-    it('ゴール地点(size-2, size-2)がゴール(2)であること', () => {
+    it('迷路内にゴールが1つだけ存在すること', () => {
       const size = 11;
       const maze = generateMaze(size);
-      expect(maze[size - 2][size - 2]).toBe(TileType.GOAL);
+      const goalCount = maze.flat().filter((tile) => tile === TileType.GOAL).length;
+      expect(goalCount).toBe(1);
+    });
+  });
+
+  describe('ゴール位置のランダム化', () => {
+    it('ゴールがスタート地点(1,1)とは異なる位置にあること', () => {
+      const size = 11;
+      const maze = generateMaze(size);
+      expect(maze[1][1]).not.toBe(TileType.GOAL);
+    });
+
+    it('ゴールが外周の壁ではなく内部に配置されていること', () => {
+      const size = 11;
+      const maze = generateMaze(size);
+
+      // ゴール位置を探す
+      let goalX = -1;
+      let goalY = -1;
+      for (let y = 0; y < size; y++) {
+        for (let x = 0; x < size; x++) {
+          if (maze[y][x] === TileType.GOAL) {
+            goalX = x;
+            goalY = y;
+            break;
+          }
+        }
+        if (goalX !== -1) break;
+      }
+
+      // ゴールが外周でないことを確認(通路エリア内にあること)
+      expect(goalX).toBeGreaterThan(0);
+      expect(goalX).toBeLessThan(size - 1);
+      expect(goalY).toBeGreaterThan(0);
+      expect(goalY).toBeLessThan(size - 1);
+    });
+
+    it('ゴールとスタートのマンハッタン距離が迷路サイズの50%以上であること', () => {
+      const size = 11;
+      const maze = generateMaze(size);
+
+      // ゴール位置を探す
+      let goalX = -1;
+      let goalY = -1;
+      for (let y = 0; y < size; y++) {
+        for (let x = 0; x < size; x++) {
+          if (maze[y][x] === TileType.GOAL) {
+            goalX = x;
+            goalY = y;
+            break;
+          }
+        }
+        if (goalX !== -1) break;
+      }
+
+      expect(goalX).not.toBe(-1);
+      expect(goalY).not.toBe(-1);
+
+      const manhattanDistance = Math.abs(goalX - 1) + Math.abs(goalY - 1);
+      expect(manhattanDistance).toBeGreaterThanOrEqual(size * 0.5);
+    });
+
+    it('複数回生成してもマンハッタン距離の条件を満たすこと', () => {
+      const size = 11;
+      const iterations = 10;
+
+      for (let i = 0; i < iterations; i++) {
+        const maze = generateMaze(size);
+
+        // ゴール位置を探す
+        let goalX = -1;
+        let goalY = -1;
+        for (let y = 0; y < size; y++) {
+          for (let x = 0; x < size; x++) {
+            if (maze[y][x] === TileType.GOAL) {
+              goalX = x;
+              goalY = y;
+              break;
+            }
+          }
+          if (goalX !== -1) break;
+        }
+
+        const manhattanDistance = Math.abs(goalX - 1) + Math.abs(goalY - 1);
+        expect(manhattanDistance).toBeGreaterThanOrEqual(size * 0.5);
+      }
     });
   });
 

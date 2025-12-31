@@ -1,6 +1,19 @@
 import { type MazeMap, TileType } from '@maze-runner/lib';
 
 /**
+ * マンハッタン距離を計算する
+ *
+ * @param x1 - 始点のx座標
+ * @param y1 - 始点のy座標
+ * @param x2 - 終点のx座標
+ * @param y2 - 終点のy座標
+ * @returns マンハッタン距離
+ */
+function manhattanDistance(x1: number, y1: number, x2: number, y2: number): number {
+  return Math.abs(x1 - x2) + Math.abs(y1 - y2);
+}
+
+/**
  * 穴掘り法を用いて迷路を生成する純粋関数
  *
  * @param size - 迷路のサイズ（偶数の場合は自動的に奇数に調整される）
@@ -40,6 +53,33 @@ export function generateMaze(size: number): MazeMap {
 
   walk(1, 1); // スタート地点(1, 1)から掘り始め
 
-  newMap[size - 2][size - 2] = TileType.GOAL; // ゴールを設定
+  // ゴール位置をランダムに選択
+  const startX = 1;
+  const startY = 1;
+  const minDistance = size * 0.5;
+
+  // 迷路内のすべての通路座標を収集し、スタートとの距離が条件を満たす候補をフィルタリング
+  const goalCandidates: [number, number][] = [];
+  for (let y = 1; y < size - 1; y++) {
+    for (let x = 1; x < size - 1; x++) {
+      if (newMap[y][x] === TileType.FLOOR) {
+        const distance = manhattanDistance(x, y, startX, startY);
+        if (distance >= minDistance && (x !== startX || y !== startY)) {
+          goalCandidates.push([x, y]);
+        }
+      }
+    }
+  }
+
+  // 候補がある場合はランダムに選択、ない場合はフォールバック（既存の固定位置）
+  if (goalCandidates.length > 0) {
+    const randomIndex = Math.floor(Math.random() * goalCandidates.length);
+    const [goalX, goalY] = goalCandidates[randomIndex];
+    newMap[goalY][goalX] = TileType.GOAL;
+  } else {
+    // フォールバック: 既存の固定位置
+    newMap[size - 2][size - 2] = TileType.GOAL;
+  }
+
   return newMap;
 }
