@@ -289,7 +289,7 @@ canvas {
   justify-content: center;
 }
 
-.modal-buttons .btn {
+.modal-content .btn {
   padding: 12px 24px;
   font-size: 1rem;
   border: none;
@@ -302,7 +302,7 @@ canvas {
   box-shadow: 0 4px rgba(0, 0, 0, 0.3);
 }
 
-.modal-buttons .btn:active {
+.modal-content .btn:active {
   transform: translateY(2px);
   box-shadow: 0 2px rgba(0, 0, 0, 0.3);
 }
