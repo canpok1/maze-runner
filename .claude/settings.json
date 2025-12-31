@@ -51,6 +51,7 @@
       "Bash(touch:*)",
       "Bash(tree:*)",
       "Bash(while:*)",
+      "Skill(fix-pr)",
       "Skill(github)",
       "Skill(plan-issue)",
       "Skill(plan-pr)",
@@ -58,7 +59,13 @@
       "Skill(review)",
       "Skill(run)",
       "WebSearch",
-      "mcp__playwright"
+      "mcp__playwright",
+      "mcp__github__issue_read",
+      "mcp__github__issue_write",
+      "mcp__github__list_pull_requests",
+      "mcp__github__search_pull_requests",
+      "mcp__github__pull_request_read",
+      "mcp__github__create_pull_request"
     ],
     "deny": [
       "Bash(git add --all)",
