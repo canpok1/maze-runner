@@ -40,42 +40,32 @@ export function generateMaze(size: number): MazeMap {
 
   walk(1, 1); // スタート地点(1, 1)から掘り始め
 
-  // ゴール位置をランダムに選択（右端または下端の通路から選択）
+  // ゴール位置をランダムに選択
+  // 右端または下端の通路から選択することで、スタート地点(1,1)から十分な距離を確保し、
+  // プレイヤーが迷路を横断・縦断する必要がある適切な難易度を実現する
+  const goalCandidates: [number, number][] = [];
+
   // 右端（x = size - 2）の通路セルを収集
-  const rightEdgeCells: [number, number][] = [];
   for (let y = 1; y < size - 1; y++) {
     if (newMap[y][size - 2] === TileType.FLOOR) {
-      rightEdgeCells.push([size - 2, y]);
+      goalCandidates.push([size - 2, y]);
     }
   }
 
   // 下端（y = size - 2）の通路セルを収集
-  const bottomEdgeCells: [number, number][] = [];
-  for (let x = 1; x < size - 1; x++) {
+  // 右下角(size-2, size-2)は右端で収集済みのため、x < size - 2 として重複を回避
+  for (let x = 1; x < size - 2; x++) {
     if (newMap[size - 2][x] === TileType.FLOOR) {
-      bottomEdgeCells.push([x, size - 2]);
+      goalCandidates.push([x, size - 2]);
     }
   }
 
-  // 重複を除外して候補リストを作成（Set を使用）
-  const candidateSet = new Set<string>();
-  for (const [x, y] of rightEdgeCells) {
-    candidateSet.add(`${x},${y}`);
-  }
-  for (const [x, y] of bottomEdgeCells) {
-    candidateSet.add(`${x},${y}`);
-  }
-  const goalCandidates: [number, number][] = Array.from(candidateSet).map((s) => {
-    const [x, y] = s.split(',').map(Number);
-    return [x, y] as [number, number];
-  });
-
   if (goalCandidates.length > 0) {
-    // 候補からランダムに選択
     const [goalX, goalY] = goalCandidates[Math.floor(Math.random() * goalCandidates.length)];
     newMap[goalY][goalX] = TileType.GOAL;
   } else {
-    // 候補がない場合のフォールバック処理（例: 3x3の迷路など）
+    // 候補がない場合（例: 3x3の迷路など）は右下隅をゴールに設定
+    // 右下隅はスタート地点(1,1)から最も遠い位置となる
     newMap[size - 2][size - 2] = TileType.GOAL;
   }
 
