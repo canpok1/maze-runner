@@ -57,16 +57,16 @@ export async function submitScore(
 }
 
 /**
- * クリアタイムがランキングのトップ10に入るかどうかを判定する
+ * クリアタイムがランキングの何位になるかを取得する
  * @param difficulty 難易度
  * @param clearTime クリアタイム（ミリ秒）
- * @returns ランクイン判定結果（rank: 何位になるか, isTopTen: ランクインするか）
+ * @returns 順位
  * @throws {ApiError} APIリクエストが失敗した場合
  */
 export async function checkRankEligibility(
   difficulty: Difficulty,
   clearTime: number
-): Promise<{ rank: number; isTopTen: boolean }> {
+): Promise<{ rank: number }> {
   const params = new URLSearchParams({ clearTime: String(clearTime) });
   const url = `/api/rankings/${difficulty}/rank?${params.toString()}`;
 

@@ -60,7 +60,8 @@ export async function showScoreModal(
   const clearTimeMs = Math.round(score * 1000);
   try {
     const result = await checkRankEligibility(difficulty, clearTimeMs);
-    if (result.isTopTen) {
+    const isTopTen = result.rank <= 10;
+    if (isTopTen) {
       rankMessage.textContent = `${result.rank}位にランクイン！`;
       rankMessage.classList.remove('hidden');
       registrationForm.classList.remove('hidden');

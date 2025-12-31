@@ -98,8 +98,7 @@ app.get('/rankings/:difficulty/rank', async (c) => {
 
   try {
     const rank = await calculateRank(c.env.DB, difficulty, clearTime);
-    const isTopTen = rank <= 10;
-    return c.json({ rank, isTopTen });
+    return c.json({ rank });
   } catch (error) {
     console.error('Error calculating rank:', error);
     return c.json({ error: 'Failed to calculate rank' }, 500);

@@ -37,7 +37,6 @@ describe('showScoreModal', () => {
   it('モーダルが正しく表示される', async () => {
     const onComplete = vi.fn();
     vi.spyOn(rankingsApi, 'checkRankEligibility').mockResolvedValue({
-      isTopTen: true,
       rank: 1,
     });
 
@@ -53,7 +52,6 @@ describe('showScoreModal', () => {
   it('プレイヤー名が空の場合、バリデーションエラーを表示する', async () => {
     const onComplete = vi.fn();
     vi.spyOn(rankingsApi, 'checkRankEligibility').mockResolvedValue({
-      isTopTen: true,
       rank: 1,
     });
 
@@ -75,7 +73,6 @@ describe('showScoreModal', () => {
   it('プレイヤー名が1文字の場合、登録できる', async () => {
     const onComplete = vi.fn();
     vi.spyOn(rankingsApi, 'checkRankEligibility').mockResolvedValue({
-      isTopTen: true,
       rank: 1,
     });
     const submitScoreMock = vi.spyOn(rankingsApi, 'submitScore').mockResolvedValue({
@@ -103,7 +100,6 @@ describe('showScoreModal', () => {
   it('プレイヤー名が20文字の場合、登録できる', async () => {
     const onComplete = vi.fn();
     vi.spyOn(rankingsApi, 'checkRankEligibility').mockResolvedValue({
-      isTopTen: true,
       rank: 1,
     });
     const submitScoreMock = vi.spyOn(rankingsApi, 'submitScore').mockResolvedValue({
@@ -131,7 +127,6 @@ describe('showScoreModal', () => {
   it('プレイヤー名が21文字以上の場合、バリデーションエラーを表示する', async () => {
     const onComplete = vi.fn();
     vi.spyOn(rankingsApi, 'checkRankEligibility').mockResolvedValue({
-      isTopTen: true,
       rank: 1,
     });
 
@@ -153,7 +148,6 @@ describe('showScoreModal', () => {
   it('登録ボタン押下時にAPIが呼ばれる', async () => {
     const onComplete = vi.fn();
     vi.spyOn(rankingsApi, 'checkRankEligibility').mockResolvedValue({
-      isTopTen: true,
       rank: 1,
     });
     const submitScoreMock = vi.spyOn(rankingsApi, 'submitScore').mockResolvedValue({
@@ -181,7 +175,6 @@ describe('showScoreModal', () => {
   it('スキップボタン押下時にAPIが呼ばれない', async () => {
     const onComplete = vi.fn();
     vi.spyOn(rankingsApi, 'checkRankEligibility').mockResolvedValue({
-      isTopTen: true,
       rank: 1,
     });
     const submitScoreMock = vi.spyOn(rankingsApi, 'submitScore');
@@ -202,7 +195,6 @@ describe('showScoreModal', () => {
   it('両ボタン押下後にonCompleteが呼ばれる', async () => {
     const onComplete = vi.fn();
     vi.spyOn(rankingsApi, 'checkRankEligibility').mockResolvedValue({
-      isTopTen: true,
       rank: 1,
     });
     vi.spyOn(rankingsApi, 'submitScore').mockResolvedValue({
@@ -254,7 +246,6 @@ describe('showScoreModal', () => {
 
     // スキップボタンのテスト
     vi.spyOn(rankingsApi, 'checkRankEligibility').mockResolvedValue({
-      isTopTen: true,
       rank: 1,
     });
     await showScoreModal(50, 'hard', onComplete);
@@ -270,7 +261,6 @@ describe('showScoreModal', () => {
   it('APIエラー時にエラーメッセージを表示してモーダルを閉じない', async () => {
     const onComplete = vi.fn();
     vi.spyOn(rankingsApi, 'checkRankEligibility').mockResolvedValue({
-      isTopTen: true,
       rank: 1,
     });
     const submitScoreMock = vi
@@ -312,7 +302,6 @@ describe('showScoreModal', () => {
   it('プレイヤー名の前後の空白は自動的に削除される', async () => {
     const onComplete = vi.fn();
     vi.spyOn(rankingsApi, 'checkRankEligibility').mockResolvedValue({
-      isTopTen: true,
       rank: 1,
     });
     const submitScoreMock = vi.spyOn(rankingsApi, 'submitScore').mockResolvedValue({
@@ -342,7 +331,6 @@ describe('showScoreModal', () => {
   it('スコアを秒からミリ秒に正しく変換して送信する', async () => {
     const onComplete = vi.fn();
     vi.spyOn(rankingsApi, 'checkRankEligibility').mockResolvedValue({
-      isTopTen: true,
       rank: 1,
     });
     const submitScoreMock = vi.spyOn(rankingsApi, 'submitScore').mockResolvedValue({
@@ -372,7 +360,6 @@ describe('showScoreModal', () => {
   it('登録後にモーダルが非表示になる', async () => {
     const onComplete = vi.fn();
     vi.spyOn(rankingsApi, 'checkRankEligibility').mockResolvedValue({
-      isTopTen: true,
       rank: 1,
     });
     vi.spyOn(rankingsApi, 'submitScore').mockResolvedValue({
@@ -401,7 +388,6 @@ describe('showScoreModal', () => {
   it('スキップ後にモーダルが非表示になる', async () => {
     const onComplete = vi.fn();
     vi.spyOn(rankingsApi, 'checkRankEligibility').mockResolvedValue({
-      isTopTen: true,
       rank: 1,
     });
 
@@ -423,7 +409,6 @@ describe('showScoreModal', () => {
     vi.useFakeTimers();
     const onComplete = vi.fn();
     vi.spyOn(rankingsApi, 'checkRankEligibility').mockResolvedValue({
-      isTopTen: true,
       rank: 1,
     });
     // 非同期処理を遅延させる
@@ -466,7 +451,6 @@ describe('showScoreModal', () => {
   it('オフライン時にエラーメッセージを表示してモーダルを閉じない', async () => {
     const onComplete = vi.fn();
     vi.spyOn(rankingsApi, 'checkRankEligibility').mockResolvedValue({
-      isTopTen: true,
       rank: 1,
     });
     const originalOnLine = Object.getOwnPropertyDescriptor(Navigator.prototype, 'onLine');
@@ -506,7 +490,6 @@ describe('showScoreModal', () => {
   it('エラー後に再試行できる', async () => {
     const onComplete = vi.fn();
     vi.spyOn(rankingsApi, 'checkRankEligibility').mockResolvedValue({
-      isTopTen: true,
       rank: 1,
     });
     const submitScoreMock = vi
@@ -548,10 +531,9 @@ describe('showScoreModal', () => {
   });
 
   describe('ランクイン判定機能', () => {
-    it('ランクイン時（isTopTen: true）に登録フォームとランクインメッセージが表示される', async () => {
+    it('ランクイン時（rank <= 10）に登録フォームとランクインメッセージが表示される', async () => {
       const onComplete = vi.fn();
       const checkRankMock = vi.spyOn(rankingsApi, 'checkRankEligibility').mockResolvedValue({
-        isTopTen: true,
         rank: 3,
       });
 
@@ -581,11 +563,10 @@ describe('showScoreModal', () => {
       expect(skipBtn.textContent).toBe('スキップ');
     });
 
-    it('ランク外時（isTopTen: false）に登録フォームが非表示になり、ランク外メッセージが表示される', async () => {
+    it('ランク外時（rank > 10）に登録フォームが非表示になり、ランク外メッセージが表示される', async () => {
       const onComplete = vi.fn();
       const checkRankMock = vi.spyOn(rankingsApi, 'checkRankEligibility').mockResolvedValue({
         rank: 11,
-        isTopTen: false,
       });
 
       showScoreModal(999.99, 'normal', onComplete);
@@ -613,7 +594,6 @@ describe('showScoreModal', () => {
       const onComplete = vi.fn();
       vi.spyOn(rankingsApi, 'checkRankEligibility').mockResolvedValue({
         rank: 11,
-        isTopTen: false,
       });
 
       showScoreModal(999.99, 'hard', onComplete);

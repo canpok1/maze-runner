@@ -87,12 +87,12 @@ test.describe('通常モード', () => {
 
 test.describe('ランクイン判定', () => {
   test('ランク外の場合は登録フォームが非表示になり閉じるボタンのみ表示される', async ({ page }) => {
-    // ランク判定APIをモックしてランク外を返す
+    // ランク判定APIをモックしてランク外を返す（rank > 10）
     await page.route('**/api/rankings/*/rank**', (route) => {
       route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ isTopTen: false }),
+        body: JSON.stringify({ rank: 11 }),
       });
     });
 
@@ -122,12 +122,12 @@ test.describe('ランクイン判定', () => {
   });
 
   test('ランクイン時は登録フォームとランクインメッセージが表示される', async ({ page }) => {
-    // ランク判定APIをモックしてランクインを返す
+    // ランク判定APIをモックしてランクインを返す（rank <= 10）
     await page.route('**/api/rankings/*/rank**', (route) => {
       route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ isTopTen: true, rank: 3 }),
+        body: JSON.stringify({ rank: 3 }),
       });
     });
 
