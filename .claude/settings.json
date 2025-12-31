@@ -1,11 +1,17 @@
 {
   "permissions": {
     "allow": [
+      "Bash(./.claude/skills/github/scripts/github-graphql.sh:*)",
+      "Bash(./.claude/skills/github/scripts/github-rest.sh:*)",
+      "Bash(./.claude/skills/github/scripts/pr-checks.sh:*)",
       "Bash(./.claude/skills/github/scripts/pr-create.sh:*)",
+      "Bash(./.claude/skills/github/scripts/pr-number.sh:*)",
+      "Bash(./.claude/skills/github/scripts/repo-info.sh:*)",
       "Bash(./.claude/skills/github/scripts/thread-details.sh:*)",
       "Bash(./.claude/skills/github/scripts/thread-list.sh:*)",
       "Bash(./.claude/skills/github/scripts/thread-reply.sh:*)",
       "Bash(./.claude/skills/github/scripts/thread-resolve.sh:*)",
+      "Bash(./.claude/skills/github/scripts/workflow-log.sh:*)",
       "Bash(cat:*)",
       "Bash(cp:*)",
       "Bash(done)",

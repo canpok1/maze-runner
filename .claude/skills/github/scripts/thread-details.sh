@@ -24,19 +24,12 @@
 
 set -euo pipefail
 
-# GH_TOKEN 環境変数のチェック
-if [[ -z "${GH_TOKEN:-}" ]]; then
-    echo "エラー: GH_TOKEN 環境変数が設定されていません。" >&2
-    exit 1
-fi
+# スクリプトのディレクトリを取得
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# 必要なコマンドの存在確認
-for cmd in curl jq; do
-    if ! command -v "$cmd" &> /dev/null; then
-        echo "エラー: $cmd コマンドが見つかりません。インストールしてください。" >&2
-        exit 1
-    fi
-done
+# 共通スクリプトを読み込む
+# shellcheck source=./common/github-graphql.sh
+source "$SCRIPT_DIR/common/github-graphql.sh"
 
 # 使用方法を表示
 usage() {
@@ -80,33 +73,22 @@ query($threadId: ID!) {
 }
 GRAPHQL
 
-    # GraphQL クエリをJSON形式で構築
-    local graphql_payload
-    graphql_payload=$(jq -n \
-        --arg query "$query" \
-        --arg threadId "$thread_id" \
-        '{query: $query, variables: {threadId: $threadId}}')
+    # 変数をJSON形式で構築
+    local variables
+    variables=$(jq -n --arg threadId "$thread_id" '{threadId: $threadId}')
 
+    # github-graphql.sh を使用してクエリを実行
+    # エラーハンドリングのため set +e を使用
     set +e
     local response
-    response=$(curl -s -H "Authorization: Bearer $GH_TOKEN" \
-        -H "Content-Type: application/json" \
-        -d "$graphql_payload" \
-        https://api.github.com/graphql 2>&1)
+    response=$(github_graphql_query "$query" "$variables" 2>&1)
     local exit_code=$?
     set -e
 
-    # curl コマンドがエラーの場合
+    # エラーが発生した場合
     if [ $exit_code -ne 0 ]; then
         echo "エラー: スレッドID '$thread_id' の取得に失敗しました。" >&2
         echo "$response" >&2
-        return 1
-    fi
-
-    # GitHub API がエラーを返した場合（errors フィールドが存在する場合）
-    if echo "$response" | jq -e '.errors' > /dev/null 2>&1; then
-        echo "エラー: スレッドID '$thread_id' の取得に失敗しました。" >&2
-        echo "$response" | jq -r '.errors[] | .message' >&2
         return 1
     fi
 
