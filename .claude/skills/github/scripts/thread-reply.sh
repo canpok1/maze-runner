@@ -19,20 +19,8 @@
 
 set -euo pipefail
 
-# 必要なコマンドの存在確認
-for cmd in curl git jq; do
-    if ! command -v "$cmd" &> /dev/null; then
-        echo "エラー: $cmd コマンドが見つかりません。インストールしてください。" >&2
-        exit 1
-    fi
-done
-
-# GH_TOKEN の存在チェック
-if [[ -z "${GH_TOKEN:-}" ]]; then
-    echo "エラー: GH_TOKEN 環境変数が設定されていません。" >&2
-    echo "GitHub Personal Access Token を GH_TOKEN 環境変数に設定してください。" >&2
-    exit 1
-fi
+# スクリプトディレクトリを取得
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # 使用方法を表示
 usage() {
@@ -84,19 +72,10 @@ if [[ -z "$COMMENT_BODY" ]]; then
 fi
 
 # リポジトリ情報を取得
-REMOTE_URL=$(git remote get-url origin)
-# SSH形式: git@github.com:owner/repo.git
-# HTTPS形式: https://github.com/owner/repo.git
-# ローカルプロキシ形式: http://...@127.0.0.1:.../git/owner/repo
-if [[ "$REMOTE_URL" =~ github\.com[:/]([^/]+)/([^/.]+)(\.git)?$ ]]; then
-    OWNER="${BASH_REMATCH[1]}"
-    REPO="${BASH_REMATCH[2]}"
-elif [[ "$REMOTE_URL" =~ /git/([^/]+)/([^/]+)$ ]]; then
-    OWNER="${BASH_REMATCH[1]}"
-    REPO="${BASH_REMATCH[2]}"
-else
-    echo "エラー: GitHubリポジトリのURLを取得できませんでした。" >&2
-    echo "リモートURL: $REMOTE_URL" >&2
+read -r OWNER REPO < <("$SCRIPT_DIR/repo-info.sh")
+
+if [[ -z "$OWNER" || -z "$REPO" ]]; then
+    echo "エラー: リポジトリ情報を取得できませんでした。" >&2
     exit 1
 fi
 
@@ -123,38 +102,23 @@ GRAPHQL_QUERY='mutation($pullRequestReviewThreadId: ID!, $body: String!) {
   }
 }'
 
-# GraphQL リクエストのJSONペイロードを構築
-REQUEST_JSON=$(jq -n \
-  --arg query "$GRAPHQL_QUERY" \
+# GraphQL 変数を構築
+VARIABLES=$(jq -n \
   --arg threadId "$THREAD_ID" \
   --arg body "$COMMENT_BODY" \
   '{
-    query: $query,
-    variables: {
-      pullRequestReviewThreadId: $threadId,
-      body: $body
-    }
+    pullRequestReviewThreadId: $threadId,
+    body: $body
   }')
 
+# github-graphql.shを使用して返信を投稿
 set +e
-RESULT=$(curl -s -X POST \
-  -H "Authorization: Bearer $GH_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d "$REQUEST_JSON" \
-  https://api.github.com/graphql 2>&1)
-CURL_EXIT_CODE=$?
+RESULT=$("$SCRIPT_DIR/github-graphql.sh" "$GRAPHQL_QUERY" "$VARIABLES" 2>&1)
+GRAPHQL_EXIT_CODE=$?
 set -e
 
-# 結果を確認
-if [[ "$CURL_EXIT_CODE" -ne 0 ]]; then
-    echo "エラー: 返信の投稿に失敗しました (curl error)。" >&2
-    exit 1
-fi
-
-# APIエラーをチェック
-if echo "$RESULT" | jq -e '.errors' > /dev/null 2>&1; then
-    echo "エラー: 返信の投稿に失敗しました (API error)。" >&2
-    echo "$RESULT" | jq -r '.errors[].message' >&2
+if [[ $GRAPHQL_EXIT_CODE -ne 0 ]]; then
+    echo "エラー: 返信の投稿に失敗しました。" >&2
     exit 1
 fi
 
@@ -181,30 +145,19 @@ if [[ "$REVIEW_STATE" == "PENDING" && -n "$REVIEW_ID" ]]; then
       }
     }'
 
-    SUBMIT_JSON=$(jq -n \
-      --arg query "$SUBMIT_QUERY" \
+    SUBMIT_VARIABLES=$(jq -n \
       --arg reviewId "$REVIEW_ID" \
       '{
-        query: $query,
-        variables: {
-          reviewId: $reviewId
-        }
+        reviewId: $reviewId
       }')
 
     set +e
-    SUBMIT_RESULT=$(curl -s -X POST \
-      -H "Authorization: Bearer $GH_TOKEN" \
-      -H "Content-Type: application/json" \
-      -d "$SUBMIT_JSON" \
-      https://api.github.com/graphql 2>&1)
+    SUBMIT_RESULT=$("$SCRIPT_DIR/github-graphql.sh" "$SUBMIT_QUERY" "$SUBMIT_VARIABLES" 2>&1)
     SUBMIT_EXIT_CODE=$?
     set -e
 
-    if [[ "$SUBMIT_EXIT_CODE" -ne 0 ]]; then
-        echo "警告: レビューのsubmitに失敗しました (curl error)。返信はPENDING状態のままです。" >&2
-    elif echo "$SUBMIT_RESULT" | jq -e '.errors' > /dev/null 2>&1; then
-        echo "警告: レビューのsubmitに失敗しました (API error)。返信はPENDING状態のままです。" >&2
-        echo "$SUBMIT_RESULT" | jq -r '.errors[].message' >&2
+    if [[ $SUBMIT_EXIT_CODE -ne 0 ]]; then
+        echo "警告: レビューのsubmitに失敗しました。返信はPENDING状態のままです。" >&2
     else
         SUBMITTED_STATE=$(echo "$SUBMIT_RESULT" | jq -r '.data.submitPullRequestReview.pullRequestReview.state // empty')
         if [[ "$SUBMITTED_STATE" == "COMMENTED" ]]; then
