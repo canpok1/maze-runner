@@ -1,5 +1,5 @@
 import type { Difficulty } from '@maze-runner/lib';
-import { checkRankEligibility, submitScore } from '../api-client/rankings';
+import { fetchRank, submitScore } from '../api-client/rankings';
 
 /**
  * スコア登録モーダルを表示する
@@ -59,7 +59,7 @@ export async function showScoreModal(
   // モーダル表示前にランクイン判定を実行
   const clearTimeMs = Math.round(score * 1000);
   try {
-    const result = await checkRankEligibility(difficulty, clearTimeMs);
+    const result = await fetchRank(difficulty, clearTimeMs);
     const isTopTen = result.rank <= 10;
     if (isTopTen) {
       rankMessage.textContent = `${result.rank}位にランクイン！`;

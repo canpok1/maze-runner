@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { checkRankEligibility, fetchRankings, submitScore } from './rankings';
+import { fetchRank, fetchRankings, submitScore } from './rankings';
 import type { Ranking, RankingWithId } from './types';
 import { ApiError } from './types';
 
@@ -113,9 +113,9 @@ describe('rankings API client', () => {
     });
   });
 
-  describe('checkRankEligibility', () => {
-    it('正常系: ランクイン判定を取得できる（rank: 1, isTopTen: true）', async () => {
-      const mockResponse = { rank: 1, isTopTen: true };
+  describe('fetchRank', () => {
+    it('正常系: 順位を取得できる（rank: 1）', async () => {
+      const mockResponse = { rank: 1 };
 
       globalThis.fetch = vi.fn().mockResolvedValue({
         ok: true,
@@ -123,7 +123,7 @@ describe('rankings API client', () => {
         json: async () => mockResponse,
       });
 
-      const result = await checkRankEligibility('easy', 50000);
+      const result = await fetchRank('easy', 50000);
 
       expect(result).toEqual(mockResponse);
       expect(globalThis.fetch).toHaveBeenCalledWith('/api/rankings/easy/rank?clearTime=50000', {
@@ -131,8 +131,8 @@ describe('rankings API client', () => {
       });
     });
 
-    it('正常系: ランク外判定を取得できる（rank: 11, isTopTen: false）', async () => {
-      const mockResponse = { rank: 11, isTopTen: false };
+    it('正常系: ランク外の順位を取得できる（rank: 11）', async () => {
+      const mockResponse = { rank: 11 };
 
       globalThis.fetch = vi.fn().mockResolvedValue({
         ok: true,
@@ -140,7 +140,7 @@ describe('rankings API client', () => {
         json: async () => mockResponse,
       });
 
-      const result = await checkRankEligibility('normal', 999999);
+      const result = await fetchRank('normal', 999999);
 
       expect(result).toEqual(mockResponse);
       expect(globalThis.fetch).toHaveBeenCalledWith('/api/rankings/normal/rank?clearTime=999999', {
@@ -156,13 +156,13 @@ describe('rankings API client', () => {
       });
 
       try {
-        await checkRankEligibility('hard', 100000);
-        expect.fail('Expected checkRankEligibility to throw, but it did not.');
+        await fetchRank('hard', 100000);
+        expect.fail('Expected fetchRank to throw, but it did not.');
       } catch (error) {
         expect(error).toBeInstanceOf(ApiError);
         if (error instanceof ApiError) {
           expect(error.status).toBe(500);
-          expect(error.message).toBe('Failed to check rank eligibility: Internal Server Error');
+          expect(error.message).toBe('Failed to fetch rank: Internal Server Error');
         }
       }
     });
@@ -170,7 +170,7 @@ describe('rankings API client', () => {
     it('異常系: fetch自体が失敗した場合、エラーをスローする', async () => {
       globalThis.fetch = vi.fn().mockRejectedValue(new Error('Network failure'));
 
-      await expect(checkRankEligibility('easy', 50000)).rejects.toThrow('Network failure');
+      await expect(fetchRank('easy', 50000)).rejects.toThrow('Network failure');
     });
   });
 });

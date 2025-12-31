@@ -63,7 +63,7 @@ export async function submitScore(
  * @returns 順位
  * @throws {ApiError} APIリクエストが失敗した場合
  */
-export async function checkRankEligibility(
+export async function fetchRank(
   difficulty: Difficulty,
   clearTime: number
 ): Promise<{ rank: number }> {
@@ -75,7 +75,7 @@ export async function checkRankEligibility(
   });
 
   if (!response.ok) {
-    throw new ApiError(response.status, `Failed to check rank eligibility: ${response.statusText}`);
+    throw new ApiError(response.status, `Failed to fetch rank: ${response.statusText}`);
   }
 
   const data = await response.json();
