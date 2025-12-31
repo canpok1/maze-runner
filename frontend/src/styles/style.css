@@ -243,7 +243,8 @@ canvas {
 
 .rank-message.hidden,
 .not-ranked.hidden,
-#registration-form.hidden {
+#registration-form.hidden,
+#submit-score-btn.hidden {
   display: none;
 }
 

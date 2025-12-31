@@ -54,6 +54,7 @@ export async function showScoreModal(
   rankMessage.textContent = '';
   notRankedMessage.classList.add('hidden');
   registrationForm.classList.add('hidden');
+  submitBtn.classList.add('hidden');
   skipBtn.textContent = 'スキップ';
 
   // モーダル表示前にランクイン判定を実行
@@ -65,6 +66,7 @@ export async function showScoreModal(
       rankMessage.textContent = `${result.rank}位にランクイン！`;
       rankMessage.classList.remove('hidden');
       registrationForm.classList.remove('hidden');
+      submitBtn.classList.remove('hidden');
     } else {
       notRankedMessage.classList.remove('hidden');
       registrationForm.classList.add('hidden');
@@ -74,6 +76,7 @@ export async function showScoreModal(
     // エラー時は従来どおり登録フォームを表示（フォールバック）
     console.error('Failed to check rank eligibility:', error);
     registrationForm.classList.remove('hidden');
+    submitBtn.classList.remove('hidden');
   }
 
   // ランクイン判定完了後にモーダルを表示
