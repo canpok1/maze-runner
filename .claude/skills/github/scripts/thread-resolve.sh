@@ -9,19 +9,8 @@
 
 set -euo pipefail
 
-# 必要なコマンドの存在確認
-for cmd in curl jq; do
-    if ! command -v "$cmd" &> /dev/null; then
-        echo "エラー: $cmd コマンドが見つかりません。インストールしてください。" >&2
-        exit 1
-    fi
-done
-
-# GH_TOKEN の存在チェック
-if [[ -z "${GH_TOKEN:-}" ]]; then
-    echo "エラー: GH_TOKEN 環境変数が設定されていません。" >&2
-    exit 1
-fi
+# スクリプトのディレクトリを取得
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # 使用方法を表示
 usage() {
@@ -49,32 +38,27 @@ fi
 echo "レビュースレッドをresolve中..." >&2
 echo "スレッドID: $THREAD_ID" >&2
 
-# GraphQL クエリを JSON 形式で構築
-GRAPHQL_QUERY=$(jq -n \
-  --arg threadId "$THREAD_ID" \
-  '{
-    query: "mutation($threadId: ID!) { resolveReviewThread(input: {threadId: $threadId}) { thread { id isResolved } } }",
-    variables: {threadId: $threadId}
-  }')
+# GraphQL mutation を定義
+GRAPHQL_MUTATION='mutation($threadId: ID!) {
+  resolveReviewThread(input: {threadId: $threadId}) {
+    thread {
+      id
+      isResolved
+    }
+  }
+}'
 
-# レビュースレッドをresolve
+# 変数を JSON 形式で構築
+VARIABLES=$(jq -n --arg threadId "$THREAD_ID" '{threadId: $threadId}')
+
+# github-graphql.sh を呼び出してレビュースレッドをresolve
 set +e
-RESULT=$(curl -s -H "Authorization: Bearer $GH_TOKEN" \
-     -H "Content-Type: application/json" \
-     -d "$GRAPHQL_QUERY" \
-     https://api.github.com/graphql 2>&1)
-CURL_EXIT_CODE=$?
+RESULT=$("$SCRIPT_DIR/github-graphql.sh" "$GRAPHQL_MUTATION" "$VARIABLES")
+EXIT_CODE=$?
 set -e
 
-if [[ $CURL_EXIT_CODE -ne 0 ]]; then
-    echo "エラー: GitHub API へのリクエストに失敗しました (curl error)。" >&2
-    exit 1
-fi
-
-# APIエラーをチェック
-if echo "$RESULT" | jq -e '.errors' > /dev/null 2>&1; then
-    echo "エラー: GitHub API へのリクエストに失敗しました (API error)。" >&2
-    echo "$RESULT" | jq -r '.errors[].message' >&2
+if [[ $EXIT_CODE -ne 0 ]]; then
+    echo "エラー: GitHub API へのリクエストに失敗しました。" >&2
     exit 1
 fi
 
