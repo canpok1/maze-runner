@@ -9,6 +9,11 @@ description: |
 
 # GitHub操作スキル
 
+## 前提条件
+
+- 環境変数 `GH_TOKEN` が設定されている必要があります
+- 必要なコマンド: `curl`, `jq`, `git`
+
 ## 操作タイプの選択
 
 1. **Issue操作** → [Issue操作](#issue操作)
@@ -19,68 +24,31 @@ description: |
 
 ### Issue取得
 
-#### gh版
-
-`gh issue view`コマンドを使用:
-
-```bash
-gh issue view <Issue番号>
-```
-
-#### GitHub MCP版
-
-`mcp__github__issue_read`ツール（method: 'get'）を使用
+MCPツール `mcp__github__issue_read` を使用（method: 'get'）
 
 ### Issue作成
 
-#### gh版
-
-`gh issue create`コマンドを使用:
-
-```bash
-gh issue create --title "タイトル" --body "本文"
-```
+MCPツール `mcp__github__issue_write` を使用（method: 'create'）
 
 **推奨**: document-specialistエージェントで説明文を生成してから使用
 
-#### GitHub MCP版
-
-`mcp__github__issue_write`ツール（method: 'create'）を使用
-
 ### Issue更新
 
-#### gh版
-
-`gh issue edit`コマンドを使用:
-
-```bash
-gh issue edit <Issue番号> --title "新タイトル" --body "新本文"
-```
-
-#### GitHub MCP版
-
-`mcp__github__issue_write`ツール（method: 'update'）を使用
+MCPツール `mcp__github__issue_write` を使用（method: 'update'）
 
 ## PR操作
 
 ### PR作成
 
-#### gh版
-
-PRを作成:
+**スクリプト版**:
 
 ```bash
 ./.claude/skills/github/scripts/pr-create.sh <タイトル> <本文>
 ```
 
-**注意事項**:
-- mainブランチからは実行不可
-- PRタイトルにissue番号を含めない
-- 本文には `fixed #<issue番号>` を含める
+**MCPツール版**:
 
-#### GitHub MCP版
-
-`mcp__github__create_pull_request`ツールを使用
+`mcp__github__create_pull_request` を使用
 
 **注意事項**:
 - mainブランチからは実行不可
@@ -89,43 +57,39 @@ PRを作成:
 
 ### 現在のブランチのPR番号取得
 
-#### gh版
-
-現在の作業ブランチに対応するPRの番号を取得:
+**スクリプト版**:
 
 ```bash
-gh pr view --json number --jq '.number'
+./.claude/skills/github/scripts/pr-number.sh
 ```
 
-**補足**: `gh pr view`は引数なしで現在のブランチのPRを参照する
+**出力**: PR番号のみ（例: `123`）
 
-#### GitHub MCP版
+**MCPツール版**:
 
-`mcp__github__list_pull_requests`または`mcp__github__search_pull_requests`ツールを使用
+`mcp__github__list_pull_requests` または `mcp__github__search_pull_requests` を使用
 
 ### CI状態取得
 
-#### gh版
-
-PRのCI状態を取得:
+**スクリプト版**:
 
 ```bash
-gh pr checks <PR番号>
+./.claude/skills/github/scripts/pr-checks.sh <PR番号>
 ```
 
-#### GitHub MCP版（部分対応）
+**出力形式**: タブ区切り（チェック名、状態、結論、URL）
 
-`mcp__github__pull_request_read`ツール（method: 'get_status'）を使用
+**MCPツール版（部分対応）**:
 
-**制限事項**: コミットステータスのみ取得可能。詳細なチェックリストが必要な場合はgh版を使用
+`mcp__github__pull_request_read`（method: 'get_status'）を使用
+
+**制限事項**: コミットステータスのみ取得可能。詳細なチェックリストが必要な場合はスクリプト版を使用
 
 ## Thread操作
 
 ### スレッド一覧取得
 
-#### gh版
-
-PRの未解決レビューコメントを取得:
+**スクリプト版**:
 
 ```bash
 ./.claude/skills/github/scripts/thread-list.sh <PR番号>
@@ -136,15 +100,13 @@ PRの未解決レビューコメントを取得:
 {"thread_id": "...", "author": "...", "comment": "..."}
 ```
 
-#### GitHub MCP版
+**MCPツール版**:
 
-`mcp__github__pull_request_read`ツール（method: 'get_review_comments'）を使用
+`mcp__github__pull_request_read`（method: 'get_review_comments'）を使用
 
 ### スレッド詳細取得
 
-#### gh版
-
-レビュースレッドの詳細情報を取得:
+**スクリプト版**:
 
 ```bash
 ./.claude/skills/github/scripts/thread-details.sh <スレッドID> [スレッドID...]
@@ -154,17 +116,15 @@ PRの未解決レビューコメントを取得:
 - スレッドID、解決状態、ファイルパス、行番号
 - 各コメント（作成者、本文、作成日時）を時系列順で表示
 
-#### GitHub MCP版
+**MCPツール版**:
 
-`mcp__github__pull_request_read`ツール（method: 'get_review_comments'）を使用
+`mcp__github__pull_request_read`（method: 'get_review_comments'）を使用
 
 **補足**: スレッド一覧取得と同じツール。返されるスレッド配列から対象を抽出
 
 ### スレッド返信
 
-#### gh版
-
-レビュースレッドに返信を投稿:
+**スクリプト版**:
 
 ```bash
 ./.claude/skills/github/scripts/thread-reply.sh <スレッドID> "コメント内容"
@@ -172,37 +132,34 @@ PRの未解決レビューコメントを取得:
 
 **注意**: 返信先の対象者には `@ユーザー名` 形式でメンションを付与すること
 
-#### GitHub MCP版
+**MCPツール版**:
 
-**対応不可** - gh版を使用すること
+**対応不可** - スクリプト版を使用すること
 
 ### スレッド解決
 
-#### gh版
-
-レビュースレッドを解決済みに変更:
+**スクリプト版**:
 
 ```bash
 ./.claude/skills/github/scripts/thread-resolve.sh <スレッドID>
 ```
 
-#### GitHub MCP版
+**MCPツール版**:
 
-**対応不可** - gh版を使用すること
+**対応不可** - スクリプト版を使用すること
 
 ## ワークフロー操作
 
 ### ログ取得
 
-#### gh版
-
-ワークフローの実行ログを取得:
-`gh pr checks` で表示されるURLから `<run-id>` を取得して使用します。
+**スクリプト版**:
 
 ```bash
-gh run view <run-id>
+./.claude/skills/github/scripts/workflow-log.sh <run-id>
 ```
 
-#### GitHub MCP版
+`pr-checks.sh` で表示されるURLから `<run-id>` を取得して使用します。
 
-**対応不可** - gh版を使用すること
+**MCPツール版**:
+
+**対応不可** - スクリプト版を使用すること
