@@ -15,7 +15,7 @@
 set -euo pipefail
 
 # GH_TOKEN の存在チェック
-if [ -z "${GH_TOKEN:-}" ]; then
+if [[ -z "${GH_TOKEN:-}" ]]; then
   echo "エラー: GH_TOKEN 環境変数が設定されていません" >&2
   exit 1
 fi
@@ -42,7 +42,7 @@ echo "リポジトリ: $OWNER/$REPO" >&2
 
 # 現在のブランチ名の取得
 BRANCH=$(git branch --show-current)
-if [ -z "$BRANCH" ]; then
+if [[ -z "$BRANCH" ]]; then
   echo "エラー: 現在のブランチ名を取得できません" >&2
   exit 1
 fi
@@ -50,21 +50,29 @@ fi
 echo "ブランチ: $BRANCH" >&2
 
 # mainブランチのチェック
-if [ "$BRANCH" = "main" ] || [ "$BRANCH" = "master" ]; then
+if [[ "$BRANCH" == "main" ]] || [[ "$BRANCH" == "master" ]]; then
   echo "エラー: メインブランチではPR番号を取得できません" >&2
   exit 1
 fi
 
 # GitHub REST API でPRを検索
 echo "PRを検索中..." >&2
+set +e
 RESPONSE=$(curl -s -H "Authorization: Bearer $GH_TOKEN" \
      -H "Accept: application/vnd.github+json" \
-     "https://api.github.com/repos/$OWNER/$REPO/pulls?head=$OWNER:$BRANCH&state=open")
+     "https://api.github.com/repos/$OWNER/$REPO/pulls?head=$OWNER:$BRANCH&state=open" 2>&1)
+CURL_EXIT_CODE=$?
+set -e
+
+if [[ $CURL_EXIT_CODE -ne 0 ]]; then
+    echo "エラー: GitHub API へのリクエストに失敗しました。" >&2
+    exit 1
+fi
 
 # PR番号を抽出
 PR_NUMBER=$(echo "$RESPONSE" | jq -r '.[0].number // empty')
 
-if [ -z "$PR_NUMBER" ]; then
+if [[ -z "$PR_NUMBER" ]]; then
   echo "エラー: ブランチ '$BRANCH' に対応するオープンなPRが見つかりません" >&2
   exit 1
 fi

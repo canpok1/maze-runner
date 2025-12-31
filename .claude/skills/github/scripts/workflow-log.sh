@@ -14,7 +14,7 @@
 set -euo pipefail
 
 # GH_TOKEN の存在チェック
-if [ -z "${GH_TOKEN:-}" ]; then
+if [[ -z "${GH_TOKEN:-}" ]]; then
   echo "エラー: GH_TOKEN 環境変数が設定されていません" >&2
   echo "GitHub Personal Access Token を GH_TOKEN 環境変数に設定してください" >&2
   exit 1
@@ -29,7 +29,7 @@ for cmd in curl git jq; do
 done
 
 # 引数チェック
-if [ $# -ne 1 ]; then
+if [[ $# -ne 1 ]]; then
   echo "使用方法: $0 <run-id>" >&2
   exit 1
 fi
@@ -55,9 +55,17 @@ else
 fi
 
 # ワークフロー実行情報を取得
+set +e
 RUN_INFO=$(curl -s -H "Authorization: Bearer $GH_TOKEN" \
   -H "Accept: application/vnd.github+json" \
-  "https://api.github.com/repos/$OWNER/$REPO/actions/runs/$RUN_ID")
+  "https://api.github.com/repos/$OWNER/$REPO/actions/runs/$RUN_ID" 2>&1)
+CURL_EXIT_CODE=$?
+set -e
+
+if [[ $CURL_EXIT_CODE -ne 0 ]]; then
+    echo "エラー: GitHub API へのリクエストに失敗しました。" >&2
+    exit 1
+fi
 
 # エラーチェック
 if echo "$RUN_INFO" | jq -e '.message' > /dev/null 2>&1; then
@@ -67,9 +75,17 @@ if echo "$RUN_INFO" | jq -e '.message' > /dev/null 2>&1; then
 fi
 
 # ワークフロー実行のジョブ一覧を取得
+set +e
 JOBS_INFO=$(curl -s -H "Authorization: Bearer $GH_TOKEN" \
   -H "Accept: application/vnd.github+json" \
-  "https://api.github.com/repos/$OWNER/$REPO/actions/runs/$RUN_ID/jobs")
+  "https://api.github.com/repos/$OWNER/$REPO/actions/runs/$RUN_ID/jobs" 2>&1)
+CURL_EXIT_CODE=$?
+set -e
+
+if [[ $CURL_EXIT_CODE -ne 0 ]]; then
+    echo "エラー: ジョブ一覧の取得に失敗しました。" >&2
+    exit 1
+fi
 
 # ワークフロー情報の抽出
 WORKFLOW_NAME=$(echo "$RUN_INFO" | jq -r '.name')

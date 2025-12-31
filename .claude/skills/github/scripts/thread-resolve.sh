@@ -58,10 +58,18 @@ GRAPHQL_QUERY=$(jq -n \
   }')
 
 # レビュースレッドをresolve
+set +e
 RESULT=$(curl -s -H "Authorization: Bearer $GH_TOKEN" \
      -H "Content-Type: application/json" \
      -d "$GRAPHQL_QUERY" \
-     https://api.github.com/graphql)
+     https://api.github.com/graphql 2>&1)
+CURL_EXIT_CODE=$?
+set -e
+
+if [[ $CURL_EXIT_CODE -ne 0 ]]; then
+    echo "エラー: GitHub API へのリクエストに失敗しました。" >&2
+    exit 1
+fi
 
 # 結果を確認
 IS_RESOLVED=$(echo "$RESULT" | jq -r '.data.resolveReviewThread.thread.isResolved')
