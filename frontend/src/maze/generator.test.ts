@@ -63,10 +63,11 @@ describe('generateMaze', () => {
       expect(goal).not.toBeNull();
 
       // ゴールが外周でないことを確認(通路エリア内にあること)
-      expect(goal!.x).toBeGreaterThan(0);
-      expect(goal!.x).toBeLessThan(size - 1);
-      expect(goal!.y).toBeGreaterThan(0);
-      expect(goal!.y).toBeLessThan(size - 1);
+      const goalPos = goal as { x: number; y: number };
+      expect(goalPos.x).toBeGreaterThan(0);
+      expect(goalPos.x).toBeLessThan(size - 1);
+      expect(goalPos.y).toBeGreaterThan(0);
+      expect(goalPos.y).toBeLessThan(size - 1);
     });
 
     it('ゴールとスタートのマンハッタン距離が迷路サイズの50%以上であること', () => {
@@ -76,7 +77,8 @@ describe('generateMaze', () => {
       const goal = findGoal(maze);
       expect(goal).not.toBeNull();
 
-      const manhattanDistance = Math.abs(goal!.x - 1) + Math.abs(goal!.y - 1);
+      const goalPos = goal as { x: number; y: number };
+      const manhattanDistance = Math.abs(goalPos.x - 1) + Math.abs(goalPos.y - 1);
       expect(manhattanDistance).toBeGreaterThanOrEqual(size * 0.5);
     });
 
@@ -90,7 +92,8 @@ describe('generateMaze', () => {
         const goal = findGoal(maze);
         expect(goal).not.toBeNull();
 
-        const manhattanDistance = Math.abs(goal!.x - 1) + Math.abs(goal!.y - 1);
+        const goalPos = goal as { x: number; y: number };
+        const manhattanDistance = Math.abs(goalPos.x - 1) + Math.abs(goalPos.y - 1);
         expect(manhattanDistance).toBeGreaterThanOrEqual(size * 0.5);
       }
     });

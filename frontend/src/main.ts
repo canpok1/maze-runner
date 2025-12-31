@@ -11,7 +11,7 @@ import { setupControls } from './input/controls';
 import { getTestMaze } from './maze/fixtures';
 import { generateMaze } from './maze/generator';
 import { createRenderer } from './renderer';
-import { type RankingControls, initRankingDisplay } from './ui/ranking-display';
+import { initRankingDisplay, type RankingControls } from './ui/ranking-display';
 import { showScoreModal } from './ui/score-modal';
 
 /**
