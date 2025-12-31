@@ -10,18 +10,12 @@
 
 set -euo pipefail
 
-# 必要なコマンドの存在確認
-for cmd in git curl jq; do
-    if ! command -v "$cmd" &> /dev/null; then
-        echo "エラー: $cmd コマンドが見つかりません。インストールしてください。" >&2
-        exit 1
-    fi
-done
+# スクリプトディレクトリを取得
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# GH_TOKEN の存在確認
-if [[ -z "${GH_TOKEN:-}" ]]; then
-    echo "エラー: GH_TOKEN 環境変数が設定されていません。" >&2
-    echo "GitHub Personal Access Token を設定してください。" >&2
+# gitコマンドの存在確認
+if ! command -v git &> /dev/null; then
+    echo "エラー: git コマンドが見つかりません。インストールしてください。" >&2
     exit 1
 fi
 
@@ -80,29 +74,13 @@ fi
 
 # リポジトリ情報を取得
 echo "リポジトリ情報を取得中..." >&2
-REMOTE_URL=$(git remote get-url origin)
-
-# SSH形式: git@github.com:owner/repo.git
-# HTTPS形式: https://github.com/owner/repo.git
-# ローカルプロキシ形式: http://...@127.0.0.1:.../git/owner/repo
-if [[ "$REMOTE_URL" =~ github\.com[:/]([^/]+)/([^/.]+)(\.git)?$ ]]; then
-    OWNER="${BASH_REMATCH[1]}"
-    REPO="${BASH_REMATCH[2]}"
-elif [[ "$REMOTE_URL" =~ /git/([^/]+)/([^/]+)$ ]]; then
-    OWNER="${BASH_REMATCH[1]}"
-    REPO="${BASH_REMATCH[2]}"
-else
-    echo "エラー: GitHub リポジトリのURLを解析できません。" >&2
-    echo "Remote URL: $REMOTE_URL" >&2
-    exit 1
-fi
-
+read -r OWNER REPO < <("$SCRIPT_DIR/repo-info.sh")
 echo "Owner: $OWNER, Repo: $REPO" >&2
 
 # PR作成
 echo "PR作成中..." >&2
 
-# JSON ペイロードを作成（jq を使用して安全にJSONを構築）
+# JSON ペイロードを作成
 JSON_PAYLOAD=$(jq -n \
     --arg title "$PR_TITLE" \
     --arg body "$PR_BODY" \
@@ -111,33 +89,17 @@ JSON_PAYLOAD=$(jq -n \
     '{title: $title, body: $body, head: $head, base: $base}')
 
 # GitHub API を使用してPRを作成
-API_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
-    -H "Authorization: Bearer $GH_TOKEN" \
-    -H "Accept: application/vnd.github+json" \
-    -H "X-GitHub-Api-Version: 2022-11-28" \
-    -d "$JSON_PAYLOAD" \
-    "https://api.github.com/repos/$OWNER/$REPO/pulls")
+ENDPOINT="/repos/$OWNER/$REPO/pulls"
+RESPONSE=$("$SCRIPT_DIR/github-rest.sh" "$ENDPOINT" "POST" "$JSON_PAYLOAD")
 
-# HTTPステータスコードとレスポンスボディを分離
-HTTP_STATUS=$(echo "$API_RESPONSE" | tail -n1)
-RESPONSE_BODY=$(echo "$API_RESPONSE" | head -n-1)
+# 成功: html_url を抽出
+PR_URL=$(echo "$RESPONSE" | jq -r '.html_url')
 
-if [[ "$HTTP_STATUS" -ge 200 && "$HTTP_STATUS" -lt 300 ]]; then
-    # 成功: html_url を抽出
-    PR_URL=$(echo "$RESPONSE_BODY" | jq -r '.html_url')
-
-    if [[ -z "$PR_URL" || "$PR_URL" == "null" ]]; then
-        echo "エラー: PR URLを取得できませんでした。" >&2
-        echo "レスポンス: $RESPONSE_BODY" >&2
-        exit 1
-    fi
-
-    echo "PR URL: $PR_URL" >&2
-    exit 0
-else
-    # エラー
-    echo "エラー: プルリクエストの作成に失敗しました。" >&2
-    echo "HTTPステータス: $HTTP_STATUS" >&2
-    echo "レスポンス: $RESPONSE_BODY" >&2
+if [[ -z "$PR_URL" || "$PR_URL" == "null" ]]; then
+    echo "エラー: PR URLを取得できませんでした。" >&2
+    echo "レスポンス: $RESPONSE" >&2
     exit 1
 fi
+
+echo "PR URL: $PR_URL" >&2
+exit 0
