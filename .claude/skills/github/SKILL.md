@@ -1,8 +1,8 @@
 ---
 name: github
 description: |
-  GitHub操作の統合スキル。issue作成、PR作成、レビュースレッド操作を提供。
-  使用ケース:（1）issue作成、（2）PR作成（事前チェック統合）、
+  GitHub操作の統合スキル。issue操作、PR操作、レビュースレッド操作を提供。
+  使用ケース:（1）issue取得/作成/更新、（2）PR作成（事前チェック統合）、
   （3）レビューコメント取得、（4）スレッド返信、（5）スレッド解決、
   （6）PRのCI状態取得、（7）ワークフローのログ取得
 ---
@@ -11,13 +11,27 @@ description: |
 
 ## 操作タイプの選択
 
-1. **Issue作成** → [Issue操作](#issue操作)
+1. **Issue操作** → [Issue操作](#issue操作)
 2. **PR作成** → [PR操作](#pr操作)
 3. **レビュースレッド操作** → [Thread操作](#thread操作)
 
 ## Issue操作
 
-### issue作成
+### Issue取得
+
+#### gh版
+
+`gh issue view`コマンドを使用:
+
+```bash
+gh issue view <Issue番号>
+```
+
+#### GitHub MCP版
+
+`mcp__github__issue_read`ツール（method: 'get'）を使用
+
+### Issue作成
 
 #### gh版
 
@@ -32,6 +46,20 @@ gh issue create --title "タイトル" --body "本文"
 #### GitHub MCP版
 
 `mcp__github__issue_write`ツール（method: 'create'）を使用
+
+### Issue更新
+
+#### gh版
+
+`gh issue edit`コマンドを使用:
+
+```bash
+gh issue edit <Issue番号> --title "新タイトル" --body "新本文"
+```
+
+#### GitHub MCP版
+
+`mcp__github__issue_write`ツール（method: 'update'）を使用
 
 ## PR操作
 
