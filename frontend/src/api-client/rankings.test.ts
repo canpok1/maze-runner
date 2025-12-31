@@ -126,12 +126,9 @@ describe('rankings API client', () => {
       const result = await checkRankEligibility('easy', 50000);
 
       expect(result).toEqual(mockResponse);
-      expect(globalThis.fetch).toHaveBeenCalledWith(
-        '/api/rankings/easy/rank?clearTime=50000',
-        {
-          cache: 'no-store',
-        }
-      );
+      expect(globalThis.fetch).toHaveBeenCalledWith('/api/rankings/easy/rank?clearTime=50000', {
+        cache: 'no-store',
+      });
     });
 
     it('正常系: ランク外判定を取得できる（isTopTen: false）', async () => {
@@ -146,12 +143,9 @@ describe('rankings API client', () => {
       const result = await checkRankEligibility('normal', 999999);
 
       expect(result).toEqual(mockResponse);
-      expect(globalThis.fetch).toHaveBeenCalledWith(
-        '/api/rankings/normal/rank?clearTime=999999',
-        {
-          cache: 'no-store',
-        }
-      );
+      expect(globalThis.fetch).toHaveBeenCalledWith('/api/rankings/normal/rank?clearTime=999999', {
+        cache: 'no-store',
+      });
     });
 
     it('異常系: ネットワークエラーの場合、ApiErrorをスローする', async () => {
