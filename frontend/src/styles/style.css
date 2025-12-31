@@ -124,6 +124,86 @@ body {
   color: #3498db; /* ブルー */
 }
 
+/* ランキングを見るボタン */
+.show-ranking-btn {
+  padding: 15px;
+  margin: 20px 0 0 0;
+  font-size: 1.1rem;
+  cursor: pointer;
+  border: 2px solid #5267a1;
+  border-radius: 8px;
+  width: 80%;
+  max-width: 300px;
+  color: white;
+  background: #5267a1;
+  transition:
+    background 0.2s,
+    transform 0.1s;
+  box-shadow: 0 4px #3e5672;
+}
+
+.show-ranking-btn:hover {
+  background: #6b7fb5;
+}
+
+.show-ranking-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px #3e5672;
+}
+
+/* ランキング専用画面 */
+#ranking-screen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  z-index: 20;
+  background: rgba(26, 26, 46, 0.95);
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+#ranking-screen.hidden {
+  display: none;
+}
+
+#ranking-screen h1 {
+  font-size: 2rem;
+  color: #ffd700;
+  margin-bottom: 20px;
+}
+
+/* 戻るボタン */
+.back-to-menu-btn {
+  padding: 12px 30px;
+  margin-top: 20px;
+  font-size: 1rem;
+  cursor: pointer;
+  border: 2px solid #5267a1;
+  border-radius: 8px;
+  color: white;
+  background: #5267a1;
+  transition:
+    background 0.2s,
+    transform 0.1s;
+  box-shadow: 0 4px #3e5672;
+}
+
+.back-to-menu-btn:hover {
+  background: #6b7fb5;
+}
+
+.back-to-menu-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px #3e5672;
+}
+
 /* ゲーム画面とキャンバス */
 #canvas-container {
   flex-grow: 1; /* 残りの高さを占める */
