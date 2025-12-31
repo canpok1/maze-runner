@@ -58,26 +58,42 @@ export function generateMaze(size: number): MazeMap {
   const startY = 1;
   const minDistance = size * 0.5;
 
-  // 迷路内のすべての通路座標を収集し、スタートとの距離が条件を満たす候補をフィルタリング
-  const goalCandidates: [number, number][] = [];
+  // スタート地点以外のすべての通路を収集
+  const floorCells: [number, number][] = [];
   for (let y = 1; y < size - 1; y++) {
     for (let x = 1; x < size - 1; x++) {
-      if (newMap[y][x] === TileType.FLOOR) {
-        const distance = manhattanDistance(x, y, startX, startY);
-        if (distance >= minDistance && (x !== startX || y !== startY)) {
-          goalCandidates.push([x, y]);
-        }
+      if (newMap[y][x] === TileType.FLOOR && (x !== startX || y !== startY)) {
+        floorCells.push([x, y]);
       }
     }
   }
 
-  // 候補がある場合はランダムに選択、ない場合はフォールバック（既存の固定位置）
+  // 最小距離を満たすゴール候補をフィルタリング
+  const goalCandidates = floorCells.filter(
+    ([x, y]) => manhattanDistance(x, y, startX, startY) >= minDistance
+  );
+
   if (goalCandidates.length > 0) {
-    const randomIndex = Math.floor(Math.random() * goalCandidates.length);
-    const [goalX, goalY] = goalCandidates[randomIndex];
+    // 候補からランダムに選択
+    const [goalX, goalY] = goalCandidates[Math.floor(Math.random() * goalCandidates.length)];
+    newMap[goalY][goalX] = TileType.GOAL;
+  } else if (floorCells.length > 0) {
+    // 候補がない場合、スタートから最も遠い通路をゴールにする
+    let maxDistance = -1;
+    let farthestCell: [number, number] = floorCells[0];
+    for (const cell of floorCells) {
+      const dist = manhattanDistance(cell[0], cell[1], startX, startY);
+      if (dist > maxDistance) {
+        maxDistance = dist;
+        farthestCell = cell;
+      }
+    }
+    const [goalX, goalY] = farthestCell;
     newMap[goalY][goalX] = TileType.GOAL;
   } else {
-    // フォールバック: 既存の固定位置
+    // スタート以外の通路がないエッジケース (例: 3x3)。
+    // この場合、迷路として成立しませんが、元のフォールバックロジックに倒します。
+    // これによりスタート地点がゴールになる可能性がありますが、これは迷路生成器の制約です。
     newMap[size - 2][size - 2] = TileType.GOAL;
   }
 
