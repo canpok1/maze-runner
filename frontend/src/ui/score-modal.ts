@@ -7,11 +7,11 @@ import { checkRankEligibility, submitScore } from '../api-client/rankings';
  * @param difficulty 難易度
  * @param onComplete モーダル完了時のコールバック
  */
-export function showScoreModal(
+export async function showScoreModal(
   score: number,
   difficulty: Difficulty,
   onComplete: () => void
-): void {
+): Promise<void> {
   const modal = document.getElementById('score-modal');
   const scoreDisplay = document.getElementById('score-display');
   const playerNameInput = document.getElementById('player-name') as HTMLInputElement;
@@ -41,9 +41,6 @@ export function showScoreModal(
   // スコアを表示
   scoreDisplay.textContent = `クリアタイム: ${score.toFixed(2)}秒`;
 
-  // モーダルを表示
-  modal.classList.remove('hidden');
-
   // 入力とボタン状態をリセット
   playerNameInput.value = '';
   nameError.textContent = '';
@@ -59,34 +56,27 @@ export function showScoreModal(
   registrationForm.classList.add('hidden');
   skipBtn.textContent = 'スキップ';
 
-  // ランクイン判定を実行
+  // モーダル表示前にランクイン判定を実行
   const clearTimeMs = Math.round(score * 1000);
-  (async () => {
-    try {
-      const result = await checkRankEligibility(difficulty, clearTimeMs);
-
-      // モーダルが閉じられていないか確認
-      if (modal.classList.contains('hidden')) {
-        return;
-      }
-
-      if (result.isTopTen) {
-        rankMessage.textContent = `${result.rank}位にランクイン！`;
-        rankMessage.classList.remove('hidden');
-        registrationForm.classList.remove('hidden');
-      } else {
-        notRankedMessage.classList.remove('hidden');
-        registrationForm.classList.add('hidden');
-        skipBtn.textContent = '閉じる';
-      }
-    } catch (error) {
-      // エラー時は従来どおり登録フォームを表示（フォールバック）
-      console.error('Failed to check rank eligibility:', error);
-      if (!modal.classList.contains('hidden')) {
-        registrationForm.classList.remove('hidden');
-      }
+  try {
+    const result = await checkRankEligibility(difficulty, clearTimeMs);
+    if (result.isTopTen) {
+      rankMessage.textContent = `${result.rank}位にランクイン！`;
+      rankMessage.classList.remove('hidden');
+      registrationForm.classList.remove('hidden');
+    } else {
+      notRankedMessage.classList.remove('hidden');
+      registrationForm.classList.add('hidden');
+      skipBtn.textContent = '閉じる';
     }
-  })();
+  } catch (error) {
+    // エラー時は従来どおり登録フォームを表示（フォールバック）
+    console.error('Failed to check rank eligibility:', error);
+    registrationForm.classList.remove('hidden');
+  }
+
+  // ランクイン判定完了後にモーダルを表示
+  modal.classList.remove('hidden');
 
   // 登録ボタンのイベントハンドラ
   const handleSubmit = async () => {

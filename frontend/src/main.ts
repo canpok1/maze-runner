@@ -113,8 +113,8 @@ function win(): void {
     gameState,
     menuElement,
     cancelAnimationFrame: cancelAnimationFrame.bind(window),
-    showScoreModal: (score, difficulty, onComplete) => {
-      showScoreModal(score, difficulty, () => {
+    showScoreModal: async (score, difficulty, onComplete) => {
+      await showScoreModal(score, difficulty, () => {
         onComplete();
         // スコア登録後にランキングを再取得
         refreshRankings?.();

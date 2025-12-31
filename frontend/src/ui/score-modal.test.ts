@@ -34,10 +34,14 @@ describe('showScoreModal', () => {
     vi.restoreAllMocks();
   });
 
-  it('モーダルが正しく表示される', () => {
+  it('モーダルが正しく表示される', async () => {
     const onComplete = vi.fn();
+    vi.spyOn(rankingsApi, 'checkRankEligibility').mockResolvedValue({
+      isTopTen: true,
+      rank: 1,
+    });
 
-    showScoreModal(123.45, 'easy', onComplete);
+    await showScoreModal(123.45, 'easy', onComplete);
 
     const modal = document.getElementById('score-modal');
     const scoreDisplay = document.getElementById('score-display');
@@ -48,8 +52,12 @@ describe('showScoreModal', () => {
 
   it('プレイヤー名が空の場合、バリデーションエラーを表示する', async () => {
     const onComplete = vi.fn();
+    vi.spyOn(rankingsApi, 'checkRankEligibility').mockResolvedValue({
+      isTopTen: true,
+      rank: 1,
+    });
 
-    showScoreModal(100, 'normal', onComplete);
+    await showScoreModal(100, 'normal', onComplete);
 
     const submitBtn = document.getElementById('submit-score-btn') as HTMLButtonElement;
     const playerNameInput = document.getElementById('player-name') as HTMLInputElement;
@@ -66,6 +74,10 @@ describe('showScoreModal', () => {
 
   it('プレイヤー名が1文字の場合、登録できる', async () => {
     const onComplete = vi.fn();
+    vi.spyOn(rankingsApi, 'checkRankEligibility').mockResolvedValue({
+      isTopTen: true,
+      rank: 1,
+    });
     const submitScoreMock = vi.spyOn(rankingsApi, 'submitScore').mockResolvedValue({
       id: 1,
       playerName: 'A',
@@ -73,7 +85,7 @@ describe('showScoreModal', () => {
       createdAt: '2025-12-28T00:00:00Z',
     });
 
-    showScoreModal(100, 'normal', onComplete);
+    await showScoreModal(100, 'normal', onComplete);
 
     const submitBtn = document.getElementById('submit-score-btn') as HTMLButtonElement;
     const playerNameInput = document.getElementById('player-name') as HTMLInputElement;
@@ -90,6 +102,10 @@ describe('showScoreModal', () => {
 
   it('プレイヤー名が20文字の場合、登録できる', async () => {
     const onComplete = vi.fn();
+    vi.spyOn(rankingsApi, 'checkRankEligibility').mockResolvedValue({
+      isTopTen: true,
+      rank: 1,
+    });
     const submitScoreMock = vi.spyOn(rankingsApi, 'submitScore').mockResolvedValue({
       id: 1,
       playerName: '12345678901234567890',
@@ -97,7 +113,7 @@ describe('showScoreModal', () => {
       createdAt: '2025-12-28T00:00:00Z',
     });
 
-    showScoreModal(100, 'normal', onComplete);
+    await showScoreModal(100, 'normal', onComplete);
 
     const submitBtn = document.getElementById('submit-score-btn') as HTMLButtonElement;
     const playerNameInput = document.getElementById('player-name') as HTMLInputElement;
@@ -114,8 +130,12 @@ describe('showScoreModal', () => {
 
   it('プレイヤー名が21文字以上の場合、バリデーションエラーを表示する', async () => {
     const onComplete = vi.fn();
+    vi.spyOn(rankingsApi, 'checkRankEligibility').mockResolvedValue({
+      isTopTen: true,
+      rank: 1,
+    });
 
-    showScoreModal(100, 'normal', onComplete);
+    await showScoreModal(100, 'normal', onComplete);
 
     const submitBtn = document.getElementById('submit-score-btn') as HTMLButtonElement;
     const playerNameInput = document.getElementById('player-name') as HTMLInputElement;
@@ -132,6 +152,10 @@ describe('showScoreModal', () => {
 
   it('登録ボタン押下時にAPIが呼ばれる', async () => {
     const onComplete = vi.fn();
+    vi.spyOn(rankingsApi, 'checkRankEligibility').mockResolvedValue({
+      isTopTen: true,
+      rank: 1,
+    });
     const submitScoreMock = vi.spyOn(rankingsApi, 'submitScore').mockResolvedValue({
       id: 1,
       playerName: 'TestPlayer',
@@ -139,7 +163,7 @@ describe('showScoreModal', () => {
       createdAt: '2025-12-28T00:00:00Z',
     });
 
-    showScoreModal(50, 'hard', onComplete);
+    await showScoreModal(50, 'hard', onComplete);
 
     const submitBtn = document.getElementById('submit-score-btn') as HTMLButtonElement;
     const playerNameInput = document.getElementById('player-name') as HTMLInputElement;
@@ -156,9 +180,13 @@ describe('showScoreModal', () => {
 
   it('スキップボタン押下時にAPIが呼ばれない', async () => {
     const onComplete = vi.fn();
+    vi.spyOn(rankingsApi, 'checkRankEligibility').mockResolvedValue({
+      isTopTen: true,
+      rank: 1,
+    });
     const submitScoreMock = vi.spyOn(rankingsApi, 'submitScore');
 
-    showScoreModal(50, 'hard', onComplete);
+    await showScoreModal(50, 'hard', onComplete);
 
     const skipBtn = document.getElementById('skip-score-btn') as HTMLButtonElement;
 
@@ -173,6 +201,10 @@ describe('showScoreModal', () => {
 
   it('両ボタン押下後にonCompleteが呼ばれる', async () => {
     const onComplete = vi.fn();
+    vi.spyOn(rankingsApi, 'checkRankEligibility').mockResolvedValue({
+      isTopTen: true,
+      rank: 1,
+    });
     vi.spyOn(rankingsApi, 'submitScore').mockResolvedValue({
       id: 1,
       playerName: 'TestPlayer',
@@ -181,7 +213,7 @@ describe('showScoreModal', () => {
     });
 
     // 登録ボタンのテスト
-    showScoreModal(50, 'hard', onComplete);
+    await showScoreModal(50, 'hard', onComplete);
 
     const submitBtn = document.getElementById('submit-score-btn') as HTMLButtonElement;
     const playerNameInput = document.getElementById('player-name') as HTMLInputElement;
@@ -221,7 +253,11 @@ describe('showScoreModal', () => {
     `;
 
     // スキップボタンのテスト
-    showScoreModal(50, 'hard', onComplete);
+    vi.spyOn(rankingsApi, 'checkRankEligibility').mockResolvedValue({
+      isTopTen: true,
+      rank: 1,
+    });
+    await showScoreModal(50, 'hard', onComplete);
 
     const skipBtn = document.getElementById('skip-score-btn') as HTMLButtonElement;
     skipBtn.click();
@@ -233,11 +269,15 @@ describe('showScoreModal', () => {
 
   it('APIエラー時にエラーメッセージを表示してモーダルを閉じない', async () => {
     const onComplete = vi.fn();
+    vi.spyOn(rankingsApi, 'checkRankEligibility').mockResolvedValue({
+      isTopTen: true,
+      rank: 1,
+    });
     const submitScoreMock = vi
       .spyOn(rankingsApi, 'submitScore')
       .mockRejectedValue(new Error('API Error'));
 
-    showScoreModal(50, 'hard', onComplete);
+    await showScoreModal(50, 'hard', onComplete);
 
     const modal = document.getElementById('score-modal');
     const submitBtn = document.getElementById('submit-score-btn') as HTMLButtonElement;
@@ -262,15 +302,19 @@ describe('showScoreModal', () => {
     expect(submitBtn.disabled).toBe(false);
   });
 
-  it('必須DOM要素が存在しない場合、エラーをthrowする', () => {
+  it('必須DOM要素が存在しない場合、エラーをthrowする', async () => {
     document.body.innerHTML = '<div></div>';
-    expect(() => {
-      showScoreModal(100, 'normal', () => {});
-    }).toThrow('Required modal elements not found');
+    await expect(async () => {
+      await showScoreModal(100, 'normal', () => {});
+    }).rejects.toThrow('Required modal elements not found');
   });
 
   it('プレイヤー名の前後の空白は自動的に削除される', async () => {
     const onComplete = vi.fn();
+    vi.spyOn(rankingsApi, 'checkRankEligibility').mockResolvedValue({
+      isTopTen: true,
+      rank: 1,
+    });
     const submitScoreMock = vi.spyOn(rankingsApi, 'submitScore').mockResolvedValue({
       id: 1,
       playerName: 'TestPlayer',
@@ -278,7 +322,7 @@ describe('showScoreModal', () => {
       createdAt: '2025-12-28T00:00:00Z',
     });
 
-    showScoreModal(100, 'normal', onComplete);
+    await showScoreModal(100, 'normal', onComplete);
 
     const submitBtn = document.getElementById('submit-score-btn') as HTMLButtonElement;
     const playerNameInput = document.getElementById('player-name') as HTMLInputElement;
@@ -297,6 +341,10 @@ describe('showScoreModal', () => {
 
   it('スコアを秒からミリ秒に正しく変換して送信する', async () => {
     const onComplete = vi.fn();
+    vi.spyOn(rankingsApi, 'checkRankEligibility').mockResolvedValue({
+      isTopTen: true,
+      rank: 1,
+    });
     const submitScoreMock = vi.spyOn(rankingsApi, 'submitScore').mockResolvedValue({
       id: 1,
       playerName: 'TestPlayer',
@@ -305,7 +353,7 @@ describe('showScoreModal', () => {
     });
 
     // 123.456秒を渡す
-    showScoreModal(123.456, 'normal', onComplete);
+    await showScoreModal(123.456, 'normal', onComplete);
 
     const submitBtn = document.getElementById('submit-score-btn') as HTMLButtonElement;
     const playerNameInput = document.getElementById('player-name') as HTMLInputElement;
@@ -323,6 +371,10 @@ describe('showScoreModal', () => {
 
   it('登録後にモーダルが非表示になる', async () => {
     const onComplete = vi.fn();
+    vi.spyOn(rankingsApi, 'checkRankEligibility').mockResolvedValue({
+      isTopTen: true,
+      rank: 1,
+    });
     vi.spyOn(rankingsApi, 'submitScore').mockResolvedValue({
       id: 1,
       playerName: 'TestPlayer',
@@ -330,7 +382,7 @@ describe('showScoreModal', () => {
       createdAt: '2025-12-28T00:00:00Z',
     });
 
-    showScoreModal(100, 'normal', onComplete);
+    await showScoreModal(100, 'normal', onComplete);
 
     const modal = document.getElementById('score-modal');
     const submitBtn = document.getElementById('submit-score-btn') as HTMLButtonElement;
@@ -348,8 +400,12 @@ describe('showScoreModal', () => {
 
   it('スキップ後にモーダルが非表示になる', async () => {
     const onComplete = vi.fn();
+    vi.spyOn(rankingsApi, 'checkRankEligibility').mockResolvedValue({
+      isTopTen: true,
+      rank: 1,
+    });
 
-    showScoreModal(100, 'normal', onComplete);
+    await showScoreModal(100, 'normal', onComplete);
 
     const modal = document.getElementById('score-modal');
     const skipBtn = document.getElementById('skip-score-btn') as HTMLButtonElement;
@@ -366,6 +422,10 @@ describe('showScoreModal', () => {
   it('送信中はボタンテキストが「送信中...」に変更される', async () => {
     vi.useFakeTimers();
     const onComplete = vi.fn();
+    vi.spyOn(rankingsApi, 'checkRankEligibility').mockResolvedValue({
+      isTopTen: true,
+      rank: 1,
+    });
     // 非同期処理を遅延させる
     const submitScoreMock = vi.spyOn(rankingsApi, 'submitScore').mockImplementation(
       () =>
@@ -381,7 +441,7 @@ describe('showScoreModal', () => {
         })
     );
 
-    showScoreModal(100, 'normal', onComplete);
+    await showScoreModal(100, 'normal', onComplete);
 
     const submitBtn = document.getElementById('submit-score-btn') as HTMLButtonElement;
     const playerNameInput = document.getElementById('player-name') as HTMLInputElement;
@@ -405,6 +465,10 @@ describe('showScoreModal', () => {
 
   it('オフライン時にエラーメッセージを表示してモーダルを閉じない', async () => {
     const onComplete = vi.fn();
+    vi.spyOn(rankingsApi, 'checkRankEligibility').mockResolvedValue({
+      isTopTen: true,
+      rank: 1,
+    });
     const originalOnLine = Object.getOwnPropertyDescriptor(Navigator.prototype, 'onLine');
 
     // オフライン状態をシミュレート
@@ -413,7 +477,7 @@ describe('showScoreModal', () => {
       get: () => false,
     });
 
-    showScoreModal(100, 'normal', onComplete);
+    await showScoreModal(100, 'normal', onComplete);
 
     const modal = document.getElementById('score-modal');
     const submitBtn = document.getElementById('submit-score-btn') as HTMLButtonElement;
@@ -441,6 +505,10 @@ describe('showScoreModal', () => {
 
   it('エラー後に再試行できる', async () => {
     const onComplete = vi.fn();
+    vi.spyOn(rankingsApi, 'checkRankEligibility').mockResolvedValue({
+      isTopTen: true,
+      rank: 1,
+    });
     const submitScoreMock = vi
       .spyOn(rankingsApi, 'submitScore')
       .mockRejectedValueOnce(new Error('API Error'))
@@ -451,7 +519,7 @@ describe('showScoreModal', () => {
         createdAt: '2025-12-28T00:00:00Z',
       });
 
-    showScoreModal(100, 'normal', onComplete);
+    await showScoreModal(100, 'normal', onComplete);
 
     const modal = document.getElementById('score-modal');
     const submitBtn = document.getElementById('submit-score-btn') as HTMLButtonElement;
