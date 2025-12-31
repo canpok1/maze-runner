@@ -59,22 +59,25 @@ export async function showScoreModal(
 
   // モーダル表示前にランクイン判定を実行
   const clearTimeMs = Math.round(score * 1000);
+  let showForm = false;
   try {
     const result = await fetchRank(difficulty, clearTimeMs);
     const isTopTen = result.rank <= 10;
     if (isTopTen) {
       rankMessage.textContent = `${result.rank}位にランクイン！`;
       rankMessage.classList.remove('hidden');
-      registrationForm.classList.remove('hidden');
-      submitBtn.classList.remove('hidden');
+      showForm = true;
     } else {
       notRankedMessage.classList.remove('hidden');
-      registrationForm.classList.add('hidden');
       skipBtn.textContent = '閉じる';
     }
   } catch (error) {
     // エラー時は従来どおり登録フォームを表示（フォールバック）
     console.error('Failed to check rank eligibility:', error);
+    showForm = true;
+  }
+
+  if (showForm) {
     registrationForm.classList.remove('hidden');
     submitBtn.classList.remove('hidden');
   }

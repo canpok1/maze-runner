@@ -341,7 +341,7 @@ describe('POST /rankings', () => {
   });
 });
 
-describe('GET /rankings/check', () => {
+describe('GET /rankings/:difficulty/rank', () => {
   let app: Hono<{ Bindings: Env }>;
   let mockDb: D1Database;
 
@@ -383,7 +383,6 @@ describe('GET /rankings/check', () => {
 
     const data = await res.json();
     expect(data).toHaveProperty('rank', 2);
-    expect(data).toHaveProperty('isTopTen', true);
   });
 
   it('should return 400 when difficulty value is invalid', async () => {
