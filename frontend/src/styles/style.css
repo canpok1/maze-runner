@@ -228,6 +228,26 @@ canvas {
   color: #e4e6eb;
 }
 
+.rank-message {
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: #ffd700;
+  margin-bottom: 15px;
+}
+
+.not-ranked {
+  font-size: 1.1rem;
+  color: #95a5a6;
+  margin-bottom: 15px;
+}
+
+.rank-message.hidden,
+.not-ranked.hidden,
+#registration-form.hidden,
+#submit-score-btn.hidden {
+  display: none;
+}
+
 .name-input-container {
   display: flex;
   flex-direction: column;
@@ -270,7 +290,7 @@ canvas {
   justify-content: center;
 }
 
-.modal-buttons .btn {
+.modal-content .btn {
   padding: 12px 24px;
   font-size: 1rem;
   border: none;
@@ -283,7 +303,7 @@ canvas {
   box-shadow: 0 4px rgba(0, 0, 0, 0.3);
 }
 
-.modal-buttons .btn:active {
+.modal-content .btn:active {
   transform: translateY(2px);
   box-shadow: 0 2px rgba(0, 0, 0, 0.3);
 }

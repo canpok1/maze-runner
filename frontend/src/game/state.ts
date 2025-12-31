@@ -34,7 +34,7 @@ export interface WinDependencies {
   gameState: GameState;
   menuElement: HTMLElement;
   cancelAnimationFrame: (id: number) => void;
-  showScoreModal: (score: number, difficulty: Difficulty, onComplete: () => void) => void;
+  showScoreModal: (score: number, difficulty: Difficulty, onComplete: () => void) => Promise<void>;
   getDifficultyFromSize: (size: number) => Difficulty;
 }
 

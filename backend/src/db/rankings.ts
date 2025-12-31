@@ -77,3 +77,23 @@ export async function addRanking(
     createdAt: newRankingInfo.created_at,
   };
 }
+
+/**
+ * 指定されたクリアタイムの順位を計算する
+ * @param db D1データベースインスタンス
+ * @param difficulty 難易度名（'easy', 'normal', 'hard'）
+ * @param clearTime クリアタイム（ミリ秒）
+ * @returns 順位（1位から始まる）
+ */
+export async function calculateRank(
+  db: D1Database,
+  difficulty: Difficulty,
+  clearTime: number
+): Promise<number> {
+  // 既存のトップ10ランキングを取得
+  const rankings = await getRankings(db, difficulty, 10);
+
+  // 何位になるかを計算（自分より速いタイムの数 + 1）
+  const rank = rankings.filter((r) => r.clearTime < clearTime).length + 1;
+  return rank;
+}

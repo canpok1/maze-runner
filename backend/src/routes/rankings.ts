@@ -1,6 +1,6 @@
 import type { D1Database } from '@cloudflare/workers-types';
 import { Hono } from 'hono';
-import { addRanking, getRankings, isDifficulty } from '../db/rankings';
+import { addRanking, calculateRank, getRankings, isDifficulty } from '../db/rankings';
 
 type Env = {
   DB: D1Database;
@@ -71,6 +71,37 @@ app.post('/rankings', async (c) => {
   } catch (error) {
     console.error('Error adding ranking:', error);
     return c.json({ error: 'Failed to add ranking' }, 500);
+  }
+});
+
+// GET /rankings/:difficulty/rank?clearTime=12345
+app.get('/rankings/:difficulty/rank', async (c) => {
+  const difficulty = c.req.param('difficulty');
+  const clearTimeStr = c.req.query('clearTime');
+
+  if (!isDifficulty(difficulty)) {
+    return c.json(
+      { error: "difficulty parameter is required and must be one of 'easy', 'normal', or 'hard'" },
+      400
+    );
+  }
+
+  if (!clearTimeStr) {
+    return c.json({ error: 'clearTime parameter is required' }, 400);
+  }
+
+  const clearTime = Number.parseInt(clearTimeStr, 10);
+
+  if (Number.isNaN(clearTime) || clearTime <= 0) {
+    return c.json({ error: 'clearTime must be a positive number' }, 400);
+  }
+
+  try {
+    const rank = await calculateRank(c.env.DB, difficulty, clearTime);
+    return c.json({ rank });
+  } catch (error) {
+    console.error('Error calculating rank:', error);
+    return c.json({ error: 'Failed to calculate rank' }, 500);
   }
 });
 

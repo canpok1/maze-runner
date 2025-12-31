@@ -55,3 +55,29 @@ export async function submitScore(
   const data = await response.json();
   return data.ranking;
 }
+
+/**
+ * クリアタイムがランキングの何位になるかを取得する
+ * @param difficulty 難易度
+ * @param clearTime クリアタイム（ミリ秒）
+ * @returns 順位
+ * @throws {ApiError} APIリクエストが失敗した場合
+ */
+export async function fetchRank(
+  difficulty: Difficulty,
+  clearTime: number
+): Promise<{ rank: number }> {
+  const params = new URLSearchParams({ clearTime: String(clearTime) });
+  const url = `/api/rankings/${difficulty}/rank?${params.toString()}`;
+
+  const response = await fetch(url, {
+    cache: 'no-store',
+  });
+
+  if (!response.ok) {
+    throw new ApiError(response.status, `Failed to fetch rank: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  return data;
+}

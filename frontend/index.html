@@ -53,11 +53,19 @@
   <div class="modal-content">
     <h2>クリアおめでとう！</h2>
     <p id="score-display"></p>
-    <div class="name-input-container">
-      <label for="player-name">プレイヤー名</label>
-      <input type="text" id="player-name" maxlength="20" placeholder="名前を入力">
-      <span id="name-error" class="error-text"></span>
-      <span id="submit-error" class="error-text hidden"></span>
+    <!-- ランクインメッセージ -->
+    <p id="rank-message" class="rank-message hidden"></p>
+    <!-- ランク外メッセージ -->
+    <p id="not-ranked-message" class="not-ranked hidden">
+      トップ10にランクインできませんでした
+    </p>
+    <div id="registration-form">
+      <div class="name-input-container">
+        <label for="player-name">プレイヤー名</label>
+        <input type="text" id="player-name" maxlength="20" placeholder="名前を入力">
+        <span id="name-error" class="error-text"></span>
+        <span id="submit-error" class="error-text hidden"></span>
+      </div>
     </div>
     <div class="modal-buttons">
       <button id="submit-score-btn" class="btn submit-btn">登録</button>

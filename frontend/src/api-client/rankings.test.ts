@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { fetchRankings, submitScore } from './rankings';
+import { fetchRank, fetchRankings, submitScore } from './rankings';
 import type { Ranking, RankingWithId } from './types';
 import { ApiError } from './types';
 
@@ -110,6 +110,67 @@ describe('rankings API client', () => {
       globalThis.fetch = vi.fn().mockRejectedValue(new Error('Network failure'));
 
       await expect(submitScore('TestPlayer', 150, 'normal')).rejects.toThrow('Network failure');
+    });
+  });
+
+  describe('fetchRank', () => {
+    it('正常系: 順位を取得できる（rank: 1）', async () => {
+      const mockResponse = { rank: 1 };
+
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => mockResponse,
+      });
+
+      const result = await fetchRank('easy', 50000);
+
+      expect(result).toEqual(mockResponse);
+      expect(globalThis.fetch).toHaveBeenCalledWith('/api/rankings/easy/rank?clearTime=50000', {
+        cache: 'no-store',
+      });
+    });
+
+    it('正常系: ランク外の順位を取得できる（rank: 11）', async () => {
+      const mockResponse = { rank: 11 };
+
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => mockResponse,
+      });
+
+      const result = await fetchRank('normal', 999999);
+
+      expect(result).toEqual(mockResponse);
+      expect(globalThis.fetch).toHaveBeenCalledWith('/api/rankings/normal/rank?clearTime=999999', {
+        cache: 'no-store',
+      });
+    });
+
+    it('異常系: ネットワークエラーの場合、ApiErrorをスローする', async () => {
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: false,
+        status: 500,
+        statusText: 'Internal Server Error',
+      });
+
+      try {
+        await fetchRank('hard', 100000);
+        expect.fail('Expected fetchRank to throw, but it did not.');
+      } catch (error) {
+        expect(error).toBeInstanceOf(ApiError);
+        if (error instanceof ApiError) {
+          expect(error.status).toBe(500);
+          expect(error.message).toBe('Failed to fetch rank: Internal Server Error');
+        }
+      }
+    });
+
+    it('異常系: fetch自体が失敗した場合、エラーをスローする', async () => {
+      globalThis.fetch = vi.fn().mockRejectedValue(new Error('Network failure'));
+
+      await expect(fetchRank('easy', 50000)).rejects.toThrow('Network failure');
     });
   });
 });
