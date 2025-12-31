@@ -1,6 +1,6 @@
 import type { D1Database } from '@cloudflare/workers-types';
 import { Hono } from 'hono';
-import { addRanking, checkRankEligibility, getRankings, isDifficulty } from '../db/rankings';
+import { addRanking, calculateRank, getRankings, isDifficulty } from '../db/rankings';
 
 type Env = {
   DB: D1Database;
@@ -97,11 +97,12 @@ app.get('/rankings/:difficulty/rank', async (c) => {
   }
 
   try {
-    const result = await checkRankEligibility(c.env.DB, difficulty, clearTime);
-    return c.json(result);
+    const rank = await calculateRank(c.env.DB, difficulty, clearTime);
+    const isTopTen = rank <= 10;
+    return c.json({ rank, isTopTen });
   } catch (error) {
-    console.error('Error checking rank eligibility:', error);
-    return c.json({ error: 'Failed to check rank eligibility' }, 500);
+    console.error('Error calculating rank:', error);
+    return c.json({ error: 'Failed to calculate rank' }, 500);
   }
 });
 

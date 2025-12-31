@@ -114,8 +114,8 @@ describe('rankings API client', () => {
   });
 
   describe('checkRankEligibility', () => {
-    it('正常系: ランクイン判定を取得できる（isTopTen: true, rank: 1）', async () => {
-      const mockResponse = { isTopTen: true, rank: 1 };
+    it('正常系: ランクイン判定を取得できる（rank: 1, isTopTen: true）', async () => {
+      const mockResponse = { rank: 1, isTopTen: true };
 
       globalThis.fetch = vi.fn().mockResolvedValue({
         ok: true,
@@ -131,8 +131,8 @@ describe('rankings API client', () => {
       });
     });
 
-    it('正常系: ランク外判定を取得できる（isTopTen: false）', async () => {
-      const mockResponse = { isTopTen: false };
+    it('正常系: ランク外判定を取得できる（rank: 11, isTopTen: false）', async () => {
+      const mockResponse = { rank: 11, isTopTen: false };
 
       globalThis.fetch = vi.fn().mockResolvedValue({
         ok: true,

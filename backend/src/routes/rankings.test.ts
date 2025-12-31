@@ -372,7 +372,7 @@ describe('GET /rankings/check', () => {
     mockDb.prepare = mockPrepare;
 
     const res = await app.request(
-      '/rankings/check?difficulty=easy&clearTime=150',
+      '/rankings/easy/rank?clearTime=150',
       {
         method: 'GET',
       },
@@ -382,29 +382,13 @@ describe('GET /rankings/check', () => {
     expect(res.status).toBe(200);
 
     const data = await res.json();
-    expect(data).toHaveProperty('isTopTen', true);
     expect(data).toHaveProperty('rank', 2);
-  });
-
-  it('should return 400 when difficulty parameter is missing', async () => {
-    const res = await app.request(
-      '/rankings/check?clearTime=150',
-      {
-        method: 'GET',
-      },
-      { DB: mockDb }
-    );
-
-    expect(res.status).toBe(400);
-
-    const data = await res.json();
-    expect(data).toHaveProperty('error');
-    expect(data.error).toContain('difficulty');
+    expect(data).toHaveProperty('isTopTen', true);
   });
 
   it('should return 400 when difficulty value is invalid', async () => {
     const res = await app.request(
-      '/rankings/check?difficulty=invalid&clearTime=150',
+      '/rankings/invalid/rank?clearTime=150',
       {
         method: 'GET',
       },
@@ -420,7 +404,7 @@ describe('GET /rankings/check', () => {
 
   it('should return 400 when clearTime parameter is missing', async () => {
     const res = await app.request(
-      '/rankings/check?difficulty=easy',
+      '/rankings/easy/rank',
       {
         method: 'GET',
       },
@@ -436,7 +420,7 @@ describe('GET /rankings/check', () => {
 
   it('should return 400 when clearTime is not a number', async () => {
     const res = await app.request(
-      '/rankings/check?difficulty=easy&clearTime=invalid',
+      '/rankings/easy/rank?clearTime=invalid',
       {
         method: 'GET',
       },
@@ -452,7 +436,7 @@ describe('GET /rankings/check', () => {
 
   it('should return 400 when clearTime is not positive', async () => {
     const res = await app.request(
-      '/rankings/check?difficulty=easy&clearTime=-100',
+      '/rankings/easy/rank?clearTime=-100',
       {
         method: 'GET',
       },
@@ -476,7 +460,7 @@ describe('GET /rankings/check', () => {
     mockDb.prepare = mockPrepare;
 
     const res = await app.request(
-      '/rankings/check?difficulty=easy&clearTime=150',
+      '/rankings/easy/rank?clearTime=150',
       {
         method: 'GET',
       },

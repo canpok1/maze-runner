@@ -584,6 +584,7 @@ describe('showScoreModal', () => {
     it('ランク外時（isTopTen: false）に登録フォームが非表示になり、ランク外メッセージが表示される', async () => {
       const onComplete = vi.fn();
       const checkRankMock = vi.spyOn(rankingsApi, 'checkRankEligibility').mockResolvedValue({
+        rank: 11,
         isTopTen: false,
       });
 
@@ -611,6 +612,7 @@ describe('showScoreModal', () => {
     it('ランク外時にスキップボタンのテキストが「閉じる」になる', async () => {
       const onComplete = vi.fn();
       vi.spyOn(rankingsApi, 'checkRankEligibility').mockResolvedValue({
+        rank: 11,
         isTopTen: false,
       });
 

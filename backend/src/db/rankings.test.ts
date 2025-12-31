@@ -1,6 +1,6 @@
 import type { D1Database, D1Result } from '@cloudflare/workers-types';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { addRanking, checkRankEligibility, getRankings } from './rankings';
+import { addRanking, calculateRank, getRankings } from './rankings';
 
 describe('getRankings', () => {
   let mockDb: D1Database;
@@ -139,7 +139,7 @@ describe('addRanking', () => {
   });
 });
 
-describe('checkRankEligibility', () => {
+describe('calculateRank', () => {
   let mockDb: D1Database;
 
   beforeEach(() => {
@@ -148,7 +148,7 @@ describe('checkRankEligibility', () => {
     } as unknown as D1Database;
   });
 
-  it('should return isTopTen: true and rank: 1 when no rankings exist', async () => {
+  it('should return rank 1 when no rankings exist', async () => {
     const mockPrepare = vi.fn().mockReturnValue({
       bind: vi.fn().mockReturnValue({
         all: vi.fn().mockResolvedValue({
@@ -160,13 +160,12 @@ describe('checkRankEligibility', () => {
 
     mockDb.prepare = mockPrepare;
 
-    const result = await checkRankEligibility(mockDb, 'easy', 1000);
+    const result = await calculateRank(mockDb, 'easy', 1000);
 
-    expect(result.isTopTen).toBe(true);
-    expect(result.rank).toBe(1);
+    expect(result).toBe(1);
   });
 
-  it('should return isTopTen: true when rankings have less than 10 entries', async () => {
+  it('should return correct rank when rankings have less than 10 entries', async () => {
     const mockRows = [
       { player_name: 'Player1', clear_time: 100, created_at: '2025-01-01T00:00:00.000Z' },
       { player_name: 'Player2', clear_time: 200, created_at: '2025-01-01T01:00:00.000Z' },
@@ -184,13 +183,12 @@ describe('checkRankEligibility', () => {
 
     mockDb.prepare = mockPrepare;
 
-    const result = await checkRankEligibility(mockDb, 'easy', 250);
+    const result = await calculateRank(mockDb, 'easy', 250);
 
-    expect(result.isTopTen).toBe(true);
-    expect(result.rank).toBe(3);
+    expect(result).toBe(3);
   });
 
-  it('should return isTopTen: true and correct rank when clear time beats 10th place', async () => {
+  it('should return correct rank when clear time beats 10th place', async () => {
     const mockRows = Array.from({ length: 10 }, (_, i) => ({
       player_name: `Player${i + 1}`,
       clear_time: (i + 1) * 100,
@@ -208,13 +206,12 @@ describe('checkRankEligibility', () => {
 
     mockDb.prepare = mockPrepare;
 
-    const result = await checkRankEligibility(mockDb, 'easy', 550);
+    const result = await calculateRank(mockDb, 'easy', 550);
 
-    expect(result.isTopTen).toBe(true);
-    expect(result.rank).toBe(6);
+    expect(result).toBe(6);
   });
 
-  it('should return isTopTen: false when clear time does not beat 10th place', async () => {
+  it('should return rank 11 when clear time does not beat 10th place', async () => {
     const mockRows = Array.from({ length: 10 }, (_, i) => ({
       player_name: `Player${i + 1}`,
       clear_time: (i + 1) * 100,
@@ -232,13 +229,12 @@ describe('checkRankEligibility', () => {
 
     mockDb.prepare = mockPrepare;
 
-    const result = await checkRankEligibility(mockDb, 'easy', 1100);
+    const result = await calculateRank(mockDb, 'easy', 1100);
 
-    expect(result.isTopTen).toBe(false);
-    expect(result.rank).toBeUndefined();
+    expect(result).toBe(11);
   });
 
-  it('should return rank: 1 when clear time is faster than all existing rankings', async () => {
+  it('should return rank 1 when clear time is faster than all existing rankings', async () => {
     const mockRows = [
       { player_name: 'Player1', clear_time: 100, created_at: '2025-01-01T00:00:00.000Z' },
       { player_name: 'Player2', clear_time: 200, created_at: '2025-01-01T01:00:00.000Z' },
@@ -255,9 +251,8 @@ describe('checkRankEligibility', () => {
 
     mockDb.prepare = mockPrepare;
 
-    const result = await checkRankEligibility(mockDb, 'easy', 50);
+    const result = await calculateRank(mockDb, 'easy', 50);
 
-    expect(result.isTopTen).toBe(true);
-    expect(result.rank).toBe(1);
+    expect(result).toBe(1);
   });
 });

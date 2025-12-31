@@ -79,29 +79,21 @@ export async function addRanking(
 }
 
 /**
- * 指定されたクリアタイムがランキングのトップ10に入るかどうかを判定する
+ * 指定されたクリアタイムの順位を計算する
  * @param db D1データベースインスタンス
  * @param difficulty 難易度名（'easy', 'normal', 'hard'）
  * @param clearTime クリアタイム（ミリ秒）
- * @returns ランクイン判定結果（isTopTen: ランクインするか, rank: 何位になるか）
+ * @returns 順位（1位から始まる）
  */
-export async function checkRankEligibility(
+export async function calculateRank(
   db: D1Database,
   difficulty: Difficulty,
   clearTime: number
-): Promise<{ isTopTen: boolean; rank?: number }> {
+): Promise<number> {
   // 既存のトップ10ランキングを取得
   const rankings = await getRankings(db, difficulty, 10);
 
-  // ランキングが10件未満か、10位のタイムより速いか判定
-  const isEligible = rankings.length < 10 || clearTime < rankings[9].clearTime;
-
-  if (isEligible) {
-    // 何位になるかを計算
-    const rank = rankings.filter((r) => r.clearTime < clearTime).length + 1;
-    return { isTopTen: true, rank };
-  }
-
-  // ランクイン対象外
-  return { isTopTen: false };
+  // 何位になるかを計算（自分より速いタイムの数 + 1）
+  const rank = rankings.filter((r) => r.clearTime < clearTime).length + 1;
+  return rank;
 }
