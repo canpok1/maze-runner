@@ -14,19 +14,8 @@
 
 set -euo pipefail
 
-# GH_TOKEN の存在チェック
-if [[ -z "${GH_TOKEN:-}" ]]; then
-    echo "エラー: GH_TOKEN 環境変数が設定されていません。" >&2
-    exit 1
-fi
-
-# 必要なコマンドの存在確認
-for cmd in curl jq git; do
-    if ! command -v "$cmd" &> /dev/null; then
-        echo "エラー: $cmd コマンドが見つかりません。インストールしてください。" >&2
-        exit 1
-    fi
-done
+# スクリプトディレクトリを取得
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # 使用方法を表示
 usage() {
@@ -49,26 +38,7 @@ if ! [[ "$PR_NUMBER" =~ ^[0-9]+$ ]]; then
 fi
 
 # リポジトリ情報を取得
-REMOTE_URL=$(git remote get-url origin 2>/dev/null || echo "")
-if [[ -z "$REMOTE_URL" ]]; then
-    echo "エラー: git remote が見つかりません。" >&2
-    exit 1
-fi
-
-# SSH形式: git@github.com:owner/repo.git
-# HTTPS形式: https://github.com/owner/repo.git
-# ローカルプロキシ形式: http://...@127.0.0.1:.../git/owner/repo
-if [[ "$REMOTE_URL" =~ github\.com[:/]([^/]+)/([^/.]+)(\.git)?$ ]]; then
-    OWNER="${BASH_REMATCH[1]}"
-    REPO="${BASH_REMATCH[2]}"
-elif [[ "$REMOTE_URL" =~ /git/([^/]+)/([^/]+)$ ]]; then
-    OWNER="${BASH_REMATCH[1]}"
-    REPO="${BASH_REMATCH[2]}"
-else
-    echo "エラー: GitHub リポジトリのURLを解析できませんでした。" >&2
-    echo "Remote URL: $REMOTE_URL" >&2
-    exit 1
-fi
+read -r OWNER REPO < <("$SCRIPT_DIR/repo-info.sh")
 
 # GraphQL クエリを構築
 QUERY=$(cat <<'EOF'
@@ -96,35 +66,15 @@ query($owner: String!, $name: String!, $number: Int!) {
 EOF
 )
 
-# GraphQL API 呼び出し用の JSON ペイロードを構築
-PAYLOAD=$(jq -n \
-    --arg query "$QUERY" \
+# 変数を JSON 形式で構築
+VARIABLES=$(jq -n \
     --arg owner "$OWNER" \
     --arg name "$REPO" \
     --argjson number "$PR_NUMBER" \
-    '{query: $query, variables: {owner: $owner, name: $name, number: $number}}')
+    '{owner: $owner, name: $name, number: $number}')
 
-# set +e で一時的にエラーでの終了を無効化
-set +e
-RESPONSE=$(curl -s -H "Authorization: Bearer $GH_TOKEN" \
-    -H "Content-Type: application/json" \
-    -d "$PAYLOAD" \
-    https://api.github.com/graphql 2>&1)
-CURL_EXIT_CODE=$?
-set -e
-
-# curl コマンドがエラーの場合
-if [ $CURL_EXIT_CODE -ne 0 ]; then
-    echo "エラー: GitHub API へのリクエストに失敗しました。" >&2
-    exit 1
-fi
-
-# APIエラーをチェック
-if echo "$RESPONSE" | jq -e '.errors' > /dev/null 2>&1; then
-    echo "エラー: GitHub API がエラーを返しました。" >&2
-    echo "$RESPONSE" | jq -r '.errors[].message' >&2
-    exit 1
-fi
+# GitHub GraphQL API を呼び出す
+RESPONSE=$("$SCRIPT_DIR/github-graphql.sh" "$QUERY" "$VARIABLES")
 
 # PRが存在しない場合（nullの場合）
 if echo "$RESPONSE" | jq -e '.data.repository.pullRequest == null' > /dev/null 2>&1; then
