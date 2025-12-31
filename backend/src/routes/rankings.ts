@@ -74,9 +74,9 @@ app.post('/rankings', async (c) => {
   }
 });
 
-// GET /rankings/check?difficulty=easy&clearTime=12345
-app.get('/rankings/check', async (c) => {
-  const difficulty = c.req.query('difficulty');
+// GET /rankings/:difficulty/rank?clearTime=12345
+app.get('/rankings/:difficulty/rank', async (c) => {
+  const difficulty = c.req.param('difficulty');
   const clearTimeStr = c.req.query('clearTime');
 
   if (!isDifficulty(difficulty)) {

@@ -93,18 +93,10 @@ export async function checkRankEligibility(
   // 既存のトップ10ランキングを取得
   const rankings = await getRankings(db, difficulty, 10);
 
-  // ランキングが10件未満の場合は無条件でランクイン対象
-  if (rankings.length < 10) {
-    // 何位になるかを計算
-    const rank = rankings.filter((r) => r.clearTime < clearTime).length + 1;
-    return { isTopTen: true, rank };
-  }
+  // ランキングが10件未満か、10位のタイムより速いか判定
+  const isEligible = rankings.length < 10 || clearTime < rankings[9].clearTime;
 
-  // 10位のタイムと比較
-  const tenthPlaceTime = rankings[9].clearTime;
-
-  // クリアタイムが10位のタイムより速い場合はランクイン対象
-  if (clearTime < tenthPlaceTime) {
+  if (isEligible) {
     // 何位になるかを計算
     const rank = rankings.filter((r) => r.clearTime < clearTime).length + 1;
     return { isTopTen: true, rank };

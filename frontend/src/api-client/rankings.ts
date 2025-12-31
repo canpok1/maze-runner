@@ -67,8 +67,8 @@ export async function checkRankEligibility(
   difficulty: Difficulty,
   clearTime: number
 ): Promise<{ isTopTen: boolean; rank?: number }> {
-  const params = new URLSearchParams({ difficulty, clearTime: String(clearTime) });
-  const url = `/api/rankings/check?${params.toString()}`;
+  const params = new URLSearchParams({ clearTime: String(clearTime) });
+  const url = `/api/rankings/${difficulty}/rank?${params.toString()}`;
 
   const response = await fetch(url, {
     cache: 'no-store',

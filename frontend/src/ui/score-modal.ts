@@ -56,7 +56,7 @@ export function showScoreModal(
   rankMessage.classList.add('hidden');
   rankMessage.textContent = '';
   notRankedMessage.classList.add('hidden');
-  registrationForm.classList.remove('hidden');
+  registrationForm.classList.add('hidden');
   skipBtn.textContent = 'スキップ';
 
   // ランクイン判定を実行
@@ -64,9 +64,16 @@ export function showScoreModal(
   (async () => {
     try {
       const result = await checkRankEligibility(difficulty, clearTimeMs);
+
+      // モーダルが閉じられていないか確認
+      if (modal.classList.contains('hidden')) {
+        return;
+      }
+
       if (result.isTopTen) {
         rankMessage.textContent = `${result.rank}位にランクイン！`;
         rankMessage.classList.remove('hidden');
+        registrationForm.classList.remove('hidden');
       } else {
         notRankedMessage.classList.remove('hidden');
         registrationForm.classList.add('hidden');
@@ -75,6 +82,9 @@ export function showScoreModal(
     } catch (error) {
       // エラー時は従来どおり登録フォームを表示（フォールバック）
       console.error('Failed to check rank eligibility:', error);
+      if (!modal.classList.contains('hidden')) {
+        registrationForm.classList.remove('hidden');
+      }
     }
   })();
 

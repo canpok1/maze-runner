@@ -127,7 +127,7 @@ describe('rankings API client', () => {
 
       expect(result).toEqual(mockResponse);
       expect(globalThis.fetch).toHaveBeenCalledWith(
-        '/api/rankings/check?difficulty=easy&clearTime=50000',
+        '/api/rankings/easy/rank?clearTime=50000',
         {
           cache: 'no-store',
         }
@@ -147,7 +147,7 @@ describe('rankings API client', () => {
 
       expect(result).toEqual(mockResponse);
       expect(globalThis.fetch).toHaveBeenCalledWith(
-        '/api/rankings/check?difficulty=normal&clearTime=999999',
+        '/api/rankings/normal/rank?clearTime=999999',
         {
           cache: 'no-store',
         }
