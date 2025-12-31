@@ -43,20 +43,21 @@ export function generateMaze(size: number): MazeMap {
   // ゴール位置をランダムに選択
   // 右端または下端の通路から選択することで、スタート地点(1,1)から十分な距離を確保し、
   // プレイヤーが迷路を横断・縦断する必要がある適切な難易度を実現する
+  const edge = size - 2; // マップ内部の最右列・最下行のインデックス
   const goalCandidates: [number, number][] = [];
 
-  // 右端（x = size - 2）の通路セルを収集
-  for (let y = 1; y < size - 1; y++) {
-    if (newMap[y][size - 2] === TileType.FLOOR) {
-      goalCandidates.push([size - 2, y]);
+  // 右端（x = edge）の通路セルを収集
+  for (let y = 1; y <= edge; y++) {
+    if (newMap[y][edge] === TileType.FLOOR) {
+      goalCandidates.push([edge, y]);
     }
   }
 
-  // 下端（y = size - 2）の通路セルを収集
-  // 右下角(size-2, size-2)は右端で収集済みのため、x < size - 2 として重複を回避
-  for (let x = 1; x < size - 2; x++) {
-    if (newMap[size - 2][x] === TileType.FLOOR) {
-      goalCandidates.push([x, size - 2]);
+  // 下端（y = edge）の通路セルを収集
+  // 右下角(edge, edge)は右端で収集済みのため、x < edge として重複を回避
+  for (let x = 1; x < edge; x++) {
+    if (newMap[edge][x] === TileType.FLOOR) {
+      goalCandidates.push([x, edge]);
     }
   }
 
@@ -64,9 +65,25 @@ export function generateMaze(size: number): MazeMap {
     const [goalX, goalY] = goalCandidates[Math.floor(Math.random() * goalCandidates.length)];
     newMap[goalY][goalX] = TileType.GOAL;
   } else {
-    // 候補がない場合（例: 3x3の迷路など）は右下隅をゴールに設定
-    // 右下隅はスタート地点(1,1)から最も遠い位置となる
-    newMap[size - 2][size - 2] = TileType.GOAL;
+    // フォールバック: 右端・下端に通路がない場合、スタート地点以外の通路からゴールを選ぶ
+    // これにより、常に到達可能なゴールが保証される
+    const fallbackCandidates: [number, number][] = [];
+    for (let y = 1; y <= edge; y++) {
+      for (let x = 1; x <= edge; x++) {
+        if (newMap[y][x] === TileType.FLOOR && (x !== 1 || y !== 1)) {
+          fallbackCandidates.push([x, y]);
+        }
+      }
+    }
+
+    if (fallbackCandidates.length > 0) {
+      const [goalX, goalY] = fallbackCandidates[Math.floor(Math.random() * fallbackCandidates.length)];
+      newMap[goalY][goalX] = TileType.GOAL;
+    } else {
+      // スタート地点しか通路がないエッジケース(例: 3x3)
+      // この場合、迷路として成立しないが、右下隅をゴールに設定
+      newMap[edge][edge] = TileType.GOAL;
+    }
   }
 
   return newMap;
