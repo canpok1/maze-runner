@@ -13,20 +13,8 @@
 
 set -euo pipefail
 
-# GH_TOKEN の存在チェック
-if [[ -z "${GH_TOKEN:-}" ]]; then
-  echo "エラー: GH_TOKEN 環境変数が設定されていません" >&2
-  echo "GitHub Personal Access Token を GH_TOKEN 環境変数に設定してください" >&2
-  exit 1
-fi
-
-# 必要なコマンドの存在確認
-for cmd in curl git jq; do
-  if ! command -v "$cmd" &> /dev/null; then
-    echo "エラー: $cmd コマンドが見つかりません" >&2
-    exit 1
-  fi
-done
+# スクリプトディレクトリの取得
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # 引数チェック
 if [[ $# -ne 1 ]]; then
@@ -43,63 +31,13 @@ if ! [[ "$RUN_ID" =~ ^[0-9]+$ ]]; then
 fi
 
 # リポジトリ情報の取得
-REMOTE_URL=$(git remote get-url origin)
-
-# リポジトリのオーナーと名前を抽出
-# SSH形式: git@github.com:owner/repo.git
-# HTTPS形式: https://github.com/owner/repo.git
-# ローカルプロキシ形式: http://...@127.0.0.1:.../git/owner/repo
-if [[ "$REMOTE_URL" =~ github\.com[:/]([^/]+)/([^/.]+)(\.git)?$ ]]; then
-  OWNER="${BASH_REMATCH[1]}"
-  REPO="${BASH_REMATCH[2]}"
-elif [[ "$REMOTE_URL" =~ /git/([^/]+)/([^/]+)$ ]]; then
-  OWNER="${BASH_REMATCH[1]}"
-  REPO="${BASH_REMATCH[2]}"
-else
-  echo "エラー: リポジトリ情報を取得できませんでした" >&2
-  echo "Remote URL: $REMOTE_URL" >&2
-  exit 1
-fi
+read -r OWNER REPO < <("$SCRIPT_DIR/repo-info.sh")
 
 # ワークフロー実行情報を取得
-set +e
-RUN_INFO=$(curl -s -H "Authorization: Bearer $GH_TOKEN" \
-  -H "Accept: application/vnd.github+json" \
-  "https://api.github.com/repos/$OWNER/$REPO/actions/runs/$RUN_ID" 2>&1)
-CURL_EXIT_CODE=$?
-set -e
-
-if [[ $CURL_EXIT_CODE -ne 0 ]]; then
-    echo "エラー: GitHub API へのリクエストに失敗しました。" >&2
-    exit 1
-fi
-
-# エラーチェック
-if echo "$RUN_INFO" | jq -e '.message' > /dev/null 2>&1; then
-  ERROR_MSG=$(echo "$RUN_INFO" | jq -r '.message')
-  echo "エラー: $ERROR_MSG" >&2
-  exit 1
-fi
+RUN_INFO=$("$SCRIPT_DIR/github-rest.sh" "/repos/$OWNER/$REPO/actions/runs/$RUN_ID")
 
 # ワークフロー実行のジョブ一覧を取得
-set +e
-JOBS_INFO=$(curl -s -H "Authorization: Bearer $GH_TOKEN" \
-  -H "Accept: application/vnd.github+json" \
-  "https://api.github.com/repos/$OWNER/$REPO/actions/runs/$RUN_ID/jobs" 2>&1)
-CURL_EXIT_CODE=$?
-set -e
-
-if [[ $CURL_EXIT_CODE -ne 0 ]]; then
-    echo "エラー: ジョブ一覧の取得に失敗しました (curl error)。" >&2
-    exit 1
-fi
-
-# APIエラーをチェック
-if echo "$JOBS_INFO" | jq -e '.message' > /dev/null 2>&1; then
-    ERROR_MSG=$(echo "$JOBS_INFO" | jq -r '.message')
-    echo "エラー: ジョブ一覧の取得に失敗しました: $ERROR_MSG" >&2
-    exit 1
-fi
+JOBS_INFO=$("$SCRIPT_DIR/github-rest.sh" "/repos/$OWNER/$REPO/actions/runs/$RUN_ID/jobs")
 
 # ワークフロー情報の抽出
 WORKFLOW_NAME=$(echo "$RUN_INFO" | jq -r '.name')
