@@ -82,7 +82,13 @@ fi
 echo "リポジトリ情報を取得中..." >&2
 REMOTE_URL=$(git remote get-url origin)
 
+# SSH形式: git@github.com:owner/repo.git
+# HTTPS形式: https://github.com/owner/repo.git
+# ローカルプロキシ形式: http://...@127.0.0.1:.../git/owner/repo
 if [[ "$REMOTE_URL" =~ github\.com[:/]([^/]+)/([^/.]+)(\.git)?$ ]]; then
+    OWNER="${BASH_REMATCH[1]}"
+    REPO="${BASH_REMATCH[2]}"
+elif [[ "$REMOTE_URL" =~ /git/([^/]+)/([^/]+)$ ]]; then
     OWNER="${BASH_REMATCH[1]}"
     REPO="${BASH_REMATCH[2]}"
 else
