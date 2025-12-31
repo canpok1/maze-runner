@@ -58,7 +58,15 @@
       "Skill(review)",
       "Skill(run)",
       "WebSearch",
-      "mcp__playwright"
+      "mcp__playwright",
+      "mcp__github__issue_read",
+      "mcp__github__issue_write",
+      "mcp__github__list_issues",
+      "mcp__github__search_issues",
+      "mcp__github__list_pull_requests",
+      "mcp__github__update_pull_request",
+      "mcp__github__add_comment_to_pending_review",
+      "mcp__github__create_pull_request"
     ],
     "deny": [
       "Bash(git add --all)",
