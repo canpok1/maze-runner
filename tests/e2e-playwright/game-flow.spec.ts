@@ -85,6 +85,77 @@ test.describe('通常モード', () => {
   });
 });
 
+test.describe('ランクイン判定', () => {
+  test('ランク外の場合は登録フォームが非表示になり閉じるボタンのみ表示される', async ({ page }) => {
+    // ランク判定APIをモックしてランク外を返す
+    await page.route('**/api/rankings/*/rank**', (route) => {
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ isTopTen: false }),
+      });
+    });
+
+    await page.goto('/?testMaze=simple');
+
+    // ゲーム開始
+    await page.click('.diff-btn[data-size="11"]');
+
+    // ゴールに到達
+    await page.keyboard.down('ArrowUp');
+    await expect(page.locator('#score-modal')).toBeVisible({ timeout: 10000 });
+    await page.keyboard.up('ArrowUp');
+
+    // ランク外メッセージが表示されることを確認
+    await expect(page.locator('#not-ranked-message')).toBeVisible();
+
+    // 登録フォーム（名前入力欄と登録ボタン）が非表示であることを確認
+    await expect(page.locator('#registration-form')).toBeHidden();
+
+    // 閉じるボタンが表示されていることを確認
+    await expect(page.locator('#skip-score-btn')).toBeVisible();
+    await expect(page.locator('#skip-score-btn')).toContainText('閉じる');
+
+    // 閉じるボタンをクリックしてメニューに戻る
+    await page.click('#skip-score-btn');
+    await expect(page.locator('#menu')).toBeVisible({ timeout: 5000 });
+  });
+
+  test('ランクイン時は登録フォームとランクインメッセージが表示される', async ({ page }) => {
+    // ランク判定APIをモックしてランクインを返す
+    await page.route('**/api/rankings/*/rank**', (route) => {
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ isTopTen: true, rank: 3 }),
+      });
+    });
+
+    await page.goto('/?testMaze=simple');
+
+    // ゲーム開始
+    await page.click('.diff-btn[data-size="11"]');
+
+    // ゴールに到達
+    await page.keyboard.down('ArrowUp');
+    await expect(page.locator('#score-modal')).toBeVisible({ timeout: 10000 });
+    await page.keyboard.up('ArrowUp');
+
+    // ランクインメッセージが表示されることを確認
+    await expect(page.locator('#rank-message')).toBeVisible();
+    await expect(page.locator('#rank-message')).toContainText('3位にランクイン');
+
+    // 登録フォーム（名前入力欄と登録ボタン）が表示されていることを確認
+    await expect(page.locator('#registration-form')).toBeVisible();
+    await expect(page.locator('#player-name')).toBeVisible();
+    await expect(page.locator('#submit-score-btn')).toBeVisible();
+
+    // スキップボタンが表示されていることを確認
+    await expect(page.locator('#skip-score-btn')).toBeVisible();
+    await expect(page.locator('#skip-score-btn')).toContainText('スキップ');
+  });
+});
+
 test.describe('エラーハンドリング', () => {
   test('APIエラー時にランキングエラーメッセージが表示される', async ({ page }) => {
     // APIリクエストをインターセプトしてエラーを返す
