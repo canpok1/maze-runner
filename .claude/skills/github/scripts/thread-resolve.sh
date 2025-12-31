@@ -67,7 +67,14 @@ CURL_EXIT_CODE=$?
 set -e
 
 if [[ $CURL_EXIT_CODE -ne 0 ]]; then
-    echo "エラー: GitHub API へのリクエストに失敗しました。" >&2
+    echo "エラー: GitHub API へのリクエストに失敗しました (curl error)。" >&2
+    exit 1
+fi
+
+# APIエラーをチェック
+if echo "$RESULT" | jq -e '.errors' > /dev/null 2>&1; then
+    echo "エラー: GitHub API へのリクエストに失敗しました (API error)。" >&2
+    echo "$RESULT" | jq -r '.errors[].message' >&2
     exit 1
 fi
 

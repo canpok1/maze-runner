@@ -11,7 +11,7 @@
 set -euo pipefail
 
 # 必要なコマンドの存在確認
-for cmd in git curl; do
+for cmd in git curl jq; do
     if ! command -v "$cmd" &> /dev/null; then
         echo "エラー: $cmd コマンドが見つかりません。インストールしてください。" >&2
         exit 1
@@ -96,22 +96,13 @@ echo "Owner: $OWNER, Repo: $REPO" >&2
 # PR作成
 echo "PR作成中..." >&2
 
-# JSON ペイロードを作成（特殊文字のエスケープ処理）
-# jq を使用して安全にJSONを構築
-if command -v jq &> /dev/null; then
-    JSON_PAYLOAD=$(jq -n \
-        --arg title "$PR_TITLE" \
-        --arg body "$PR_BODY" \
-        --arg head "$CURRENT_BRANCH" \
-        --arg base "main" \
-        '{title: $title, body: $body, head: $head, base: $base}')
-else
-    # jq がない場合は手動でエスケープ
-    # 改行、タブ、ダブルクォート、バックスラッシュをエスケープ
-    ESCAPED_TITLE=$(echo "$PR_TITLE" | sed 's/\\/\\\\/g' | sed 's/"/\\"/g' | sed ':a;N;$!ba;s/\n/\\n/g' | sed 's/\t/\\t/g')
-    ESCAPED_BODY=$(echo "$PR_BODY" | sed 's/\\/\\\\/g' | sed 's/"/\\"/g' | sed ':a;N;$!ba;s/\n/\\n/g' | sed 's/\t/\\t/g')
-    JSON_PAYLOAD="{\"title\":\"$ESCAPED_TITLE\",\"body\":\"$ESCAPED_BODY\",\"head\":\"$CURRENT_BRANCH\",\"base\":\"main\"}"
-fi
+# JSON ペイロードを作成（jq を使用して安全にJSONを構築）
+JSON_PAYLOAD=$(jq -n \
+    --arg title "$PR_TITLE" \
+    --arg body "$PR_BODY" \
+    --arg head "$CURRENT_BRANCH" \
+    --arg base "main" \
+    '{title: $title, body: $body, head: $head, base: $base}')
 
 # GitHub API を使用してPRを作成
 API_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
@@ -127,12 +118,7 @@ RESPONSE_BODY=$(echo "$API_RESPONSE" | head -n-1)
 
 if [[ "$HTTP_STATUS" -ge 200 && "$HTTP_STATUS" -lt 300 ]]; then
     # 成功: html_url を抽出
-    if command -v jq &> /dev/null; then
-        PR_URL=$(echo "$RESPONSE_BODY" | jq -r '.html_url')
-    else
-        # jq がない場合は grep と sed で抽出
-        PR_URL=$(echo "$RESPONSE_BODY" | grep -o '"html_url":"[^"]*"' | head -n1 | sed 's/"html_url":"\([^"]*\)"/\1/')
-    fi
+    PR_URL=$(echo "$RESPONSE_BODY" | jq -r '.html_url')
 
     if [[ -z "$PR_URL" || "$PR_URL" == "null" ]]; then
         echo "エラー: PR URLを取得できませんでした。" >&2

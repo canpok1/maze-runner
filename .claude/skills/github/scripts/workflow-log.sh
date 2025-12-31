@@ -83,7 +83,14 @@ CURL_EXIT_CODE=$?
 set -e
 
 if [[ $CURL_EXIT_CODE -ne 0 ]]; then
-    echo "エラー: ジョブ一覧の取得に失敗しました。" >&2
+    echo "エラー: ジョブ一覧の取得に失敗しました (curl error)。" >&2
+    exit 1
+fi
+
+# APIエラーをチェック
+if echo "$JOBS_INFO" | jq -e '.message' > /dev/null 2>&1; then
+    ERROR_MSG=$(echo "$JOBS_INFO" | jq -r '.message')
+    echo "エラー: ジョブ一覧の取得に失敗しました: $ERROR_MSG" >&2
     exit 1
 fi
 
