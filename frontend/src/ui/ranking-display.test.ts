@@ -5,18 +5,22 @@ import { initRankingDisplay } from './ranking-display';
 describe('initRankingDisplay', () => {
   beforeEach(() => {
     document.body.innerHTML = `
-      <section id="ranking-section">
-        <h2>ランキング</h2>
-        <div class="ranking-tabs">
-          <button class="ranking-tab active" data-difficulty="easy">初級</button>
-          <button class="ranking-tab" data-difficulty="normal">中級</button>
-          <button class="ranking-tab" data-difficulty="hard">上級</button>
-        </div>
-        <div id="ranking-loading" class="hidden">読み込み中...</div>
-        <div id="ranking-empty" class="hidden">ランキングデータがありません</div>
-        <div id="ranking-error" class="hidden ranking__error">データの取得に失敗しました</div>
-        <ol id="ranking-list"></ol>
-      </section>
+      <div id="ranking-screen" class="hidden">
+        <h1>ランキング</h1>
+        <section id="ranking-section">
+          <h2>ランキング</h2>
+          <div class="ranking-tabs">
+            <button class="ranking-tab active" data-difficulty="easy">初級</button>
+            <button class="ranking-tab" data-difficulty="normal">中級</button>
+            <button class="ranking-tab" data-difficulty="hard">上級</button>
+          </div>
+          <div id="ranking-loading" class="hidden">読み込み中...</div>
+          <div id="ranking-empty" class="hidden">ランキングデータがありません</div>
+          <div id="ranking-error" class="hidden ranking__error">データの取得に失敗しました</div>
+          <ol id="ranking-list"></ol>
+        </section>
+        <button id="back-to-menu-btn" class="back-to-menu-btn">戻る</button>
+      </div>
     `;
 
     vi.restoreAllMocks();
@@ -28,7 +32,8 @@ describe('initRankingDisplay', () => {
       { playerName: 'Player2', clearTime: 20000, createdAt: '2025-12-28T00:00:00Z' },
     ]);
 
-    await initRankingDisplay();
+    const result = await initRankingDisplay();
+    await result.show();
 
     expect(fetchRankingsMock).toHaveBeenCalledWith('easy', 10);
   });
@@ -40,7 +45,8 @@ describe('initRankingDisplay', () => {
       { playerName: 'Player3', clearTime: 30000, createdAt: '2025-12-28T00:00:00Z' },
     ]);
 
-    await initRankingDisplay();
+    const result = await initRankingDisplay();
+    await result.show();
 
     const rankingList = document.getElementById('ranking-list');
     const items = rankingList?.querySelectorAll('li.ranking-item');
@@ -59,7 +65,8 @@ describe('initRankingDisplay', () => {
       { playerName: 'Player1', clearTime: 12345, createdAt: '2025-12-28T00:00:00Z' },
     ]);
 
-    await initRankingDisplay();
+    const result = await initRankingDisplay();
+    await result.show();
 
     const rankingList = document.getElementById('ranking-list');
     const items = rankingList?.querySelectorAll('li.ranking-item');
@@ -70,7 +77,8 @@ describe('initRankingDisplay', () => {
   it('ランキングデータが空の場合、空状態を表示する', async () => {
     vi.spyOn(rankingsApi, 'fetchRankings').mockResolvedValue([]);
 
-    await initRankingDisplay();
+    const result = await initRankingDisplay();
+    await result.show();
 
     const rankingList = document.getElementById('ranking-list');
     const emptyMessage = document.getElementById('ranking-empty');
@@ -87,7 +95,11 @@ describe('initRankingDisplay', () => {
 
     vi.spyOn(rankingsApi, 'fetchRankings').mockReturnValue(promise as Promise<never>);
 
-    const initPromise = initRankingDisplay();
+    const result = await initRankingDisplay();
+    const showPromise = result.show();
+
+    // show()呼び出し後、少し待ってローディング状態をチェック
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     // データ取得中はローディングが表示される
     const loadingMessage = document.getElementById('ranking-loading');
@@ -95,7 +107,7 @@ describe('initRankingDisplay', () => {
 
     // データ取得完了後はローディングが非表示になる
     resolvePromise([]);
-    await initPromise;
+    await showPromise;
 
     expect(loadingMessage?.classList.contains('hidden')).toBe(true);
   });
@@ -103,7 +115,8 @@ describe('initRankingDisplay', () => {
   it('タブクリック時に対応する難易度のランキングを取得する', async () => {
     const fetchRankingsMock = vi.spyOn(rankingsApi, 'fetchRankings').mockResolvedValue([]);
 
-    await initRankingDisplay();
+    const result = await initRankingDisplay();
+    await result.show();
 
     const normalTab = document.querySelector('[data-difficulty="normal"]') as HTMLButtonElement;
     normalTab.click();
@@ -117,7 +130,8 @@ describe('initRankingDisplay', () => {
   it('タブクリック時にactive状態が切り替わる', async () => {
     vi.spyOn(rankingsApi, 'fetchRankings').mockResolvedValue([]);
 
-    await initRankingDisplay();
+    const result = await initRankingDisplay();
+    await result.show();
 
     const easyTab = document.querySelector('[data-difficulty="easy"]') as HTMLButtonElement;
     const normalTab = document.querySelector('[data-difficulty="normal"]') as HTMLButtonElement;
@@ -149,7 +163,8 @@ describe('initRankingDisplay', () => {
     const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     vi.spyOn(rankingsApi, 'fetchRankings').mockRejectedValue(new Error('API Error'));
 
-    await initRankingDisplay();
+    const result = await initRankingDisplay();
+    await result.show();
 
     expect(consoleErrorSpy).toHaveBeenCalled();
 
@@ -171,7 +186,8 @@ describe('initRankingDisplay', () => {
       value: false,
     });
 
-    await initRankingDisplay();
+    const result = await initRankingDisplay();
+    await result.show();
 
     expect(consoleErrorSpy).toHaveBeenCalled();
 
@@ -192,7 +208,8 @@ describe('initRankingDisplay', () => {
       { playerName: 'Player1', clearTime: 10000, createdAt: '2025-12-28T00:00:00Z' },
     ]);
 
-    await initRankingDisplay();
+    const result = await initRankingDisplay();
+    await result.show();
 
     const errorMessage = document.getElementById('ranking-error');
     expect(errorMessage?.classList.contains('hidden')).toBe(true);
@@ -213,11 +230,19 @@ describe('initRankingDisplay', () => {
 
     const result = await initRankingDisplay();
 
-    // initRankingDisplayがrefresh関数を持つオブジェクトを返すことを確認
+    // initRankingDisplayがrefresh, show, hide関数を持つオブジェクトを返すことを確認
     expect(result).toHaveProperty('refresh');
+    expect(result).toHaveProperty('show');
+    expect(result).toHaveProperty('hide');
     expect(typeof result.refresh).toBe('function');
+    expect(typeof result.show).toBe('function');
+    expect(typeof result.hide).toBe('function');
 
-    // 初期表示で1回呼ばれている
+    // 初期化時は呼ばれていない
+    expect(fetchRankingsMock).toHaveBeenCalledTimes(0);
+
+    // show()を呼び出すと1回呼ばれる
+    await result.show();
     expect(fetchRankingsMock).toHaveBeenCalledTimes(1);
 
     // refresh関数を呼び出す
@@ -232,6 +257,7 @@ describe('initRankingDisplay', () => {
     const fetchRankingsMock = vi.spyOn(rankingsApi, 'fetchRankings').mockResolvedValue([]);
 
     const result = await initRankingDisplay();
+    await result.show();
 
     // normalタブに切り替え
     const normalTab = document.querySelector('[data-difficulty="normal"]') as HTMLButtonElement;

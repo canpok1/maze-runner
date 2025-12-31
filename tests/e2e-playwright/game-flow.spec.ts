@@ -41,6 +41,12 @@ test.describe
       // スキップか登録後、メニューに戻るまで待機
       await expect(page.locator('#menu')).toBeVisible({ timeout: 10000 });
 
+      // ランキングを見るボタンをクリックしてランキング画面を開く
+      await page.click('#show-ranking-btn');
+
+      // ランキング画面が表示されていることを確認
+      await expect(page.locator('#ranking-screen')).toBeVisible();
+
       // ランキングセクションが表示されていることを確認
       const rankingSection = page.locator('#ranking-section');
       await expect(rankingSection).toBeVisible();
@@ -168,6 +174,9 @@ test.describe('エラーハンドリング', () => {
 
     await page.goto('/');
 
+    // ランキング画面を開く
+    await page.click('#show-ranking-btn');
+
     // エラーメッセージが表示されることを確認
     await expect(page.locator('#ranking-error')).toBeVisible({ timeout: 5000 });
   });
@@ -176,6 +185,10 @@ test.describe('エラーハンドリング', () => {
     // 最初は正常に読み込む
     await page.goto('/');
     await expect(page.locator('#menu')).toBeVisible();
+
+    // ランキング画面を開く
+    await page.click('#show-ranking-btn');
+    await expect(page.locator('#ranking-screen')).toBeVisible();
 
     // オフラインに切り替え
     await context.setOffline(true);

@@ -11,7 +11,7 @@ import { setupControls } from './input/controls';
 import { getTestMaze } from './maze/fixtures';
 import { generateMaze } from './maze/generator';
 import { createRenderer } from './renderer';
-import { initRankingDisplay } from './ui/ranking-display';
+import { initRankingDisplay, type RankingControls } from './ui/ranking-display';
 import { showScoreModal } from './ui/score-modal';
 
 /**
@@ -60,8 +60,8 @@ const gameState: GameState = {
   animationId: 0,
 };
 
-/** ランキングを再取得する関数（初期化後に設定される） */
-let refreshRankings: (() => Promise<void>) | null = null;
+/** ランキング画面の制御関数（初期化後に設定される） */
+let rankingControls: RankingControls | null = null;
 
 /**
  * URLパラメータからテスト用迷路名を取得する
@@ -117,7 +117,7 @@ function win(): void {
       await showScoreModal(score, difficulty, () => {
         onComplete();
         // スコア登録後にランキングを再取得
-        refreshRankings?.();
+        rankingControls?.refresh();
       });
     },
     getDifficultyFromSize,
@@ -151,14 +151,29 @@ function setupDifficultyButtons(): void {
   });
 }
 
+/**
+ * ランキングボタンのクリックイベントを設定する
+ */
+function setupRankingButton(): void {
+  const showRankingBtn = document.getElementById('show-ranking-btn');
+  if (showRankingBtn) {
+    showRankingBtn.addEventListener('click', async () => {
+      if (rankingControls) {
+        await rankingControls.show();
+      }
+    });
+  }
+}
+
 window.addEventListener('load', () => {
   setupControls(gameState);
   setupDifficultyButtons();
+  setupRankingButton();
   resizeCanvas();
   window.addEventListener('resize', resizeCanvas);
   initRankingDisplay()
     .then((result) => {
-      refreshRankings = result.refresh;
+      rankingControls = result;
     })
     .catch((error) => {
       console.error('Failed to initialize ranking display:', error);
