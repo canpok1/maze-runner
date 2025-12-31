@@ -1,19 +1,6 @@
 import { type MazeMap, TileType } from '@maze-runner/lib';
 
 /**
- * マンハッタン距離を計算する
- *
- * @param x1 - 始点のx座標
- * @param y1 - 始点のy座標
- * @param x2 - 終点のx座標
- * @param y2 - 終点のy座標
- * @returns マンハッタン距離
- */
-function manhattanDistance(x1: number, y1: number, x2: number, y2: number): number {
-  return Math.abs(x1 - x2) + Math.abs(y1 - y2);
-}
-
-/**
  * 穴掘り法を用いて迷路を生成する純粋関数
  *
  * @param size - 迷路のサイズ（偶数の場合は自動的に奇数に調整される）
@@ -54,47 +41,50 @@ export function generateMaze(size: number): MazeMap {
   walk(1, 1); // スタート地点(1, 1)から掘り始め
 
   // ゴール位置をランダムに選択
-  const startX = 1;
-  const startY = 1;
-  const minDistance = size * 0.5;
+  // 右端または下端の通路から選択することで、スタート地点(1,1)から十分な距離を確保し、
+  // プレイヤーが迷路を横断・縦断する必要がある適切な難易度を実現する
+  const edge = size - 2; // マップ内部の最右列・最下行のインデックス
+  const goalCandidates: [number, number][] = [];
 
-  // スタート地点以外のすべての通路を収集
-  const floorCells: [number, number][] = [];
-  for (let y = 1; y < size - 1; y++) {
-    for (let x = 1; x < size - 1; x++) {
-      if (newMap[y][x] === TileType.FLOOR && (x !== startX || y !== startY)) {
-        floorCells.push([x, y]);
-      }
+  // 右端（x = edge）の通路セルを収集
+  for (let y = 1; y <= edge; y++) {
+    if (newMap[y][edge] === TileType.FLOOR) {
+      goalCandidates.push([edge, y]);
     }
   }
 
-  // 最小距離を満たすゴール候補をフィルタリング
-  const goalCandidates = floorCells.filter(
-    ([x, y]) => manhattanDistance(x, y, startX, startY) >= minDistance
-  );
+  // 下端（y = edge）の通路セルを収集
+  // 右下角(edge, edge)は右端で収集済みのため、x < edge として重複を回避
+  for (let x = 1; x < edge; x++) {
+    if (newMap[edge][x] === TileType.FLOOR) {
+      goalCandidates.push([x, edge]);
+    }
+  }
 
   if (goalCandidates.length > 0) {
-    // 候補からランダムに選択
     const [goalX, goalY] = goalCandidates[Math.floor(Math.random() * goalCandidates.length)];
     newMap[goalY][goalX] = TileType.GOAL;
-  } else if (floorCells.length > 0) {
-    // 候補がない場合、スタートから最も遠い通路をゴールにする
-    let maxDistance = -1;
-    let farthestCell: [number, number] = floorCells[0];
-    for (const cell of floorCells) {
-      const dist = manhattanDistance(cell[0], cell[1], startX, startY);
-      if (dist > maxDistance) {
-        maxDistance = dist;
-        farthestCell = cell;
+  } else {
+    // フォールバック: 右端・下端に通路がない場合、スタート地点以外の通路からゴールを選ぶ
+    // これにより、常に到達可能なゴールが保証される
+    const fallbackCandidates: [number, number][] = [];
+    for (let y = 1; y <= edge; y++) {
+      for (let x = 1; x <= edge; x++) {
+        if (newMap[y][x] === TileType.FLOOR && (x !== 1 || y !== 1)) {
+          fallbackCandidates.push([x, y]);
+        }
       }
     }
-    const [goalX, goalY] = farthestCell;
-    newMap[goalY][goalX] = TileType.GOAL;
-  } else {
-    // スタート以外の通路がないエッジケース (例: 3x3)。
-    // この場合、迷路として成立しませんが、元のフォールバックロジックに倒します。
-    // これによりスタート地点がゴールになる可能性がありますが、これは迷路生成器の制約です。
-    newMap[size - 2][size - 2] = TileType.GOAL;
+
+    if (fallbackCandidates.length > 0) {
+      const [goalX, goalY] =
+        fallbackCandidates[Math.floor(Math.random() * fallbackCandidates.length)];
+      newMap[goalY][goalX] = TileType.GOAL;
+    } else {
+      // スタート地点しか通路がないエッジケース(例: 3x3)
+      // この場合、迷路として成立しないが、右下隅をゴールに設定
+      newMap[edge][edge] = TileType.GOAL;
+    }
   }
 
   return newMap;

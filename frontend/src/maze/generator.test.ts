@@ -70,7 +70,7 @@ describe('generateMaze', () => {
       expect(goalPos.y).toBeLessThan(size - 1);
     });
 
-    it('ゴールとスタートのマンハッタン距離が迷路サイズの50%以上であること', () => {
+    it('ゴールが右端（x = size - 2）または下端（y = size - 2）にあること', () => {
       const size = 11;
       const maze = generateMaze(size);
 
@@ -78,11 +78,12 @@ describe('generateMaze', () => {
       expect(goal).not.toBeNull();
 
       const goalPos = goal as { x: number; y: number };
-      const manhattanDistance = Math.abs(goalPos.x - 1) + Math.abs(goalPos.y - 1);
-      expect(manhattanDistance).toBeGreaterThanOrEqual(size * 0.5);
+      const isOnRightEdge = goalPos.x === size - 2;
+      const isOnBottomEdge = goalPos.y === size - 2;
+      expect(isOnRightEdge || isOnBottomEdge).toBe(true);
     });
 
-    it('複数回生成してもマンハッタン距離の条件を満たすこと', () => {
+    it('複数回生成してもゴールが右端または下端にあること', () => {
       const size = 11;
       const iterations = 10;
 
@@ -93,8 +94,9 @@ describe('generateMaze', () => {
         expect(goal).not.toBeNull();
 
         const goalPos = goal as { x: number; y: number };
-        const manhattanDistance = Math.abs(goalPos.x - 1) + Math.abs(goalPos.y - 1);
-        expect(manhattanDistance).toBeGreaterThanOrEqual(size * 0.5);
+        const isOnRightEdge = goalPos.x === size - 2;
+        const isOnBottomEdge = goalPos.y === size - 2;
+        expect(isOnRightEdge || isOnBottomEdge).toBe(true);
       }
     });
   });
