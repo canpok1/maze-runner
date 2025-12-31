@@ -11,7 +11,7 @@ import { setupControls } from './input/controls';
 import { getTestMaze } from './maze/fixtures';
 import { generateMaze } from './maze/generator';
 import { createRenderer } from './renderer';
-import { initRankingDisplay } from './ui/ranking-display';
+import { type RankingControls, initRankingDisplay } from './ui/ranking-display';
 import { showScoreModal } from './ui/score-modal';
 
 /**
@@ -61,11 +61,7 @@ const gameState: GameState = {
 };
 
 /** ランキング画面の制御関数（初期化後に設定される） */
-let rankingControls: {
-  refresh: () => Promise<void>;
-  show: () => Promise<void>;
-  hide: () => void;
-} | null = null;
+let rankingControls: RankingControls | null = null;
 
 /**
  * URLパラメータからテスト用迷路名を取得する

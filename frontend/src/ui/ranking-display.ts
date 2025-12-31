@@ -3,15 +3,23 @@ import type { Difficulty, Ranking } from '../api-client/types';
 import { showRankingDetailModal } from './ranking-detail-modal';
 
 /**
+ * ランキング画面を制御するオブジェクトの型定義
+ */
+export interface RankingControls {
+  /** 現在選択中の難易度のランキングを再取得して表示を更新する */
+  refresh: () => Promise<void>;
+  /** ランキング画面を表示し、ランキングデータを取得する */
+  show: () => Promise<void>;
+  /** ランキング画面を非表示にする */
+  hide: () => void;
+}
+
+/**
  * ランキング表示を初期化する
- * @returns refresh, show, hide関数を持つオブジェクト
+ * @returns ランキング画面を制御するオブジェクト
  * @throws {Error} 必須DOM要素が存在しない場合
  */
-export async function initRankingDisplay(): Promise<{
-  refresh: () => Promise<void>;
-  show: () => Promise<void>;
-  hide: () => void;
-}> {
+export async function initRankingDisplay(): Promise<RankingControls> {
   const rankingScreen = document.getElementById('ranking-screen');
   const rankingSection = document.getElementById('ranking-section');
   const rankingList = document.getElementById('ranking-list');
