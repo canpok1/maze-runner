@@ -77,7 +77,8 @@ export function generateMaze(size: number): MazeMap {
     }
 
     if (fallbackCandidates.length > 0) {
-      const [goalX, goalY] = fallbackCandidates[Math.floor(Math.random() * fallbackCandidates.length)];
+      const [goalX, goalY] =
+        fallbackCandidates[Math.floor(Math.random() * fallbackCandidates.length)];
       newMap[goalY][goalX] = TileType.GOAL;
     } else {
       // スタート地点しか通路がないエッジケース(例: 3x3)
