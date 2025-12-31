@@ -11,12 +11,19 @@
 set -euo pipefail
 
 # 必要なコマンドの存在確認
-for cmd in gh git; do
+for cmd in git curl; do
     if ! command -v "$cmd" &> /dev/null; then
         echo "エラー: $cmd コマンドが見つかりません。インストールしてください。" >&2
         exit 1
     fi
 done
+
+# GH_TOKEN の存在確認
+if [[ -z "${GH_TOKEN:-}" ]]; then
+    echo "エラー: GH_TOKEN 環境変数が設定されていません。" >&2
+    echo "GitHub Personal Access Token を設定してください。" >&2
+    exit 1
+fi
 
 # 引数チェック
 if [[ $# -lt 2 ]]; then
@@ -71,23 +78,74 @@ else
     do_push -u origin "$CURRENT_BRANCH"
 fi
 
-# PR作成
-echo "PR作成中..." >&2
+# リポジトリ情報を取得
+echo "リポジトリ情報を取得中..." >&2
+REMOTE_URL=$(git remote get-url origin)
 
-set +e
-PR_URL=$(gh pr create \
-    --title "$PR_TITLE" \
-    --body "$PR_BODY" \
-    --base main \
-    --head "$CURRENT_BRANCH" 2>&1)
-PR_EXIT_CODE=$?
-set -e
-
-if [ $PR_EXIT_CODE -ne 0 ]; then
-    echo "エラー: プルリクエストの作成に失敗しました。" >&2
-    echo "$PR_URL" >&2
+if [[ "$REMOTE_URL" =~ github\.com[:/]([^/]+)/([^/.]+)(\.git)?$ ]]; then
+    OWNER="${BASH_REMATCH[1]}"
+    REPO="${BASH_REMATCH[2]}"
+else
+    echo "エラー: GitHub リポジトリのURLを解析できません。" >&2
+    echo "Remote URL: $REMOTE_URL" >&2
     exit 1
 fi
 
-echo "PR URL: $PR_URL" >&2
-exit 0
+echo "Owner: $OWNER, Repo: $REPO" >&2
+
+# PR作成
+echo "PR作成中..." >&2
+
+# JSON ペイロードを作成（特殊文字のエスケープ処理）
+# jq を使用して安全にJSONを構築
+if command -v jq &> /dev/null; then
+    JSON_PAYLOAD=$(jq -n \
+        --arg title "$PR_TITLE" \
+        --arg body "$PR_BODY" \
+        --arg head "$CURRENT_BRANCH" \
+        --arg base "main" \
+        '{title: $title, body: $body, head: $head, base: $base}')
+else
+    # jq がない場合は手動でエスケープ
+    # 改行、タブ、ダブルクォート、バックスラッシュをエスケープ
+    ESCAPED_TITLE=$(echo "$PR_TITLE" | sed 's/\\/\\\\/g' | sed 's/"/\\"/g' | sed ':a;N;$!ba;s/\n/\\n/g' | sed 's/\t/\\t/g')
+    ESCAPED_BODY=$(echo "$PR_BODY" | sed 's/\\/\\\\/g' | sed 's/"/\\"/g' | sed ':a;N;$!ba;s/\n/\\n/g' | sed 's/\t/\\t/g')
+    JSON_PAYLOAD="{\"title\":\"$ESCAPED_TITLE\",\"body\":\"$ESCAPED_BODY\",\"head\":\"$CURRENT_BRANCH\",\"base\":\"main\"}"
+fi
+
+# GitHub API を使用してPRを作成
+API_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
+    -H "Authorization: Bearer $GH_TOKEN" \
+    -H "Accept: application/vnd.github+json" \
+    -H "X-GitHub-Api-Version: 2022-11-28" \
+    -d "$JSON_PAYLOAD" \
+    "https://api.github.com/repos/$OWNER/$REPO/pulls")
+
+# HTTPステータスコードとレスポンスボディを分離
+HTTP_STATUS=$(echo "$API_RESPONSE" | tail -n1)
+RESPONSE_BODY=$(echo "$API_RESPONSE" | head -n-1)
+
+if [[ "$HTTP_STATUS" -ge 200 && "$HTTP_STATUS" -lt 300 ]]; then
+    # 成功: html_url を抽出
+    if command -v jq &> /dev/null; then
+        PR_URL=$(echo "$RESPONSE_BODY" | jq -r '.html_url')
+    else
+        # jq がない場合は grep と sed で抽出
+        PR_URL=$(echo "$RESPONSE_BODY" | grep -o '"html_url":"[^"]*"' | head -n1 | sed 's/"html_url":"\([^"]*\)"/\1/')
+    fi
+
+    if [[ -z "$PR_URL" || "$PR_URL" == "null" ]]; then
+        echo "エラー: PR URLを取得できませんでした。" >&2
+        echo "レスポンス: $RESPONSE_BODY" >&2
+        exit 1
+    fi
+
+    echo "PR URL: $PR_URL" >&2
+    exit 0
+else
+    # エラー
+    echo "エラー: プルリクエストの作成に失敗しました。" >&2
+    echo "HTTPステータス: $HTTP_STATUS" >&2
+    echo "レスポンス: $RESPONSE_BODY" >&2
+    exit 1
+fi

@@ -10,12 +10,18 @@
 set -euo pipefail
 
 # 必要なコマンドの存在確認
-for cmd in gh jq; do
+for cmd in curl jq; do
     if ! command -v "$cmd" &> /dev/null; then
         echo "エラー: $cmd コマンドが見つかりません。インストールしてください。" >&2
         exit 1
     fi
 done
+
+# GH_TOKEN の存在チェック
+if [[ -z "${GH_TOKEN:-}" ]]; then
+    echo "エラー: GH_TOKEN 環境変数が設定されていません。" >&2
+    exit 1
+fi
 
 # 使用方法を表示
 usage() {
@@ -43,18 +49,19 @@ fi
 echo "レビュースレッドをresolve中..." >&2
 echo "スレッドID: $THREAD_ID" >&2
 
+# GraphQL クエリを JSON 形式で構築
+GRAPHQL_QUERY=$(jq -n \
+  --arg threadId "$THREAD_ID" \
+  '{
+    query: "mutation($threadId: ID!) { resolveReviewThread(input: {threadId: $threadId}) { thread { id isResolved } } }",
+    variables: {threadId: $threadId}
+  }')
+
 # レビュースレッドをresolve
-RESULT=$(gh api graphql \
-  -F threadId="$THREAD_ID" \
-  -f query='
-mutation($threadId: ID!) {
-  resolveReviewThread(input: {threadId: $threadId}) {
-    thread {
-      id
-      isResolved
-    }
-  }
-}')
+RESULT=$(curl -s -H "Authorization: Bearer $GH_TOKEN" \
+     -H "Content-Type: application/json" \
+     -d "$GRAPHQL_QUERY" \
+     https://api.github.com/graphql)
 
 # 結果を確認
 IS_RESOLVED=$(echo "$RESULT" | jq -r '.data.resolveReviewThread.thread.isResolved')

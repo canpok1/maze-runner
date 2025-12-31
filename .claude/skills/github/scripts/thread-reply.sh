@@ -20,12 +20,19 @@
 set -euo pipefail
 
 # 必要なコマンドの存在確認
-for cmd in gh jq; do
+for cmd in curl git jq; do
     if ! command -v "$cmd" &> /dev/null; then
         echo "エラー: $cmd コマンドが見つかりません。インストールしてください。" >&2
         exit 1
     fi
 done
+
+# GH_TOKEN の存在チェック
+if [[ -z "${GH_TOKEN:-}" ]]; then
+    echo "エラー: GH_TOKEN 環境変数が設定されていません。" >&2
+    echo "GitHub Personal Access Token を GH_TOKEN 環境変数に設定してください。" >&2
+    exit 1
+fi
 
 # 使用方法を表示
 usage() {
@@ -77,20 +84,22 @@ if [[ -z "$COMMENT_BODY" ]]; then
 fi
 
 # リポジトリ情報を取得
-OWNER_REPO=$(gh repo view --json nameWithOwner --jq '.nameWithOwner')
-OWNER="${OWNER_REPO%/*}"
-REPO="${OWNER_REPO#*/}"
+REMOTE_URL=$(git remote get-url origin)
+if [[ "$REMOTE_URL" =~ github\.com[:/]([^/]+)/([^/.]+)(\.git)?$ ]]; then
+    OWNER="${BASH_REMATCH[1]}"
+    REPO="${BASH_REMATCH[2]}"
+else
+    echo "エラー: GitHubリポジトリのURLを取得できませんでした。" >&2
+    echo "リモートURL: $REMOTE_URL" >&2
+    exit 1
+fi
 
 echo "リポジトリ: $OWNER/$REPO, スレッドID: $THREAD_ID" >&2
 echo "返信を投稿中..." >&2
 
 # 返信を投稿
-set +e
-RESULT=$(gh api graphql \
-  -f pullRequestReviewThreadId="$THREAD_ID" \
-  -f body="$COMMENT_BODY" \
-  -f query='
-mutation($pullRequestReviewThreadId: ID!, $body: String!) {
+# jq を使って変数を適切にJSONエスケープ
+GRAPHQL_QUERY='mutation($pullRequestReviewThreadId: ID!, $body: String!) {
   addPullRequestReviewThreadReply(input: {pullRequestReviewThreadId: $pullRequestReviewThreadId, body: $body}) {
     comment {
       id
@@ -101,12 +110,32 @@ mutation($pullRequestReviewThreadId: ID!, $body: String!) {
       }
     }
   }
-}' 2>&1)
-GH_POST_EXIT_CODE=$?
+}'
+
+# GraphQL リクエストのJSONペイロードを構築
+REQUEST_JSON=$(jq -n \
+  --arg query "$GRAPHQL_QUERY" \
+  --arg threadId "$THREAD_ID" \
+  --arg body "$COMMENT_BODY" \
+  '{
+    query: $query,
+    variables: {
+      pullRequestReviewThreadId: $threadId,
+      body: $body
+    }
+  }')
+
+set +e
+RESULT=$(curl -s -X POST \
+  -H "Authorization: Bearer $GH_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d "$REQUEST_JSON" \
+  https://api.github.com/graphql 2>&1)
+CURL_EXIT_CODE=$?
 set -e
 
 # 結果を確認
-if [ "$GH_POST_EXIT_CODE" -ne 0 ]; then
+if [ "$CURL_EXIT_CODE" -ne 0 ]; then
     echo "エラー: 返信の投稿に失敗しました。" >&2
     echo "$RESULT" | jq >&2
     exit 1

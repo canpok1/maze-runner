@@ -10,11 +10,18 @@
 # 注意事項:
 #   - 最大30件のレビュースレッドを取得します
 #   - 各スレッドの最後の10件のコメントを取得します
+#   - GH_TOKEN 環境変数が必要です
 
 set -euo pipefail
 
+# GH_TOKEN の存在チェック
+if [[ -z "${GH_TOKEN:-}" ]]; then
+    echo "エラー: GH_TOKEN 環境変数が設定されていません。" >&2
+    exit 1
+fi
+
 # 必要なコマンドの存在確認
-for cmd in gh jq; do
+for cmd in curl jq git; do
     if ! command -v "$cmd" &> /dev/null; then
         echo "エラー: $cmd コマンドが見つかりません。インストールしてください。" >&2
         exit 1
@@ -42,17 +49,24 @@ if ! [[ "$PR_NUMBER" =~ ^[0-9]+$ ]]; then
 fi
 
 # リポジトリ情報を取得
-OWNER_REPO=$(gh repo view --json nameWithOwner --jq '.nameWithOwner')
-OWNER="${OWNER_REPO%/*}"
-REPO="${OWNER_REPO#*/}"
+REMOTE_URL=$(git remote get-url origin 2>/dev/null || echo "")
+if [[ -z "$REMOTE_URL" ]]; then
+    echo "エラー: git remote が見つかりません。" >&2
+    exit 1
+fi
 
-# set +e で一時的にエラーでの終了を無効化
-set +e
-RESPONSE=$(gh api graphql \
-  -F owner="$OWNER" \
-  -F name="$REPO" \
-  -F number="$PR_NUMBER" \
-  -f query='
+# SSH形式: git@github.com:owner/repo.git
+# HTTPS形式: https://github.com/owner/repo.git
+if [[ "$REMOTE_URL" =~ github\.com[:/]([^/]+)/([^/.]+)(\.git)?$ ]]; then
+    OWNER="${BASH_REMATCH[1]}"
+    REPO="${BASH_REMATCH[2]}"
+else
+    echo "エラー: GitHub リポジトリのURLを解析できませんでした。" >&2
+    exit 1
+fi
+
+# GraphQL クエリを構築
+QUERY=$(cat <<'EOF'
 query($owner: String!, $name: String!, $number: Int!) {
   repository(owner: $owner, name: $name) {
     pullRequest(number: $number) {
@@ -73,13 +87,37 @@ query($owner: String!, $name: String!, $number: Int!) {
       }
     }
   }
-}' 2>&1)
-GH_EXIT_CODE=$?
+}
+EOF
+)
+
+# GraphQL API 呼び出し用の JSON ペイロードを構築
+PAYLOAD=$(jq -n \
+    --arg query "$QUERY" \
+    --arg owner "$OWNER" \
+    --arg name "$REPO" \
+    --argjson number "$PR_NUMBER" \
+    '{query: $query, variables: {owner: $owner, name: $name, number: $number}}')
+
+# set +e で一時的にエラーでの終了を無効化
+set +e
+RESPONSE=$(curl -s -H "Authorization: Bearer $GH_TOKEN" \
+    -H "Content-Type: application/json" \
+    -d "$PAYLOAD" \
+    https://api.github.com/graphql 2>&1)
+CURL_EXIT_CODE=$?
 set -e
 
-# gh api コマンドがエラーの場合
-if [ $GH_EXIT_CODE -ne 0 ]; then
-    echo "エラー: PR番号 '$PR_NUMBER' が見つからないか、アクセス権がありません。" >&2
+# curl コマンドがエラーの場合
+if [ $CURL_EXIT_CODE -ne 0 ]; then
+    echo "エラー: GitHub API へのリクエストに失敗しました。" >&2
+    exit 1
+fi
+
+# APIエラーをチェック
+if echo "$RESPONSE" | jq -e '.errors' > /dev/null 2>&1; then
+    echo "エラー: GitHub API がエラーを返しました。" >&2
+    echo "$RESPONSE" | jq -r '.errors[].message' >&2
     exit 1
 fi
 
