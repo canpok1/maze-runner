@@ -13,10 +13,15 @@ const MAX_WALL_REMOVAL_ATTEMPTS = 2;
  * 品質検証結果を表すインターフェース
  */
 export interface QualityCheckResult {
+  /** 生成された迷路マップ */
   maze: MazeMap;
+  /** 最短経路長（ゴールに到達できない場合はnull） */
   pathLength: number | null;
+  /** 品質基準を満たしているかどうか */
   meetsStandard: boolean;
+  /** 迷路生成の試行回数 */
   attempts: number;
+  /** 除去した壁の数 */
   wallsRemoved: number;
 }
 

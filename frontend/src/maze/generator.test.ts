@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import { type MazeMap, TileType } from '@maze-runner/lib';
 import { generateMaze, generateQualityMaze } from './generator';
 

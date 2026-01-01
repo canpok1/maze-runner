@@ -14,7 +14,7 @@ export const PATH_LENGTH_THRESHOLDS: Record<Difficulty, number> = {
 
 /**
  * マップサイズから難易度を判定する
- * @param size マップサイズ
+ * @param size - マップサイズ
  * @returns 難易度
  */
 export function getDifficultyFromSize(size: number): Difficulty {

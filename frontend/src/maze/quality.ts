@@ -1,6 +1,14 @@
 import { type MazeMap, TileType } from '@maze-runner/lib';
 
 /**
+ * 座標を表すインターフェース
+ */
+export interface Position {
+  x: number;
+  y: number;
+}
+
+/**
  * 迷路の対角線距離を計算する
  * @param size - 迷路のサイズ
  * @returns 対角線距離
@@ -28,11 +36,11 @@ export function meetsQualityStandard(
 /**
  * 除去可能な壁（通路同士を繋げる内壁）の候補を取得する
  * @param maze - 迷路マップ
- * @returns 除去可能な壁の座標リスト [{x, y}]
+ * @returns 除去可能な壁の座標リスト
  */
-export function getRemovableWalls(maze: MazeMap): Array<{ x: number; y: number }> {
+export function getRemovableWalls(maze: MazeMap): Position[] {
   const size = maze.length;
-  const removableWalls: Array<{ x: number; y: number }> = [];
+  const removableWalls: Position[] = [];
 
   // 内壁のみを対象とする（外壁は除外）
   for (let y = 1; y < size - 1; y++) {
