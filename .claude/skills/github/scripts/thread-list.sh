@@ -10,16 +10,12 @@
 # 注意事項:
 #   - 最大30件のレビュースレッドを取得します
 #   - 各スレッドの最後の10件のコメントを取得します
+#   - GH_TOKEN 環境変数が必要です
 
 set -euo pipefail
 
-# 必要なコマンドの存在確認
-for cmd in gh jq; do
-    if ! command -v "$cmd" &> /dev/null; then
-        echo "エラー: $cmd コマンドが見つかりません。インストールしてください。" >&2
-        exit 1
-    fi
-done
+# スクリプトディレクトリを取得
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # 使用方法を表示
 usage() {
@@ -42,17 +38,10 @@ if ! [[ "$PR_NUMBER" =~ ^[0-9]+$ ]]; then
 fi
 
 # リポジトリ情報を取得
-OWNER_REPO=$(gh repo view --json nameWithOwner --jq '.nameWithOwner')
-OWNER="${OWNER_REPO%/*}"
-REPO="${OWNER_REPO#*/}"
+read -r OWNER REPO < <("$SCRIPT_DIR/repo-info.sh")
 
-# set +e で一時的にエラーでの終了を無効化
-set +e
-RESPONSE=$(gh api graphql \
-  -F owner="$OWNER" \
-  -F name="$REPO" \
-  -F number="$PR_NUMBER" \
-  -f query='
+# GraphQL クエリを構築
+QUERY=$(cat <<'EOF'
 query($owner: String!, $name: String!, $number: Int!) {
   repository(owner: $owner, name: $name) {
     pullRequest(number: $number) {
@@ -73,15 +62,19 @@ query($owner: String!, $name: String!, $number: Int!) {
       }
     }
   }
-}' 2>&1)
-GH_EXIT_CODE=$?
-set -e
+}
+EOF
+)
 
-# gh api コマンドがエラーの場合
-if [ $GH_EXIT_CODE -ne 0 ]; then
-    echo "エラー: PR番号 '$PR_NUMBER' が見つからないか、アクセス権がありません。" >&2
-    exit 1
-fi
+# 変数を JSON 形式で構築
+VARIABLES=$(jq -n \
+    --arg owner "$OWNER" \
+    --arg name "$REPO" \
+    --argjson number "$PR_NUMBER" \
+    '{owner: $owner, name: $name, number: $number}')
+
+# GitHub GraphQL API を呼び出す
+RESPONSE=$("$SCRIPT_DIR/github-graphql.sh" "$QUERY" "$VARIABLES")
 
 # PRが存在しない場合（nullの場合）
 if echo "$RESPONSE" | jq -e '.data.repository.pullRequest == null' > /dev/null 2>&1; then

@@ -10,13 +10,14 @@
 
 set -euo pipefail
 
-# 必要なコマンドの存在確認
-for cmd in gh git; do
-    if ! command -v "$cmd" &> /dev/null; then
-        echo "エラー: $cmd コマンドが見つかりません。インストールしてください。" >&2
-        exit 1
-    fi
-done
+# スクリプトディレクトリを取得
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# gitコマンドの存在確認
+if ! command -v git &> /dev/null; then
+    echo "エラー: git コマンドが見つかりません。インストールしてください。" >&2
+    exit 1
+fi
 
 # 引数チェック
 if [[ $# -lt 2 ]]; then
@@ -71,21 +72,32 @@ else
     do_push -u origin "$CURRENT_BRANCH"
 fi
 
+# リポジトリ情報を取得
+echo "リポジトリ情報を取得中..." >&2
+read -r OWNER REPO < <("$SCRIPT_DIR/repo-info.sh")
+echo "Owner: $OWNER, Repo: $REPO" >&2
+
 # PR作成
 echo "PR作成中..." >&2
 
-set +e
-PR_URL=$(gh pr create \
-    --title "$PR_TITLE" \
-    --body "$PR_BODY" \
-    --base main \
-    --head "$CURRENT_BRANCH" 2>&1)
-PR_EXIT_CODE=$?
-set -e
+# JSON ペイロードを作成
+JSON_PAYLOAD=$(jq -n \
+    --arg title "$PR_TITLE" \
+    --arg body "$PR_BODY" \
+    --arg head "$CURRENT_BRANCH" \
+    --arg base "main" \
+    '{title: $title, body: $body, head: $head, base: $base}')
 
-if [ $PR_EXIT_CODE -ne 0 ]; then
-    echo "エラー: プルリクエストの作成に失敗しました。" >&2
-    echo "$PR_URL" >&2
+# GitHub API を使用してPRを作成
+ENDPOINT="/repos/$OWNER/$REPO/pulls"
+RESPONSE=$("$SCRIPT_DIR/github-rest.sh" "$ENDPOINT" "POST" "$JSON_PAYLOAD")
+
+# 成功: html_url を抽出
+PR_URL=$(echo "$RESPONSE" | jq -r '.html_url')
+
+if [[ -z "$PR_URL" || "$PR_URL" == "null" ]]; then
+    echo "エラー: PR URLを取得できませんでした。" >&2
+    echo "レスポンス: $RESPONSE" >&2
     exit 1
 fi
 

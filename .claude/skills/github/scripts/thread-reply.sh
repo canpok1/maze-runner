@@ -19,13 +19,8 @@
 
 set -euo pipefail
 
-# 必要なコマンドの存在確認
-for cmd in gh jq; do
-    if ! command -v "$cmd" &> /dev/null; then
-        echo "エラー: $cmd コマンドが見つかりません。インストールしてください。" >&2
-        exit 1
-    fi
-done
+# スクリプトディレクトリを取得
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # 使用方法を表示
 usage() {
@@ -77,20 +72,20 @@ if [[ -z "$COMMENT_BODY" ]]; then
 fi
 
 # リポジトリ情報を取得
-OWNER_REPO=$(gh repo view --json nameWithOwner --jq '.nameWithOwner')
-OWNER="${OWNER_REPO%/*}"
-REPO="${OWNER_REPO#*/}"
+read -r OWNER REPO < <("$SCRIPT_DIR/repo-info.sh")
+
+if [[ -z "$OWNER" || -z "$REPO" ]]; then
+    echo "エラー: リポジトリ情報を取得できませんでした。" >&2
+    exit 1
+fi
 
 echo "リポジトリ: $OWNER/$REPO, スレッドID: $THREAD_ID" >&2
 echo "返信を投稿中..." >&2
 
 # 返信を投稿
-set +e
-RESULT=$(gh api graphql \
-  -f pullRequestReviewThreadId="$THREAD_ID" \
-  -f body="$COMMENT_BODY" \
-  -f query='
-mutation($pullRequestReviewThreadId: ID!, $body: String!) {
+# jq を使って変数を適切にJSONエスケープ
+# レビューの状態も取得して、PENDINGの場合は自動的にsubmitする
+GRAPHQL_QUERY='mutation($pullRequestReviewThreadId: ID!, $body: String!) {
   addPullRequestReviewThreadReply(input: {pullRequestReviewThreadId: $pullRequestReviewThreadId, body: $body}) {
     comment {
       id
@@ -99,27 +94,78 @@ mutation($pullRequestReviewThreadId: ID!, $body: String!) {
       author {
         login
       }
+      pullRequestReview {
+        id
+        state
+      }
     }
   }
-}' 2>&1)
-GH_POST_EXIT_CODE=$?
+}'
+
+# GraphQL 変数を構築
+VARIABLES=$(jq -n \
+  --arg threadId "$THREAD_ID" \
+  --arg body "$COMMENT_BODY" \
+  '{
+    pullRequestReviewThreadId: $threadId,
+    body: $body
+  }')
+
+# github-graphql.shを使用して返信を投稿
+set +e
+RESULT=$("$SCRIPT_DIR/github-graphql.sh" "$GRAPHQL_QUERY" "$VARIABLES")
+GRAPHQL_EXIT_CODE=$?
 set -e
 
-# 結果を確認
-if [ "$GH_POST_EXIT_CODE" -ne 0 ]; then
+if [[ $GRAPHQL_EXIT_CODE -ne 0 ]]; then
     echo "エラー: 返信の投稿に失敗しました。" >&2
-    echo "$RESULT" | jq >&2
     exit 1
 fi
 
 COMMENT_ID=$(echo "$RESULT" | jq -r '.data.addPullRequestReviewThreadReply.comment.id // empty')
+REVIEW_ID=$(echo "$RESULT" | jq -r '.data.addPullRequestReviewThreadReply.comment.pullRequestReview.id // empty')
+REVIEW_STATE=$(echo "$RESULT" | jq -r '.data.addPullRequestReviewThreadReply.comment.pullRequestReview.state // empty')
 
-if [[ -n "$COMMENT_ID" ]]; then
-    echo "返信を投稿しました。" >&2
-    echo "$RESULT" | jq -r '.data.addPullRequestReviewThreadReply.comment | "コメントID: \(.id), 投稿者: @\(.author.login), 作成日時: \(.createdAt)"' >&2
-    exit 0
-else
+if [[ -z "$COMMENT_ID" ]]; then
     echo "エラー: 返信の投稿は成功しましたが、レスポンスからコメントIDを取得できませんでした。" >&2
     echo "$RESULT" | jq >&2
     exit 1
 fi
+
+# レビューがPENDING状態の場合、submitして公開する
+if [[ "$REVIEW_STATE" == "PENDING" && -n "$REVIEW_ID" ]]; then
+    echo "レビューがPENDING状態のため、submitして公開します..." >&2
+
+    SUBMIT_QUERY='mutation($reviewId: ID!) {
+      submitPullRequestReview(input: {pullRequestReviewId: $reviewId, event: COMMENT}) {
+        pullRequestReview {
+          id
+          state
+        }
+      }
+    }'
+
+    SUBMIT_VARIABLES=$(jq -n \
+      --arg reviewId "$REVIEW_ID" \
+      '{
+        reviewId: $reviewId
+      }')
+
+    set +e
+    SUBMIT_RESULT=$("$SCRIPT_DIR/github-graphql.sh" "$SUBMIT_QUERY" "$SUBMIT_VARIABLES")
+    SUBMIT_EXIT_CODE=$?
+    set -e
+
+    if [[ $SUBMIT_EXIT_CODE -ne 0 ]]; then
+        echo "警告: レビューのsubmitに失敗しました。返信はPENDING状態のままです。" >&2
+    else
+        SUBMITTED_STATE=$(echo "$SUBMIT_RESULT" | jq -r '.data.submitPullRequestReview.pullRequestReview.state // empty')
+        if [[ "$SUBMITTED_STATE" == "COMMENTED" ]]; then
+            echo "レビューをsubmitしました。返信が公開されました。" >&2
+        fi
+    fi
+fi
+
+echo "返信を投稿しました。" >&2
+echo "$RESULT" | jq -r '.data.addPullRequestReviewThreadReply.comment | "コメントID: \(.id), 投稿者: @\(.author.login), 作成日時: \(.createdAt)"' >&2
+exit 0

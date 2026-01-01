@@ -9,13 +9,8 @@
 
 set -euo pipefail
 
-# 必要なコマンドの存在確認
-for cmd in gh jq; do
-    if ! command -v "$cmd" &> /dev/null; then
-        echo "エラー: $cmd コマンドが見つかりません。インストールしてください。" >&2
-        exit 1
-    fi
-done
+# スクリプトのディレクトリを取得
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # 使用方法を表示
 usage() {
@@ -43,18 +38,29 @@ fi
 echo "レビュースレッドをresolve中..." >&2
 echo "スレッドID: $THREAD_ID" >&2
 
-# レビュースレッドをresolve
-RESULT=$(gh api graphql \
-  -F threadId="$THREAD_ID" \
-  -f query='
-mutation($threadId: ID!) {
+# GraphQL mutation を定義
+GRAPHQL_MUTATION='mutation($threadId: ID!) {
   resolveReviewThread(input: {threadId: $threadId}) {
     thread {
       id
       isResolved
     }
   }
-}')
+}'
+
+# 変数を JSON 形式で構築
+VARIABLES=$(jq -n --arg threadId "$THREAD_ID" '{threadId: $threadId}')
+
+# github-graphql.sh を呼び出してレビュースレッドをresolve
+set +e
+RESULT=$("$SCRIPT_DIR/github-graphql.sh" "$GRAPHQL_MUTATION" "$VARIABLES")
+EXIT_CODE=$?
+set -e
+
+if [[ $EXIT_CODE -ne 0 ]]; then
+    echo "エラー: GitHub API へのリクエストに失敗しました。" >&2
+    exit 1
+fi
 
 # 結果を確認
 IS_RESOLVED=$(echo "$RESULT" | jq -r '.data.resolveReviewThread.thread.isResolved')

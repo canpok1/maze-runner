@@ -24,13 +24,14 @@
 
 set -euo pipefail
 
-# 必要なコマンドの存在確認
-for cmd in gh jq; do
-    if ! command -v "$cmd" &> /dev/null; then
-        echo "エラー: $cmd コマンドが見つかりません。インストールしてください。" >&2
-        exit 1
-    fi
-done
+# スクリプトのディレクトリを取得
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# jq コマンドの存在確認
+if ! command -v jq &> /dev/null; then
+    echo "エラー: jq コマンドが見つかりません。インストールしてください。" >&2
+    exit 1
+fi
 
 # 使用方法を表示
 usage() {
@@ -74,13 +75,19 @@ query($threadId: ID!) {
 }
 GRAPHQL
 
+    # 変数をJSON形式で構築
+    local variables
+    variables=$(jq -n --arg threadId "$thread_id" '{threadId: $threadId}')
+
+    # github-graphql.sh を使用してクエリを実行
+    # エラーハンドリングのため set +e を使用
     set +e
     local response
-    response=$(gh api graphql -f threadId="$thread_id" -f query="$query" 2>&1)
+    response=$("$SCRIPT_DIR/github-graphql.sh" "$query" "$variables")
     local exit_code=$?
     set -e
 
-    # gh api コマンドがエラーの場合
+    # エラーが発生した場合
     if [ $exit_code -ne 0 ]; then
         echo "エラー: スレッドID '$thread_id' の取得に失敗しました。" >&2
         echo "$response" >&2
