@@ -163,3 +163,14 @@ MCPツール `mcp__github__issue_write` を使用（method: 'update'）
 **MCPツール版**:
 
 **対応不可** - スクリプト版を使用すること
+
+## 内部用スクリプト
+
+以下のスクリプトは他のスクリプトから内部的に使用される共通処理です。
+直接実行することは想定していません。
+
+| スクリプト | 機能 |
+|-----------|------|
+| `repo-info.sh` | gitリモートURLからowner/repo情報を取得 |
+| `github-rest.sh` | GitHub REST API呼び出しの共通処理 |
+| `github-graphql.sh` | GitHub GraphQL API呼び出しの共通処理 |

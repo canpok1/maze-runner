@@ -113,7 +113,7 @@ VARIABLES=$(jq -n \
 
 # github-graphql.shを使用して返信を投稿
 set +e
-RESULT=$("$SCRIPT_DIR/github-graphql.sh" "$GRAPHQL_QUERY" "$VARIABLES" 2>&1)
+RESULT=$("$SCRIPT_DIR/github-graphql.sh" "$GRAPHQL_QUERY" "$VARIABLES")
 GRAPHQL_EXIT_CODE=$?
 set -e
 
@@ -152,7 +152,7 @@ if [[ "$REVIEW_STATE" == "PENDING" && -n "$REVIEW_ID" ]]; then
       }')
 
     set +e
-    SUBMIT_RESULT=$("$SCRIPT_DIR/github-graphql.sh" "$SUBMIT_QUERY" "$SUBMIT_VARIABLES" 2>&1)
+    SUBMIT_RESULT=$("$SCRIPT_DIR/github-graphql.sh" "$SUBMIT_QUERY" "$SUBMIT_VARIABLES")
     SUBMIT_EXIT_CODE=$?
     set -e
 

@@ -27,9 +27,11 @@ set -euo pipefail
 # スクリプトのディレクトリを取得
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# 共通スクリプトを読み込む
-# shellcheck source=./common/github-graphql.sh
-source "$SCRIPT_DIR/common/github-graphql.sh"
+# jq コマンドの存在確認
+if ! command -v jq &> /dev/null; then
+    echo "エラー: jq コマンドが見つかりません。インストールしてください。" >&2
+    exit 1
+fi
 
 # 使用方法を表示
 usage() {
@@ -81,7 +83,7 @@ GRAPHQL
     # エラーハンドリングのため set +e を使用
     set +e
     local response
-    response=$(github_graphql_query "$query" "$variables" 2>&1)
+    response=$("$SCRIPT_DIR/github-graphql.sh" "$query" "$variables")
     local exit_code=$?
     set -e
 
