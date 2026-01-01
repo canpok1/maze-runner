@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
   getDifficultyFromSize,
-  PATH_LENGTH_THRESHOLDS,
   getPathLengthThreshold,
   getPathLengthThresholdFromSize,
+  PATH_LENGTH_THRESHOLDS,
 } from './difficulty';
 
 describe('getDifficultyFromSize', () => {

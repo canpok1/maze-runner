@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'vitest';
+import type { MazeMap } from '@maze-runner/lib';
+import { describe, expect, it } from 'vitest';
 import { calculateShortestPath } from './pathfinding';
-import { type MazeMap, TileType } from '@maze-runner/lib';
 
 describe('calculateShortestPath', () => {
   it('スタートからゴールまでの最短経路長が正しく計算されること', () => {

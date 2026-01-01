@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest';
 import { type MazeMap, TileType } from '@maze-runner/lib';
+import { describe, expect, it } from 'vitest';
 import { generateMaze, generateQualityMaze } from './generator';
 
 describe('generateMaze', () => {

@@ -1,11 +1,11 @@
-import { describe, it, expect } from 'vitest';
 import { type MazeMap, TileType } from '@maze-runner/lib';
+import { describe, expect, it } from 'vitest';
 import {
   calculateDiagonalDistance,
-  meetsQualityStandard,
   getRemovableWalls,
-  removeWall,
+  meetsQualityStandard,
   removeRandomWalls,
+  removeWall,
 } from './quality';
 
 const F = TileType.FLOOR;

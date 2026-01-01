@@ -1,7 +1,7 @@
 import { type MazeMap, TileType } from '@maze-runner/lib';
+import { getPathLengthThresholdFromSize } from '../helpers/difficulty';
 import { calculateShortestPath } from './pathfinding';
 import { meetsQualityStandard, removeRandomWalls } from './quality';
-import { getPathLengthThresholdFromSize } from '../helpers/difficulty';
 
 /** 再生成の最大回数 */
 const MAX_REGENERATION_ATTEMPTS = 10;
@@ -170,7 +170,9 @@ export function generateQualityMaze(size: number): QualityCheckResult {
   }
 
   // 最大試行回数に達した場合、警告ログを出力して最後に生成した迷路を返す
-  console.warn(`迷路生成: ${MAX_REGENERATION_ATTEMPTS}回の試行後も品質基準を満たしませんでした。現状の迷路を使用します。`);
+  console.warn(
+    `迷路生成: ${MAX_REGENERATION_ATTEMPTS}回の試行後も品質基準を満たしませんでした。現状の迷路を使用します。`
+  );
 
   const finalMaze = generateMaze(adjustedSize);
   const finalPathLength = calculateShortestPath(finalMaze);

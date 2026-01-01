@@ -24,11 +24,7 @@ export function calculateDiagonalDistance(size: number): number {
  * @param threshold - 基準値（対角線距離に対する比率、0-1）
  * @returns 基準を満たしていれば true
  */
-export function meetsQualityStandard(
-  pathLength: number,
-  size: number,
-  threshold: number,
-): boolean {
+export function meetsQualityStandard(pathLength: number, size: number, threshold: number): boolean {
   const diagonalDistance = calculateDiagonalDistance(size);
   return pathLength >= diagonalDistance * threshold;
 }
@@ -115,9 +111,7 @@ export function removeRandomWalls(maze: MazeMap, count = 1): MazeMap {
 
   // ランダムにcount個の壁を除去
   const wallsToRemove = Math.min(count, removableWalls.length);
-  const selectedWalls = [...removableWalls]
-    .sort(() => Math.random() - 0.5)
-    .slice(0, wallsToRemove);
+  const selectedWalls = [...removableWalls].sort(() => Math.random() - 0.5).slice(0, wallsToRemove);
 
   for (const wall of selectedWalls) {
     removeWall(newMaze, wall.x, wall.y);

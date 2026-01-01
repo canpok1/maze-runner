@@ -16,11 +16,7 @@ interface QueueNode {
  * @param startY - スタート地点のY座標（デフォルト: 1）
  * @returns 最短経路長（ゴールが見つからない場合は null）
  */
-export function calculateShortestPath(
-  maze: MazeMap,
-  startX = 1,
-  startY = 1,
-): number | null {
+export function calculateShortestPath(maze: MazeMap, startX = 1, startY = 1): number | null {
   // 迷路のサイズを取得
   const height = maze.length;
   const width = maze[0]?.length ?? 0;
@@ -43,7 +39,7 @@ export function calculateShortestPath(
 
   // 訪問済みフラグの2次元配列
   const visited: boolean[][] = Array.from({ length: height }, () =>
-    Array.from({ length: width }, () => false),
+    Array.from({ length: width }, () => false)
   );
 
   // BFS用のキュー
@@ -54,8 +50,8 @@ export function calculateShortestPath(
   // 4方向の移動（上、右、下、左）
   const directions = [
     { dx: 0, dy: -1 }, // 上
-    { dx: 1, dy: 0 },  // 右
-    { dx: 0, dy: 1 },  // 下
+    { dx: 1, dy: 0 }, // 右
+    { dx: 0, dy: 1 }, // 下
     { dx: -1, dy: 0 }, // 左
   ];
 
