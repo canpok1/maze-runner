@@ -10,6 +10,16 @@ interface QueueNode {
 }
 
 /**
+ * 4方向の移動（上、右、下、左）
+ */
+const DIRECTIONS = [
+  { dx: 0, dy: -1 }, // 上
+  { dx: 1, dy: 0 }, // 右
+  { dx: 0, dy: 1 }, // 下
+  { dx: -1, dy: 0 }, // 左
+] as const;
+
+/**
  * BFSを用いて迷路のスタート地点からゴールまでの最短経路長を計算する
  * @param maze - 迷路マップ
  * @param startX - スタート地点のX座標（デフォルト: 1）
@@ -47,14 +57,6 @@ export function calculateShortestPath(maze: MazeMap, startX = 1, startY = 1): nu
   queue.push({ x: startX, y: startY, distance: 0 });
   visited[startY][startX] = true;
 
-  // 4方向の移動（上、右、下、左）
-  const directions = [
-    { dx: 0, dy: -1 }, // 上
-    { dx: 1, dy: 0 }, // 右
-    { dx: 0, dy: 1 }, // 下
-    { dx: -1, dy: 0 }, // 左
-  ];
-
   // BFSによる探索
   while (queue.length > 0) {
     // キューの先頭を取り出す
@@ -67,7 +69,7 @@ export function calculateShortestPath(maze: MazeMap, startX = 1, startY = 1): nu
     }
 
     // 4方向を探索
-    for (const dir of directions) {
+    for (const dir of DIRECTIONS) {
       const nextX = current.x + dir.dx;
       const nextY = current.y + dir.dy;
 

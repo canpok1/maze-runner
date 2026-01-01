@@ -92,6 +92,19 @@ export function removeWall(maze: MazeMap, x: number, y: number): MazeMap {
 }
 
 /**
+ * Fisher-Yatesシャッフルアルゴリズムで配列をシャッフルする
+ * @param array - シャッフルする配列
+ * @returns シャッフルされた配列（元の配列を変更）
+ */
+function shuffleArray<T>(array: T[]): T[] {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+/**
  * ランダムに1〜2箇所の壁を除去してループを追加する
  * @param maze - 迷路マップ（コピーが作成される）
  * @param count - 除去する壁の数（1-2、デフォルト: 1）
@@ -109,9 +122,10 @@ export function removeRandomWalls(maze: MazeMap, count = 1): MazeMap {
     return newMaze;
   }
 
-  // ランダムにcount個の壁を除去
-  const wallsToRemove = Math.min(count, removableWalls.length);
-  const selectedWalls = [...removableWalls].sort(() => Math.random() - 0.5).slice(0, wallsToRemove);
+  // Fisher-Yatesシャッフルでランダムに壁を選択
+  const shuffledWalls = shuffleArray([...removableWalls]);
+  const wallsToRemove = Math.min(count, shuffledWalls.length);
+  const selectedWalls = shuffledWalls.slice(0, wallsToRemove);
 
   for (const wall of selectedWalls) {
     removeWall(newMaze, wall.x, wall.y);

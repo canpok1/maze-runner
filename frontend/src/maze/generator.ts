@@ -146,6 +146,12 @@ export function generateQualityMaze(size: number): QualityCheckResult {
 
     // ゴールに到達できない場合は再生成
     if (pathLength === null) {
+      if (attempts === MAX_REGENERATION_ATTEMPTS) {
+        console.warn(
+          `迷路生成: ${MAX_REGENERATION_ATTEMPTS}回の試行後もゴールへの到達可能な経路が見つかりませんでした。`
+        );
+        return { maze, pathLength, meetsStandard: false, attempts, wallsRemoved };
+      }
       continue;
     }
 
@@ -166,20 +172,21 @@ export function generateQualityMaze(size: number): QualityCheckResult {
       }
     }
 
-    // 壁除去でも基準を満たさない場合は再生成
+    // 最大試行回数に達した場合は、最後に生成された迷路を返す
+    if (attempts === MAX_REGENERATION_ATTEMPTS) {
+      console.warn(
+        `迷路生成: ${MAX_REGENERATION_ATTEMPTS}回の試行後も品質基準を満たしませんでした。最後に生成された迷路を使用します。`
+      );
+      return { maze, pathLength, meetsStandard: false, attempts, wallsRemoved };
+    }
   }
 
-  // 最大試行回数に達した場合、警告ログを出力して最後に生成した迷路を返す
-  console.warn(
-    `迷路生成: ${MAX_REGENERATION_ATTEMPTS}回の試行後も品質基準を満たしませんでした。現状の迷路を使用します。`
-  );
-
+  // MAX_REGENERATION_ATTEMPTS > 0 の場合、このコードパスは到達不能
+  // コンパイラの型チェックを満たすためのフォールバック
   const finalMaze = generateMaze(adjustedSize);
-  const finalPathLength = calculateShortestPath(finalMaze);
-
   return {
     maze: finalMaze,
-    pathLength: finalPathLength,
+    pathLength: calculateShortestPath(finalMaze),
     meetsStandard: false,
     attempts,
     wallsRemoved: 0,
