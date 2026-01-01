@@ -1,4 +1,29 @@
 import { type MazeMap, TileType } from '@maze-runner/lib';
+import { getPathLengthThresholdFromSize } from '../helpers/difficulty';
+import { calculateShortestPath } from './pathfinding';
+import { meetsQualityStandard, removeRandomWalls } from './quality';
+
+/** 再生成の最大回数 */
+const MAX_REGENERATION_ATTEMPTS = 10;
+
+/** 壁除去の最大回数 */
+const MAX_WALL_REMOVAL_ATTEMPTS = 2;
+
+/**
+ * 品質検証結果を表すインターフェース
+ */
+export interface QualityCheckResult {
+  /** 生成された迷路マップ */
+  maze: MazeMap;
+  /** 最短経路長（ゴールに到達できない場合はnull） */
+  pathLength: number | null;
+  /** 品質基準を満たしているかどうか */
+  meetsStandard: boolean;
+  /** 迷路生成の試行回数 */
+  attempts: number;
+  /** 除去した壁の数 */
+  wallsRemoved: number;
+}
 
 /**
  * 穴掘り法を用いて迷路を生成する純粋関数
@@ -88,4 +113,82 @@ export function generateMaze(size: number): MazeMap {
   }
 
   return newMap;
+}
+
+/**
+ * 品質検証付きで迷路を生成する
+ *
+ * 1. 穴掘り法で基本迷路を生成
+ * 2. 最短経路長を計算
+ * 3. 基準値と比較
+ * 4. 基準未満の場合、ランダムに壁を1〜2箇所除去
+ * 5. それでも基準未満の場合は再生成（最大10回）
+ *
+ * @param size - 迷路のサイズ
+ * @returns 品質検証結果
+ */
+export function generateQualityMaze(size: number): QualityCheckResult {
+  // サイズが偶数の場合は奇数に調整
+  const adjustedSize = size % 2 === 0 ? size + 1 : size;
+  const threshold = getPathLengthThresholdFromSize(adjustedSize);
+
+  let attempts = 0;
+
+  while (attempts < MAX_REGENERATION_ATTEMPTS) {
+    attempts++;
+
+    // 基本迷路を生成
+    let maze = generateMaze(adjustedSize);
+    let wallsRemoved = 0;
+
+    // 最短経路長を計算
+    let pathLength = calculateShortestPath(maze);
+
+    // ゴールに到達できない場合は再生成
+    if (pathLength === null) {
+      if (attempts === MAX_REGENERATION_ATTEMPTS) {
+        console.warn(
+          `迷路生成: ${MAX_REGENERATION_ATTEMPTS}回の試行後もゴールへの到達可能な経路が見つかりませんでした。`
+        );
+        return { maze, pathLength, meetsStandard: false, attempts, wallsRemoved };
+      }
+      continue;
+    }
+
+    // 基準を満たしているかチェック
+    if (meetsQualityStandard(pathLength, adjustedSize, threshold)) {
+      return { maze, pathLength, meetsStandard: true, attempts, wallsRemoved };
+    }
+
+    // 基準未満の場合、壁を除去してループを追加
+    for (let i = 0; i < MAX_WALL_REMOVAL_ATTEMPTS; i++) {
+      maze = removeRandomWalls(maze, 1);
+      wallsRemoved++;
+
+      pathLength = calculateShortestPath(maze);
+
+      if (pathLength !== null && meetsQualityStandard(pathLength, adjustedSize, threshold)) {
+        return { maze, pathLength, meetsStandard: true, attempts, wallsRemoved };
+      }
+    }
+
+    // 最大試行回数に達した場合は、最後に生成された迷路を返す
+    if (attempts === MAX_REGENERATION_ATTEMPTS) {
+      console.warn(
+        `迷路生成: ${MAX_REGENERATION_ATTEMPTS}回の試行後も品質基準を満たしませんでした。最後に生成された迷路を使用します。`
+      );
+      return { maze, pathLength, meetsStandard: false, attempts, wallsRemoved };
+    }
+  }
+
+  // MAX_REGENERATION_ATTEMPTS > 0 の場合、このコードパスは到達不能
+  // コンパイラの型チェックを満たすためのフォールバック
+  const finalMaze = generateMaze(adjustedSize);
+  return {
+    maze: finalMaze,
+    pathLength: calculateShortestPath(finalMaze),
+    meetsStandard: false,
+    attempts,
+    wallsRemoved: 0,
+  };
 }

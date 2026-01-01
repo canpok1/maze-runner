@@ -1,5 +1,6 @@
 import { type MazeMap, TileType } from '@maze-runner/lib';
-import { generateMaze } from './generator';
+import { describe, expect, it } from 'vitest';
+import { generateMaze, generateQualityMaze } from './generator';
 
 describe('generateMaze', () => {
   describe('迷路サイズの調整', () => {
@@ -129,5 +130,48 @@ describe('generateMaze', () => {
         expect(row.length).toBe(size);
       }
     });
+  });
+});
+
+describe('generateQualityMaze', () => {
+  it('品質検証結果が正しい形式で返されること', () => {
+    const result = generateQualityMaze(11);
+
+    expect(result).toHaveProperty('maze');
+    expect(result).toHaveProperty('pathLength');
+    expect(result).toHaveProperty('meetsStandard');
+    expect(result).toHaveProperty('attempts');
+    expect(result).toHaveProperty('wallsRemoved');
+  });
+
+  it('生成された迷路が有効であること', () => {
+    const result = generateQualityMaze(11);
+
+    expect(result.maze.length).toBe(11);
+    expect(result.pathLength).not.toBeNull();
+  });
+
+  it('試行回数が1以上であること', () => {
+    const result = generateQualityMaze(11);
+
+    expect(result.attempts).toBeGreaterThanOrEqual(1);
+    expect(result.attempts).toBeLessThanOrEqual(10);
+  });
+
+  it('壁除去回数が0〜2の範囲であること', () => {
+    const result = generateQualityMaze(11);
+
+    expect(result.wallsRemoved).toBeGreaterThanOrEqual(0);
+    expect(result.wallsRemoved).toBeLessThanOrEqual(2);
+  });
+
+  it('各難易度サイズで迷路が生成されること', () => {
+    const sizes = [11, 15, 21];
+
+    for (const size of sizes) {
+      const result = generateQualityMaze(size);
+      expect(result.maze).toBeDefined();
+      expect(result.pathLength).not.toBeNull();
+    }
   });
 });

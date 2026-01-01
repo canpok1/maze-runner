@@ -9,7 +9,7 @@ import {
 import { getDifficultyFromSize } from './helpers/difficulty';
 import { setupControls } from './input/controls';
 import { getTestMaze } from './maze/fixtures';
-import { generateMaze } from './maze/generator';
+import { generateQualityMaze } from './maze/generator';
 import { createRenderer } from './renderer';
 import { initRankingDisplay, type RankingControls } from './ui/ranking-display';
 import { showScoreModal } from './ui/score-modal';
@@ -95,7 +95,7 @@ function startGame(size: number): void {
 
   const deps: StartGameDependencies = {
     gameState,
-    generateMaze,
+    generateMaze: (size: number) => generateQualityMaze(size).maze,
     menuElement,
     resizeCanvas,
     render,
