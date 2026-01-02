@@ -1,6 +1,6 @@
 import type { D1Database, D1Result } from '@cloudflare/workers-types';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { addRanking, calculateRank, getRankings } from './rankings';
+import { addRanking, calculateRank, deleteOldRankings, getRankings } from './rankings';
 
 describe('getRankings', () => {
   let mockDb: D1Database;
@@ -254,5 +254,68 @@ describe('calculateRank', () => {
     const result = await calculateRank(mockDb, 'easy', 50);
 
     expect(result).toBe(1);
+  });
+});
+
+describe('deleteOldRankings', () => {
+  let mockDb: D1Database;
+
+  beforeEach(() => {
+    mockDb = {
+      prepare: vi.fn(),
+    } as unknown as D1Database;
+  });
+
+  it('should delete old rankings and return the number of deleted rows', async () => {
+    const mockPrepare = vi.fn().mockReturnValue({
+      run: vi.fn().mockResolvedValue({
+        success: true,
+        meta: {
+          changes: 5,
+        },
+      } as D1Result),
+    });
+
+    mockDb.prepare = mockPrepare;
+
+    const result = await deleteOldRankings(mockDb);
+
+    expect(mockPrepare).toHaveBeenCalledWith(expect.stringContaining('DELETE FROM rankings'));
+    expect(mockPrepare).toHaveBeenCalledWith(
+      expect.stringContaining("datetime('now', '-30 days')")
+    );
+    expect(result).toBe(5);
+  });
+
+  it('should return 0 when no old rankings exist', async () => {
+    const mockPrepare = vi.fn().mockReturnValue({
+      run: vi.fn().mockResolvedValue({
+        success: true,
+        meta: {
+          changes: 0,
+        },
+      } as D1Result),
+    });
+
+    mockDb.prepare = mockPrepare;
+
+    const result = await deleteOldRankings(mockDb);
+
+    expect(result).toBe(0);
+  });
+
+  it('should throw error when database operation fails', async () => {
+    const mockPrepare = vi.fn().mockReturnValue({
+      run: vi.fn().mockResolvedValue({
+        success: false,
+        error: 'Database error',
+      } as D1Result),
+    });
+
+    mockDb.prepare = mockPrepare;
+
+    await expect(deleteOldRankings(mockDb)).rejects.toThrow(
+      'Failed to delete old rankings: Database error'
+    );
   });
 });
