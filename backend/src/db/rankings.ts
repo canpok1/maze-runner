@@ -97,3 +97,23 @@ export async function calculateRank(
   const rank = rankings.filter((r) => r.clearTime < clearTime).length + 1;
   return rank;
 }
+
+/**
+ * 30日より古いランキングデータを削除する
+ * @param db D1データベースインスタンス
+ * @returns 削除された件数
+ */
+export async function deleteOldRankings(db: D1Database): Promise<number> {
+  const query = `
+    DELETE FROM rankings
+    WHERE created_at < datetime('now', '-30 days')
+  `;
+
+  const result = await db.prepare(query).run();
+
+  if (!result.success) {
+    throw new Error('Failed to delete old rankings');
+  }
+
+  return result.meta.changes;
+}
