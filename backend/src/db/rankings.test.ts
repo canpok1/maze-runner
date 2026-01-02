@@ -314,6 +314,8 @@ describe('deleteOldRankings', () => {
 
     mockDb.prepare = mockPrepare;
 
-    await expect(deleteOldRankings(mockDb)).rejects.toThrow('Failed to delete old rankings');
+    await expect(deleteOldRankings(mockDb)).rejects.toThrow(
+      'Failed to delete old rankings: Database error'
+    );
   });
 });

@@ -104,15 +104,16 @@ export async function calculateRank(
  * @returns 削除された件数
  */
 export async function deleteOldRankings(db: D1Database): Promise<number> {
+  const RANKING_RETENTION_DAYS = 30;
   const query = `
     DELETE FROM rankings
-    WHERE created_at < datetime('now', '-30 days')
+    WHERE created_at < datetime('now', '-${RANKING_RETENTION_DAYS} days')
   `;
 
   const result = await db.prepare(query).run();
 
   if (!result.success) {
-    throw new Error('Failed to delete old rankings');
+    throw new Error(`Failed to delete old rankings: ${result.error}`);
   }
 
   return result.meta.changes;
