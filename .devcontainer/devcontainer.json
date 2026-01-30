@@ -6,7 +6,8 @@
   "image": "mcr.microsoft.com/devcontainers/base:noble",
   "runArgs": ["--env-file", "${localWorkspaceFolder}/.devcontainer/.env"],
   "features": {
-    "ghcr.io/devcontainers/features/node:1": {}
+    "ghcr.io/devcontainers/features/node:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {}
   },
   "postCreateCommand": ".devcontainer/postCreate.sh",
   "remoteUser": "vscode",
