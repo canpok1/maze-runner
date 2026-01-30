@@ -3,10 +3,11 @@
 {
   "name": "Ubuntu",
   // Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-  "image": "mcr.microsoft.com/devcontainers/base:noble",
+  "image": "mcr.microsoft.com/devcontainers/base:latest",
   "runArgs": ["--env-file", "${localWorkspaceFolder}/.devcontainer/.env"],
   "features": {
-    "ghcr.io/devcontainers/features/node:1": {}
+    "ghcr.io/devcontainers/features/node:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {}
   },
   "postCreateCommand": ".devcontainer/postCreate.sh",
   "remoteUser": "vscode",
