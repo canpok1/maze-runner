@@ -1,23 +1,7 @@
 import { fetchRankings } from '../api-client/rankings';
 import type { Difficulty, Ranking } from '../api-client/types';
+import { formatDateJST } from '../utils/date';
 import { showRankingDetailModal } from './ranking-detail-modal';
-
-/**
- * ISO 8601形式の日付文字列を日本時間（JST）のフォーマット済み文字列に変換する
- * @param isoString - ISO 8601形式の日付文字列
- * @returns YYYY/MM/DD hh:mm:ss JST 形式の文字列
- */
-const formatDateJST = (isoString: string): string => {
-  const date = new Date(isoString);
-  const jst = new Date(date.getTime() + 9 * 60 * 60 * 1000);
-  const y = jst.getUTCFullYear();
-  const mo = String(jst.getUTCMonth() + 1).padStart(2, '0');
-  const d = String(jst.getUTCDate()).padStart(2, '0');
-  const h = String(jst.getUTCHours()).padStart(2, '0');
-  const mi = String(jst.getUTCMinutes()).padStart(2, '0');
-  const s = String(jst.getUTCSeconds()).padStart(2, '0');
-  return `${y}/${mo}/${d} ${h}:${mi}:${s} JST`;
-};
 
 /**
  * ランキング画面を制御するオブジェクトの型定義
