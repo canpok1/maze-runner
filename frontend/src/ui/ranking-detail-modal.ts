@@ -1,5 +1,22 @@
 import type { Ranking } from '../api-client/types';
 
+/**
+ * ISO 8601形式の日時文字列をJST形式にフォーマットする
+ * @param isoString ISO 8601形式の日時文字列
+ * @returns YYYY/MM/DD hh:mm:ss JST 形式の文字列
+ */
+function formatDateJST(isoString: string): string {
+  const date = new Date(isoString);
+  const jst = new Date(date.getTime() + 9 * 60 * 60 * 1000);
+  const y = jst.getUTCFullYear();
+  const mo = String(jst.getUTCMonth() + 1).padStart(2, '0');
+  const d = String(jst.getUTCDate()).padStart(2, '0');
+  const h = String(jst.getUTCHours()).padStart(2, '0');
+  const mi = String(jst.getUTCMinutes()).padStart(2, '0');
+  const s = String(jst.getUTCSeconds()).padStart(2, '0');
+  return `${y}/${mo}/${d} ${h}:${mi}:${s} JST`;
+}
+
 // モーダル表示中のAbortControllerを保持
 let currentAbortController: AbortController | null = null;
 
@@ -40,7 +57,7 @@ export function showRankingDetailModal(ranking: Ranking, rank: number): void {
   rankDisplay.textContent = `${rank}位`;
   playerNameDisplay.textContent = ranking.playerName;
   clearTimeDisplay.textContent = `${(ranking.clearTime / 1000).toFixed(2)}秒`;
-  createdAtDisplay.textContent = new Date(ranking.createdAt).toLocaleString('ja-JP');
+  createdAtDisplay.textContent = formatDateJST(ranking.createdAt);
 
   modal.classList.remove('hidden');
 

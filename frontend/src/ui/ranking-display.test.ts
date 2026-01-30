@@ -60,6 +60,24 @@ describe('initRankingDisplay', () => {
     expect(items?.[2].querySelector('.ranking-time')?.textContent).toBe('30.00秒');
   });
 
+  it('登録日がJST形式で表示される', async () => {
+    vi.spyOn(rankingsApi, 'fetchRankings').mockResolvedValue([
+      { playerName: 'Player1', clearTime: 10000, createdAt: '2025-12-28T00:00:00Z' },
+      { playerName: 'Player2', clearTime: 20000, createdAt: '2025-06-15T15:30:45Z' },
+    ]);
+
+    const result = await initRankingDisplay();
+    await result.show();
+
+    const rankingList = document.getElementById('ranking-list');
+    const items = rankingList?.querySelectorAll('li.ranking-item');
+
+    // UTC 2025-12-28T00:00:00Z → JST 2025/12/28 09:00:00 JST
+    expect(items?.[0].querySelector('.ranking-date')?.textContent).toBe('2025/12/28 09:00:00 JST');
+    // UTC 2025-06-15T15:30:45Z → JST 2025/06/16 00:30:45 JST
+    expect(items?.[1].querySelector('.ranking-date')?.textContent).toBe('2025/06/16 00:30:45 JST');
+  });
+
   it('タイムをミリ秒から秒に変換して表示する', async () => {
     vi.spyOn(rankingsApi, 'fetchRankings').mockResolvedValue([
       { playerName: 'Player1', clearTime: 12345, createdAt: '2025-12-28T00:00:00Z' },
