@@ -399,7 +399,7 @@ canvas {
 #ranking-section {
   margin-top: 30px;
   width: 100%;
-  max-width: 400px;
+  max-width: 600px;
 }
 
 #ranking-section h3 {
@@ -507,6 +507,13 @@ canvas {
   margin-left: 12px;
   color: #3498db;
   font-weight: bold;
+}
+
+.ranking-date {
+  margin-left: 12px;
+  color: var(--color-text-secondary);
+  font-size: 0.85em;
+  white-space: nowrap;
 }
 
 /* ランキング詳細モーダル */

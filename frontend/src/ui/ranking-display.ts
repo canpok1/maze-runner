@@ -1,5 +1,6 @@
 import { fetchRankings } from '../api-client/rankings';
 import type { Difficulty, Ranking } from '../api-client/types';
+import { formatDateJST } from '../utils/date';
 import { showRankingDetailModal } from './ranking-detail-modal';
 
 /**
@@ -117,9 +118,14 @@ export async function initRankingDisplay(): Promise<RankingControls> {
     const timeInSeconds = (ranking.clearTime / 1000).toFixed(2);
     timeSpan.textContent = `${timeInSeconds}秒`;
 
+    const dateSpan = document.createElement('span');
+    dateSpan.className = 'ranking-date';
+    dateSpan.textContent = formatDateJST(ranking.createdAt);
+
     listItem.appendChild(rankSpan);
     listItem.appendChild(nameSpan);
     listItem.appendChild(timeSpan);
+    listItem.appendChild(dateSpan);
 
     // クリックで詳細モーダルを表示
     listItem.addEventListener('click', () => {

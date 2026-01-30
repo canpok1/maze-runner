@@ -1,4 +1,5 @@
 import type { Ranking } from '../api-client/types';
+import { formatDateJST } from '../utils/date';
 
 // モーダル表示中のAbortControllerを保持
 let currentAbortController: AbortController | null = null;
@@ -40,7 +41,7 @@ export function showRankingDetailModal(ranking: Ranking, rank: number): void {
   rankDisplay.textContent = `${rank}位`;
   playerNameDisplay.textContent = ranking.playerName;
   clearTimeDisplay.textContent = `${(ranking.clearTime / 1000).toFixed(2)}秒`;
-  createdAtDisplay.textContent = new Date(ranking.createdAt).toLocaleString('ja-JP');
+  createdAtDisplay.textContent = formatDateJST(ranking.createdAt);
 
   modal.classList.remove('hidden');
 
