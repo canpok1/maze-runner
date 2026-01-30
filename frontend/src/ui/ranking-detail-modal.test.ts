@@ -96,7 +96,7 @@ describe('showRankingDetailModal', () => {
     expect(clearTimeDisplay?.textContent).toBe('123.46秒');
   });
 
-  it('登録日時が日本語形式で正しく表示される', () => {
+  it('登録日時がJSTフォーマットで正しく表示される', () => {
     const ranking: Ranking = {
       ...defaultRanking,
       createdAt: '2025-12-28T10:30:00.000Z',
@@ -105,8 +105,7 @@ describe('showRankingDetailModal', () => {
     showRankingDetailModal(ranking, 1);
 
     const createdAtDisplay = document.getElementById('detail-created-at');
-    const expectedDate = new Date('2025-12-28T10:30:00.000Z').toLocaleString('ja-JP');
-    expect(createdAtDisplay?.textContent).toBe(expectedDate);
+    expect(createdAtDisplay?.textContent).toBe('2025/12/28 19:30:00 JST');
   });
 
   it('閉じるボタンでモーダルが閉じる', () => {

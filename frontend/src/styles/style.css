@@ -509,6 +509,13 @@ canvas {
   font-weight: bold;
 }
 
+.ranking-date {
+  margin-left: 12px;
+  color: #95a5a6;
+  font-size: 0.85em;
+  white-space: nowrap;
+}
+
 /* ランキング詳細モーダル */
 #ranking-detail-modal .modal-content {
   max-width: 350px;

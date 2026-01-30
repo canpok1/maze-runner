@@ -41,8 +41,8 @@ describe('initRankingDisplay', () => {
   it('ランキングデータを正しく表示する', async () => {
     vi.spyOn(rankingsApi, 'fetchRankings').mockResolvedValue([
       { playerName: 'Player1', clearTime: 10000, createdAt: '2025-12-28T00:00:00Z' },
-      { playerName: 'Player2', clearTime: 20000, createdAt: '2025-12-28T00:00:00Z' },
-      { playerName: 'Player3', clearTime: 30000, createdAt: '2025-12-28T00:00:00Z' },
+      { playerName: 'Player2', clearTime: 20000, createdAt: '2025-12-29T15:30:00Z' },
+      { playerName: 'Player3', clearTime: 30000, createdAt: '2025-12-30T06:00:00Z' },
     ]);
 
     const result = await initRankingDisplay();
@@ -54,10 +54,13 @@ describe('initRankingDisplay', () => {
     expect(items?.length).toBe(3);
     expect(items?.[0].querySelector('.ranking-name')?.textContent).toBe('Player1');
     expect(items?.[0].querySelector('.ranking-time')?.textContent).toBe('10.00秒');
+    expect(items?.[0].querySelector('.ranking-date')?.textContent).toBe('2025/12/28 09:00:00 JST');
     expect(items?.[1].querySelector('.ranking-name')?.textContent).toBe('Player2');
     expect(items?.[1].querySelector('.ranking-time')?.textContent).toBe('20.00秒');
+    expect(items?.[1].querySelector('.ranking-date')?.textContent).toBe('2025/12/30 00:30:00 JST');
     expect(items?.[2].querySelector('.ranking-name')?.textContent).toBe('Player3');
     expect(items?.[2].querySelector('.ranking-time')?.textContent).toBe('30.00秒');
+    expect(items?.[2].querySelector('.ranking-date')?.textContent).toBe('2025/12/30 15:00:00 JST');
   });
 
   it('タイムをミリ秒から秒に変換して表示する', async () => {
