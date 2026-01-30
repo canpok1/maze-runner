@@ -14,7 +14,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: read
-      issues: read
+      issues: write
       id-token: write
       actions: read
     env:
@@ -32,7 +32,7 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           additional_permissions: |
             actions: read
-          prompt: '/solve-issue $NUMBER'
+          prompt: "/solve-issue ${{env.NUMBER}}"
           claude_args: '--remote'
 
       - name: Add comment
