@@ -3,7 +3,7 @@
 {
   "name": "Ubuntu",
   // Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-  "image": "mcr.microsoft.com/devcontainers/base:latest",
+  "image": "mcr.microsoft.com/devcontainers/base:noble",
   "runArgs": ["--env-file", "${localWorkspaceFolder}/.devcontainer/.env"],
   "features": {
     "ghcr.io/devcontainers/features/node:1": {},

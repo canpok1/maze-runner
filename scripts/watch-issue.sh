@@ -26,15 +26,16 @@ done
 echo "issue監視を開始します (ラベル: $LABEL, 間隔: ${POLL_INTERVAL}秒)"
 
 while true; do
-  if issues=$(gh issue list --label "$LABEL" --search "-label:$IN_PROGRESS_LABEL" --state open --json number --jq '.[].number'); then
-    if [ -n "$issues" ]; then
-      echo "対象issue: $issues" | tr '\n' ' ' && echo
-      echo "$issues" | while read -r issue_number; do
-        echo "issue #${issue_number} を処理します"
-        claude --remote "/solve-issue ${issue_number}"
-        gh issue edit "$issue_number" --add-label "$IN_PROGRESS_LABEL"
+  if issue_number=$(gh issue list --label "$LABEL" --search "-label:$IN_PROGRESS_LABEL" --state open --limit 1 --json number --jq '.[0].number'); then
+    if [ -n "$issue_number" ] && [ "$issue_number" != "null" ]; then
+      echo "対象issue #${issue_number} を処理します"
+      if gh issue edit "$issue_number" --add-label "$IN_PROGRESS_LABEL"; then
         echo "issue #${issue_number} に $IN_PROGRESS_LABEL ラベルを付与しました"
-      done
+        claude --remote "/solve-issue ${issue_number}"
+      else
+        echo "エラー: issue #${issue_number} へのラベル付与に失敗しました。スキップします。" >&2
+      fi
+      continue
     fi
   else
     echo "issue一覧の取得に失敗しました。次のポーリングで再試行します。" >&2
