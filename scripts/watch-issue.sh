@@ -28,10 +28,12 @@ echo "issue監視を開始します (ラベル: $LABEL, 間隔: ${POLL_INTERVAL}
 while true; do
   if issues=$(gh issue list --label "$LABEL" --search "-label:$IN_PROGRESS_LABEL" --state open --json number --jq '.[].number'); then
     if [ -n "$issues" ]; then
+      echo "対象issue: $issues" | tr '\n' ' ' && echo
       echo "$issues" | while read -r issue_number; do
         echo "issue #${issue_number} を処理します"
         claude --remote "/solve-issue ${issue_number}"
         gh issue edit "$issue_number" --add-label "$IN_PROGRESS_LABEL"
+        echo "issue #${issue_number} に $IN_PROGRESS_LABEL ラベルを付与しました"
       done
     fi
   else
