@@ -242,6 +242,121 @@ describe('createRenderer', () => {
       expect(globalThis.requestAnimationFrame).not.toHaveBeenCalled();
     });
 
+    it('移動パス上にゴールがある場合winコールバックを呼び出す', () => {
+      // マップ:
+      // [1, 1, 1, 1, 1, 1, 1],
+      // [1, 0, 2, 0, 0, 0, 1],  <- y=1, x=2にゴール
+      // [1, 0, 1, 0, 1, 0, 1],
+      // [1, 0, 0, 0, 0, 0, 1],
+      // [1, 0, 1, 0, 1, 0, 1],
+      // [1, 0, 0, 0, 0, 0, 1],
+      // [1, 1, 1, 1, 1, 1, 1],
+      mockGameState.map = [
+        [
+          TileType.WALL,
+          TileType.WALL,
+          TileType.WALL,
+          TileType.WALL,
+          TileType.WALL,
+          TileType.WALL,
+          TileType.WALL,
+        ],
+        [
+          TileType.WALL,
+          TileType.FLOOR,
+          TileType.GOAL,
+          TileType.FLOOR,
+          TileType.FLOOR,
+          TileType.FLOOR,
+          TileType.WALL,
+        ],
+        [
+          TileType.WALL,
+          TileType.FLOOR,
+          TileType.WALL,
+          TileType.FLOOR,
+          TileType.WALL,
+          TileType.FLOOR,
+          TileType.WALL,
+        ],
+        [
+          TileType.WALL,
+          TileType.FLOOR,
+          TileType.FLOOR,
+          TileType.FLOOR,
+          TileType.FLOOR,
+          TileType.FLOOR,
+          TileType.WALL,
+        ],
+        [
+          TileType.WALL,
+          TileType.FLOOR,
+          TileType.WALL,
+          TileType.FLOOR,
+          TileType.WALL,
+          TileType.FLOOR,
+          TileType.WALL,
+        ],
+        [
+          TileType.WALL,
+          TileType.FLOOR,
+          TileType.FLOOR,
+          TileType.FLOOR,
+          TileType.FLOOR,
+          TileType.FLOOR,
+          TileType.WALL,
+        ],
+        [
+          TileType.WALL,
+          TileType.WALL,
+          TileType.WALL,
+          TileType.WALL,
+          TileType.WALL,
+          TileType.WALL,
+          TileType.WALL,
+        ],
+      ];
+      mockGameState.mapSize = 7;
+      mockGameState.exploredMap = (() => {
+        const map = Array.from({ length: 7 }, () => Array(7).fill(ExplorationState.UNEXPLORED));
+        map[1][1] = ExplorationState.EXPLORED;
+        return map;
+      })();
+
+      // プレイヤーをゴールの左側に配置し、右方向に大きく移動
+      // ゴールのセル(x=2)を通過して、最終位置は別のセル(x=4)になる
+      mockGameState.player.x = 1.5;
+      mockGameState.player.y = 1.5;
+      mockGameState.player.dir = 0; // 右方向
+      mockGameState.player.speed = 2.2; // 大きめの速度でゴールを通過
+
+      const renderer = createRenderer(deps);
+      renderer.render();
+
+      expect(mockWin).toHaveBeenCalled();
+    });
+
+    it('移動パス上にゴールがない場合winコールバックを呼び出さない', () => {
+      // マップ:
+      // [1, 1, 1, 1, 1],
+      // [1, 0, 0, 0, 1],
+      // [1, 0, 1, 0, 1],
+      // [1, 0, 0, 2, 1],  <- y=3, x=3にゴール
+      // [1, 1, 1, 1, 1],
+      mockGameState.map[3][3] = TileType.GOAL;
+
+      // プレイヤーをゴールから離れた位置に配置
+      mockGameState.player.x = 1.5;
+      mockGameState.player.y = 1.5;
+      mockGameState.player.dir = 0; // 右方向
+      mockGameState.player.speed = 0.5;
+
+      const renderer = createRenderer(deps);
+      renderer.render();
+
+      expect(mockWin).not.toHaveBeenCalled();
+    });
+
     it('通常時はrequestAnimationFrameを呼び出す', () => {
       const renderer = createRenderer(deps);
       renderer.render();

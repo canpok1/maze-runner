@@ -29,6 +29,55 @@ function getTile(map: MazeMap, x: number, y: number): TileType | undefined {
 }
 
 /**
+ * 移動パス上にゴールが存在するかチェックする
+ * @param map マップ配列
+ * @param x0 開始位置のX座標
+ * @param y0 開始位置のY座標
+ * @param x1 終了位置のX座標
+ * @param y1 終了位置のY座標
+ * @returns パス上のいずれかのセルがゴールの場合true、それ以外false
+ */
+function checkGoalAlongPath(map: MazeMap, x0: number, y0: number, x1: number, y1: number): boolean {
+  // 開始位置と終了位置のセルをチェック
+  const startCellX = Math.floor(x0);
+  const startCellY = Math.floor(y0);
+  const endCellX = Math.floor(x1);
+  const endCellY = Math.floor(y1);
+
+  // 開始位置のセルがゴールかチェック
+  if (getTile(map, x0, y0) === TileType.GOAL) {
+    return true;
+  }
+
+  // 終了位置のセルがゴールかチェック
+  if (getTile(map, x1, y1) === TileType.GOAL) {
+    return true;
+  }
+
+  // 開始位置と終了位置が同じセルの場合、これ以上チェック不要
+  if (startCellX === endCellX && startCellY === endCellY) {
+    return false;
+  }
+
+  // パスに沿って0.5セル間隔で補間し、各中間位置のセルをチェック
+  const distance = Math.sqrt((x1 - x0) ** 2 + (y1 - y0) ** 2);
+  const step = 0.5; // 0.5セル間隔
+  const steps = Math.ceil(distance / step);
+
+  for (let i = 1; i < steps; i++) {
+    const t = i / steps;
+    const x = x0 + (x1 - x0) * t;
+    const y = y0 + (y1 - y0) * t;
+
+    if (getTile(map, x, y) === TileType.GOAL) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/**
  * ゲーム状態を更新する
  * @param gameState ゲーム状態
  * @param timerElement タイマー表示要素
@@ -37,6 +86,10 @@ function getTile(map: MazeMap, x: number, y: number): TileType | undefined {
 function update(gameState: GameState, timerElement: HTMLElement): boolean {
   // 1. タイマー更新
   timerElement.innerText = ((Date.now() - gameState.startTime) / 1000).toFixed(2);
+
+  // 移動前の位置を保存
+  const prevX = gameState.player.x;
+  const prevY = gameState.player.y;
 
   // 2. プレイヤーの移動
   const moveStep = gameState.player.speed;
@@ -82,8 +135,8 @@ function update(gameState: GameState, timerElement: HTMLElement): boolean {
       ExplorationState.EXPLORED;
   }
 
-  // 3. ゴール判定
-  if (getTile(gameState.map, gameState.player.x, gameState.player.y) === TileType.GOAL) {
+  // 3. ゴール判定（移動パス全体をチェック）
+  if (checkGoalAlongPath(gameState.map, prevX, prevY, gameState.player.x, gameState.player.y)) {
     return true; // ゴール到達
   }
 
