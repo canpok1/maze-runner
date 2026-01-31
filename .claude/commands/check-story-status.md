@@ -121,7 +121,10 @@ argument-hint: [ユーザーストーリーのIssue番号]
     - 作成したIssueをサブIssueとして親ストーリーに追加する（`mcp__github__sub_issue_write` method: 'add'）。
     - 作成したIssueに `assign-to-claude` ラベルを付与してよいかユーザーに確認する（AskUserQuestion を使用）。
     - ユーザーが承認した場合、`mcp__github__issue_write`（method: 'update', labels: ['assign-to-claude']）でラベルを付与する。
-5. 全受け入れ条件が充足している場合、ユーザーストーリーの完了をユーザーに報告する。
+5. 全受け入れ条件が充足している場合:
+    - ユーザーストーリーの完了をユーザーに報告する。
+    - ユーザーに受け入れ条件の手動チェック（動作確認）を依頼する。
+      - ストーリーのURLと受け入れ条件の一覧を提示し、実際に動作確認を行うよう案内する。
 
 ## 注意点
 
