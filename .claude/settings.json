@@ -79,12 +79,14 @@
       "Bash(git push --force:*)",
       "Bash(git push -f:*)",
       "Bash(git rebase:*)",
-      "Bash(git reset:*)",
       "Bash(npm run deploy)",
       "Bash(rm -rf:*)",
       "Bash(sudo:*)",
       "Read(.env)",
       "Write(.env)"
+    ],
+    "ask": [
+      "Bash(git reset:*)"
     ]
   },
   "enableAllProjectMcpServers": true,
