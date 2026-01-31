@@ -357,6 +357,22 @@ describe('createRenderer', () => {
       expect(mockWin).not.toHaveBeenCalled();
     });
 
+    it('短い距離でセルをまたぐ移動でもゴールを検出できる', () => {
+      // ゴールを (2,1) に設定
+      mockGameState.map[1][2] = TileType.GOAL;
+
+      // ゴールセルの直前から、ゴールセルを通過する短い距離を移動
+      mockGameState.player.x = 1.9;
+      mockGameState.player.y = 1.5;
+      mockGameState.player.dir = 0; // 右方向
+      mockGameState.player.speed = 0.2; // 短い移動距離
+
+      const renderer = createRenderer(deps);
+      renderer.render();
+
+      expect(mockWin).toHaveBeenCalled();
+    });
+
     it('通常時はrequestAnimationFrameを呼び出す', () => {
       const renderer = createRenderer(deps);
       renderer.render();

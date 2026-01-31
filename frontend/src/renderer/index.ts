@@ -60,12 +60,17 @@ function checkGoalAlongPath(map: MazeMap, x0: number, y0: number, x1: number, y1
   }
 
   // パスに沿って0.5セル間隔で補間し、各中間位置のセルをチェック
-  const distance = Math.sqrt((x1 - x0) ** 2 + (y1 - y0) ** 2);
+  const distance = Math.hypot(x1 - x0, y1 - y0);
   const step = 0.5; // 0.5セル間隔
-  const steps = Math.ceil(distance / step);
 
-  for (let i = 1; i < steps; i++) {
-    const t = i / steps;
+  // 移動距離が短くてもセルをまたぐ場合、中間点のチェックが必須。
+  // stepsが1になるような短い距離だとループが実行されないため、
+  // 常に最低1回の中間点チェック（numChecks=2）が行われるようにする。
+  const steps = Math.ceil(distance / step);
+  const numChecks = Math.max(2, steps);
+
+  for (let i = 1; i < numChecks; i++) {
+    const t = i / numChecks;
     const x = x0 + (x1 - x0) * t;
     const y = y0 + (y1 - y0) * t;
 
