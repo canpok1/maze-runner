@@ -108,11 +108,6 @@ export function win(deps: WinDependencies): void {
   const score = parseFloat(((Date.now() - deps.gameState.startTime) / 1000).toFixed(2));
   const difficulty = deps.getDifficultyFromSize(deps.gameState.mapSize);
 
-  const lastScoreElement = document.getElementById('last-score');
-  if (lastScoreElement) {
-    lastScoreElement.innerHTML = `<h2>CLEAR! クリアタイム: ${score.toFixed(2)}秒</h2>`;
-  }
-
   // スコア登録モーダルを表示
   deps.showScoreModal(score, difficulty, () => {
     // モーダル完了後にメニュー画面を表示
