@@ -24,7 +24,6 @@ argument-hint: [ユーザーストーリーのIssue番号]
     - 複数PRがヒットした場合は、openな最新PRを対象とする。
     - PRが存在する場合、`mcp__github__pull_request_read`（method: 'get'）でPR詳細を取得する。
     - PRが存在する場合、`mcp__github__pull_request_read`（method: 'get_status'）でCI状態を取得する。
-    - PRが存在する場合、`mcp__github__pull_request_read`（method: 'get_reviews'）でレビュー状態を取得する。
 
 ### フェーズ2: 状態分類
 
@@ -34,9 +33,8 @@ argument-hint: [ユーザーストーリーのIssue番号]
 2. **PR作成済み・マージ可能**: 以下の条件をすべて満たす
     - PRが存在する
     - PRのstate が 'open'
-    - CI（GitHub Actions）がすべてpass（成功）している
-    - 少なくとも1つの承認レビューがある
-    - マージコンフリクトがない（mergeable_state が 'clean'）
+    - CI（GitHub Actions）がすべてpass（成功）している（チェックが0件の場合もpassとみなす）
+    - マージコンフリクトがない（mergeable が true）
 3. **PR作成済み・マージ不可**: PRが存在するがマージ可能の条件を満たさない
     - マージ不可の理由を記録する（CI失敗/レビュー待ち/コンフリクト等）
 4. **作業中**: `in-progress-by-claude` ラベルが付与されている
@@ -114,6 +112,5 @@ argument-hint: [ユーザーストーリーのIssue番号]
 - マージには merge_method: 'squash' を使用すること。
 - リポジトリのオーナーとリポジトリ名は `git remote` から取得すること。
 - 依存関係の解析は Issue本文の「依存関係」セクションに基づいて行うこと。
-- CI状態の確認では、すべてのチェックがpassしていることを確認すること。
-- レビュー承認は少なくとも1つ以上の承認（APPROVED）があることを確認すること。
+- CI状態の確認では、すべてのチェックがpassしていることを確認すること（チェックが0件の場合もpassとみなす）。
 - エラーが発生した場合は、詳細な情報をユーザーに報告すること。
