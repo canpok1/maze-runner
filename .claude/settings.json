@@ -24,6 +24,7 @@
       "Bash(gh pr create:*)",
       "Bash(gh pr view:*)",
       "Bash(gh run view:*)",
+      "Bash(gh repo view:*)",
       "Bash(git add:*)",
       "Bash(git branch:*)",
       "Bash(git commit:*)",
@@ -71,7 +72,10 @@
       "mcp__github__list_pull_requests",
       "mcp__github__search_pull_requests",
       "mcp__github__pull_request_read",
-      "mcp__github__create_pull_request"
+      "mcp__github__create_pull_request",
+      "mcp__github__sub_issue_write",
+      "mcp__github__merge_pull_request",
+      "Skill(check-story-status)"
     ],
     "deny": [
       "Bash(git add --all)",
@@ -79,16 +83,20 @@
       "Bash(git push --force:*)",
       "Bash(git push -f:*)",
       "Bash(git rebase:*)",
-      "Bash(git reset:*)",
       "Bash(npm run deploy)",
       "Bash(rm -rf:*)",
       "Bash(sudo:*)",
       "Read(.env)",
       "Write(.env)"
-    ]
+    ],
+    "ask": ["Bash(git reset:*)"]
   },
   "enableAllProjectMcpServers": true,
   "enabledPlugins": {
     "typescript-lsp@claude-plugins-official": true
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "./.claude/statusline.sh"
   }
 }
