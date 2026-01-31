@@ -24,6 +24,7 @@
       "Bash(gh pr create:*)",
       "Bash(gh pr view:*)",
       "Bash(gh run view:*)",
+      "Bash(gh repo view:*)",
       "Bash(git add:*)",
       "Bash(git branch:*)",
       "Bash(git commit:*)",
@@ -88,9 +89,7 @@
       "Read(.env)",
       "Write(.env)"
     ],
-    "ask": [
-      "Bash(git reset:*)"
-    ]
+    "ask": ["Bash(git reset:*)"]
   },
   "enableAllProjectMcpServers": true,
   "enabledPlugins": {
