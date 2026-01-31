@@ -72,7 +72,9 @@
       "mcp__github__search_pull_requests",
       "mcp__github__pull_request_read",
       "mcp__github__create_pull_request",
-      "mcp__github__sub_issue_write"
+      "mcp__github__sub_issue_write",
+      "mcp__github__merge_pull_request",
+      "Skill(check-story-status)"
     ],
     "deny": [
       "Bash(git add --all)",
