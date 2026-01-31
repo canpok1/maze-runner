@@ -15,7 +15,7 @@ calc_context_percent() {
   context_size=$(get_context_window_size)
   usage=$(get_current_usage)
 
-  if [ "$usage" != "null" ] && [ "$context_size" -gt 0 ] 2>/dev/null; then
+  if [ "$usage" != "null" ] && [[ "$context_size" =~ ^[1-9][0-9]*$ ]]; then
     echo "$usage" | jq -r "(.input_tokens + .cache_creation_input_tokens + .cache_read_input_tokens) * 100 / $context_size | floor"
   else
     echo "0"

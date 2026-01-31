@@ -120,7 +120,10 @@ argument-hint: [ユーザーストーリーのIssue番号]
       - 本文: 未充足の理由、必要な対応内容、親ストーリーへの参照を含める
     - 作成したIssueをサブIssueとして親ストーリーに追加する（`mcp__github__sub_issue_write` method: 'add'）。
     - 作成したIssueに `assign-to-claude` ラベルを付与してよいかユーザーに確認する（AskUserQuestion を使用）。
-    - ユーザーが承認した場合、`mcp__github__issue_write`（method: 'update', labels: ['assign-to-claude']）でラベルを付与する。
+    - ユーザーが承認した場合、以下を実行する:
+      - `mcp__github__issue_read`（method: 'get'）で現在のラベル一覧を取得する。
+      - 既存ラベルに `assign-to-claude` を追加した配列を作成する。
+      - `mcp__github__issue_write`（method: 'update', labels）でラベルを更新する。
 5. 全受け入れ条件が充足している場合:
     - ユーザーストーリーの完了をユーザーに報告する。
     - ユーザーに受け入れ条件の手動チェック（動作確認）を依頼する。
