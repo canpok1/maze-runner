@@ -2,9 +2,9 @@
 name: github
 description: |
   GitHub操作の統合スキル。issue操作、PR操作、レビュースレッド操作を提供。
-  使用ケース:（1）issue取得/作成/更新、（2）PR作成（事前チェック統合）、
-  （3）レビューコメント取得、（4）スレッド返信、（5）スレッド解決、
-  （6）PRのCI状態取得、（7）ワークフローのログ取得
+  使用ケース:（1）リポジトリ情報取得、（2）issue取得/作成/更新、（3）PR作成（事前チェック統合）、
+  （4）レビューコメント取得、（5）スレッド返信、（6）スレッド解決、
+  （7）PRのCI状態取得、（8）ワークフローのログ取得
 ---
 
 # GitHub操作スキル
@@ -19,6 +19,22 @@ description: |
 1. **Issue操作** → [Issue操作](#issue操作)
 2. **PR作成** → [PR操作](#pr操作)
 3. **レビュースレッド操作** → [Thread操作](#thread操作)
+
+## リポジトリ情報の取得
+
+MCPツールの多くは `owner` と `repo` パラメータを必要とします。以下の方法で取得できます。
+
+**スクリプト版**:
+
+```bash
+./.claude/skills/github/scripts/repo-info.sh
+```
+
+**出力形式**: スペース区切り（owner repo）。例: `canpok1 maze-runner`
+
+**MCPツール版**:
+
+`mcp__github__get_me` でユーザー情報を取得し、`mcp__github__get_file_contents` 等の `owner` / `repo` パラメータに直接指定
 
 ## Issue操作
 
@@ -171,6 +187,6 @@ MCPツール `mcp__github__issue_write` を使用（method: 'update'）
 
 | スクリプト | 機能 |
 |-----------|------|
-| `repo-info.sh` | gitリモートURLからowner/repo情報を取得 |
+| `repo-info.sh` | gitリモートURLからowner/repo情報を抽出（詳細: [リポジトリ情報の取得](#リポジトリ情報の取得)） |
 | `github-rest.sh` | GitHub REST API呼び出しの共通処理 |
 | `github-graphql.sh` | GitHub GraphQL API呼び出しの共通処理 |
