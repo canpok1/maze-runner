@@ -69,26 +69,8 @@ echo "検索クエリ: $QUERY" >&2
 # 検索クエリの構築（is:pr repo:OWNER/REPO を自動付加）
 FULL_QUERY="is:pr repo:$OWNER/$REPO $QUERY"
 
-# URLエンコード用の関数
-urlencode() {
-    local string="$1"
-    local strlen=${#string}
-    local encoded=""
-    local pos c o
-
-    for (( pos=0 ; pos<strlen ; pos++ )); do
-        c=${string:$pos:1}
-        case "$c" in
-            [-_.~a-zA-Z0-9] ) o="${c}" ;;
-            * ) printf -v o '%%%02x' "'$c"
-        esac
-        encoded+="${o}"
-    done
-    echo "${encoded}"
-}
-
-# クエリをURLエンコード
-ENCODED_QUERY=$(urlencode "$FULL_QUERY")
+# クエリをURLエンコード（jqの@uriフィルタでマルチバイト文字にも対応）
+ENCODED_QUERY=$(jq -nr --arg q "$FULL_QUERY" '$q|@uri')
 
 # GitHub Search API を呼び出し
 API_URL="https://api.github.com/search/issues?q=${ENCODED_QUERY}"
