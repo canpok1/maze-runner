@@ -160,6 +160,36 @@ MCPツール `mcp__github__issue_write` を使用（method: 'update'）
 
 ## PR操作
 
+### PR検索
+
+**スクリプト版**:
+
+```bash
+./.claude/skills/github/scripts/pr-search.sh <検索クエリ>
+```
+
+**出力形式**: NDJSON（各行がJSON）。例: `{"number":123,"title":"Add feature","state":"open","author":"canpok1","url":"..."}`
+
+**備考**: クエリに `is:pr repo:OWNER/REPO` は自動付加されるため不要
+
+**MCPツール版**:
+
+`mcp__github__search_pull_requests` を使用
+
+### PR詳細取得
+
+**スクリプト版**:
+
+```bash
+./.claude/skills/github/scripts/pr-get.sh <PR番号>
+```
+
+**出力形式**: JSON（number, title, state, merged, author, head_branch, base_branch, body, html_url, created_at, updated_at）
+
+**MCPツール版**:
+
+`mcp__github__pull_request_read`（method: 'get'）を使用
+
 ### PR作成
 
 **スクリプト版**:
@@ -207,6 +237,36 @@ MCPツール `mcp__github__issue_write` を使用（method: 'update'）
 `mcp__github__pull_request_read`（method: 'get_status'）を使用
 
 **制限事項**: コミットステータスのみ取得可能。詳細なチェックリストが必要な場合はスクリプト版を使用
+
+### CI状態取得（詳細版）
+
+**スクリプト版**:
+
+```bash
+./.claude/skills/github/scripts/pr-status.sh <PR番号>
+```
+
+**出力形式**: JSON（sha, overall_state, statuses配列, check_runs配列）。コミットステータスとチェックランの両方を取得
+
+**MCPツール版**:
+
+`mcp__github__pull_request_read`（method: 'get_status'）を使用
+
+### PRマージ
+
+**スクリプト版**:
+
+```bash
+./.claude/skills/github/scripts/pr-merge.sh <PR番号> [マージ方式]
+```
+
+**引数**: マージ方式は `merge`, `squash`, `rebase` のいずれか（デフォルト: `squash`）
+
+**出力形式**: JSON（sha, message）
+
+**MCPツール版**:
+
+`mcp__github__merge_pull_request` を使用
 
 ## Thread操作
 
