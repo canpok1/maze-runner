@@ -26,6 +26,37 @@ for cmd in gh claude; do
   fi
 done
 
+# 共通処理: issueにロックを取得してclaudeコマンドを実行し、成功時のみロックを解除
+# 引数1: issue_number
+# 引数2: claudeコマンド名（"breakdown-story" または "assign-tasks"）
+# 引数3: 処理の説明（"ストーリー分解" または "タスクアサイン"）
+process_issue_with_lock() {
+  local issue_number="$1"
+  local command="$2"
+  local description="$3"
+
+  # 処理開始：in-progress-by-claudeラベルをアトミックに付与してロック
+  if gh issue edit "$issue_number" --add-label "$IN_PROGRESS_LABEL"; then
+    echo "issue #${issue_number} に $IN_PROGRESS_LABEL ラベルを付与しました"
+
+    # claudeコマンドを実行
+    if claude --remote "/${command} ${issue_number}"; then
+      echo "issue #${issue_number} の${description}が完了しました"
+
+      # 処理成功時のみラベルを除去
+      if gh issue edit "$issue_number" --remove-label "$IN_PROGRESS_LABEL"; then
+        echo "issue #${issue_number} から $IN_PROGRESS_LABEL ラベルを除去しました"
+      else
+        echo "警告: issue #${issue_number} からのラベル除去に失敗しました" >&2
+      fi
+    else
+      echo "エラー: issue #${issue_number} の${description}に失敗しました。無限ループを防ぐため、$IN_PROGRESS_LABEL ラベルは除去されません。" >&2
+    fi
+  else
+    echo "エラー: issue #${issue_number} へのラベル付与に失敗しました。スキップします。" >&2
+  fi
+}
+
 echo "ユーザーストーリー監視を開始します (間隔: ${POLL_INTERVAL}秒)"
 
 while true; do
@@ -38,56 +69,16 @@ while true; do
         # サブIssueがない場合のみ処理
         if [ "$sub_issue_count" = "0" ]; then
           echo "対象issue #${issue_number} を処理します（サブIssueなし）"
-
-          # 処理開始：in-progress-by-claudeラベルをアトミックに付与してロック
-          if gh issue edit "$issue_number" --add-label "$IN_PROGRESS_LABEL"; then
-            echo "issue #${issue_number} に $IN_PROGRESS_LABEL ラベルを付与しました"
-
-            # ストーリー分解を実行
-            if claude --remote "/breakdown-story ${issue_number}"; then
-              echo "issue #${issue_number} のストーリー分解が完了しました"
-
-              # 処理成功時のみラベルを除去
-              if gh issue edit "$issue_number" --remove-label "$IN_PROGRESS_LABEL"; then
-                echo "issue #${issue_number} から $IN_PROGRESS_LABEL ラベルを除去しました"
-              else
-                echo "警告: issue #${issue_number} からのラベル除去に失敗しました" >&2
-              fi
-            else
-              echo "エラー: issue #${issue_number} のストーリー分解に失敗しました。無限ループを防ぐため、$IN_PROGRESS_LABEL ラベルは除去されません。" >&2
-            fi
-          else
-            echo "エラー: issue #${issue_number} へのラベル付与に失敗しました。スキップします。" >&2
-          fi
+          process_issue_with_lock "$issue_number" "breakdown-story" "ストーリー分解"
         else
           # サブIssueが存在する場合、未アサインのサブタスクをチェック
           # 条件: open状態、かつ assign-to-claude/in-progress-by-claude/draft ラベルなし
           if unassigned_count=$(gh api "/repos/${REPO_OWNER}/${REPO_NAME}/issues/${issue_number}/sub_issues" \
             --jq '[.[] | select(.state == "open") | select(((.labels // []) | map(.name) | any(. == "assign-to-claude" or . == "in-progress-by-claude" or . == "draft")) | not)] | length' 2>/dev/null); then
 
-            if [ "$unassigned_count" != "0" ] && [ "$unassigned_count" != "null" ] && [ -n "$unassigned_count" ]; then
+            if [ "$unassigned_count" -gt 0 ] 2>/dev/null; then
               echo "対象issue #${issue_number} を処理します（未アサインサブタスク ${unassigned_count}件）"
-
-              # 処理開始：in-progress-by-claudeラベルをアトミックに付与してロック
-              if gh issue edit "$issue_number" --add-label "$IN_PROGRESS_LABEL"; then
-                echo "issue #${issue_number} に $IN_PROGRESS_LABEL ラベルを付与しました"
-
-                # タスクアサインを実行
-                if claude --remote "/assign-tasks ${issue_number}"; then
-                  echo "issue #${issue_number} のタスクアサインが完了しました"
-
-                  # 処理成功時のみラベルを除去
-                  if gh issue edit "$issue_number" --remove-label "$IN_PROGRESS_LABEL"; then
-                    echo "issue #${issue_number} から $IN_PROGRESS_LABEL ラベルを除去しました"
-                  else
-                    echo "警告: issue #${issue_number} からのラベル除去に失敗しました" >&2
-                  fi
-                else
-                  echo "エラー: issue #${issue_number} のタスクアサインに失敗しました。無限ループを防ぐため、$IN_PROGRESS_LABEL ラベルは除去されません。" >&2
-                fi
-              else
-                echo "エラー: issue #${issue_number} へのラベル付与に失敗しました。スキップします。" >&2
-              fi
+              process_issue_with_lock "$issue_number" "assign-tasks" "タスクアサイン"
             fi
           else
             echo "警告: issue #${issue_number} の未アサインサブタスク確認に失敗しました。スキップします。" >&2
