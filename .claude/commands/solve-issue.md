@@ -9,7 +9,7 @@ argument-hint: [GitHub Issueの番号]
         - `assign-to-claude` ラベルが付いている
         - `in-progress-by-claude` ラベルが付いていない
         - open状態である
-        - 上記条件に合致するIssueから1件選択する
+        - 上記条件に合致するIssueから最も古いものを1件選択する
     - 自動選択の対象Issueがない場合は「対象タスクがありません」とユーザーに通知し、処理を終了する。
 2. `github` スキルでGitHub Issueの内容を把握する。
 3. 対応計画を立てる。
