@@ -109,10 +109,10 @@ argument-hint: [ユーザーストーリーのIssue番号]
     - 充足している条件: チェックマーク付きで一覧表示
     - 未充足の条件: 理由とともに一覧表示
 4. 未充足の受け入れ条件がある場合:
-    - 未充足の条件を満たすための追加タスクIssueを作成する（`github` スキル（`issue-create.sh`））。
+    - 未充足の条件を満たすための追加タスクIssueを作成する（`github` スキル: `issue-create.sh`）。
       - タイトル: 受け入れ条件の内容を反映した簡潔なタスク名
       - 本文: 未充足の理由、必要な対応内容、親ストーリーへの参照を含める
-    - 作成したIssueをサブIssueとして親ストーリーに追加する（`github` スキル（`sub-issue-add.sh`））。
+    - 作成したIssueをサブIssueとして親ストーリーに追加する（`github` スキル: `sub-issue-add.sh`）。
     - 作成したIssueに `assign-to-claude` ラベルを付与してよいかユーザーに確認する（AskUserQuestion を使用）。
     - ユーザーが承認した場合、以下を実行する:
       - `github` スキル（`issue-get.sh`）で現在のラベル一覧を取得する。
