@@ -15,6 +15,7 @@ REPO_OWNER="canpok1"
 REPO_NAME="maze-runner"
 IN_PROGRESS_LABEL="in-progress-by-claude"
 POLL_INTERVAL=30
+MERGE_DELAY_SECONDS=300
 
 # 依存コマンド確認
 for cmd in gh claude; do
@@ -45,17 +46,8 @@ merge_eligible_prs() {
 
   echo "${pr_count}件のPRを確認します"
 
-  # 各PRをチェック（パイプを使わずにプロセス置換を使用）
-  while IFS= read -r pr; do
-    # PRの各フィールドを取得
-    if ! pr_number=$(echo "$pr" | jq -r '.number' 2>/dev/null); then
-      continue
-    fi
-
-    created_at=$(echo "$pr" | jq -r '.createdAt' 2>/dev/null || echo "")
-    mergeable=$(echo "$pr" | jq -r '.mergeable' 2>/dev/null || echo "")
-    status_check_rollup=$(echo "$pr" | jq -c '.statusCheckRollup' 2>/dev/null || echo "null")
-
+  # 各PRをチェック
+  while IFS=$'\t' read -r pr_number created_at mergeable status_check_rollup; do
     echo "PR #${pr_number} をチェック中..."
 
     # PR作成から5分以上経過しているかチェック
@@ -68,7 +60,7 @@ merge_eligible_prs() {
     current_timestamp=$(date +%s)
     elapsed_seconds=$((current_timestamp - created_timestamp))
 
-    if [ "$elapsed_seconds" -lt 300 ]; then
+    if [ "$elapsed_seconds" -lt "$MERGE_DELAY_SECONDS" ]; then
       echo "  スキップ: PR作成から5分未満（${elapsed_seconds}秒経過）"
       continue
     fi
@@ -79,44 +71,28 @@ merge_eligible_prs() {
       continue
     fi
 
-    # statusCheckRollupチェック
-    if [ "$status_check_rollup" = "null" ] || [ "$status_check_rollup" = "[]" ]; then
-      echo "  スキップ: CIチェックが設定されていません"
-      continue
-    fi
-
-    # すべてのチェックがSUCCESSかどうか確認
-    all_checks_passed=true
-    check_count=0
-    while IFS= read -r check; do
-      check_count=$((check_count + 1))
-      # state または conclusion フィールドを確認（GitHub APIではどちらかが使われる）
-      state=$(echo "$check" | jq -r '.state // .conclusion // "UNKNOWN"' 2>/dev/null)
-      if [ "$state" != "SUCCESS" ]; then
-        all_checks_passed=false
-        echo "  スキップ: CIチェックがpassしていません（state: $state）"
-        break
-      fi
-    done < <(echo "$status_check_rollup" | jq -c '.[]' 2>/dev/null || echo "")
+    # statusCheckRollupチェックと、すべてのチェックがSUCCESSかどうかの確認
+    read -r all_checks_passed check_count < <(echo "$status_check_rollup" | jq -r 'if . == null or . == [] then "false 0" else [(all(.[]; (.state // .conclusion) == "SUCCESS")), length] | @tsv end')
 
     if [ "$check_count" -eq 0 ]; then
-      echo "  スキップ: CIチェック結果を取得できません"
+      echo "  スキップ: CIチェックが設定されていないか、結果を取得できません"
       continue
     fi
 
-    if [ "$all_checks_passed" = false ]; then
+    if [ "$all_checks_passed" != "true" ]; then
+      echo "  スキップ: CIチェックがpassしていません"
       continue
     fi
 
     # すべての条件を満たしたのでマージ実行
     echo "  ✓ すべての条件を満たしました（${elapsed_seconds}秒経過、${check_count}件のチェックpass）"
     echo "  マージを実行します..."
-    if gh pr merge "$pr_number" --squash 2>&1; then
-      echo "  ✓ PR #${pr_number} を正常にマージしました"
+    if ! output=$(gh pr merge "$pr_number" --squash 2>&1); then
+      echo "  ✗ PR #${pr_number} のマージに失敗しました: $output" >&2
     else
-      echo "  ✗ PR #${pr_number} のマージに失敗しました" >&2
+      echo "  ✓ PR #${pr_number} を正常にマージしました"
     fi
-  done < <(echo "$prs_json" | jq -c '.[]' 2>/dev/null || echo "")
+  done < <(echo "$prs_json" | jq -r '.[] | "\(.number)\t\(.createdAt)\t\(.mergeable)\t\(.statusCheckRollup | tostring)"' 2>/dev/null || echo "")
 
   echo "PRチェック完了"
 }
