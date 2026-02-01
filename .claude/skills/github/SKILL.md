@@ -4,7 +4,7 @@ description: |
   GitHub操作の統合スキル。issue操作、PR操作、レビュースレッド操作を提供。
   使用ケース:（1）リポジトリ情報取得、（2）issue取得/作成/更新、（3）PR作成（事前チェック統合）、
   （4）レビューコメント取得、（5）スレッド返信、（6）スレッド解決（resolve）、
-  （7）PRのCI状態取得、（8）ワークフローのログ取得
+  （7）PRのCI状態取得、（8）ワークフローのログ取得、（9）PR検索、（10）PR詳細取得、（11）PRマージ
 ---
 
 # GitHub操作スキル
@@ -246,11 +246,11 @@ MCPツール `mcp__github__issue_write` を使用（method: 'update'）
 ./.claude/skills/github/scripts/pr-status.sh <PR番号>
 ```
 
-**出力形式**: JSON（sha, overall_state, statuses配列, check_runs配列）。コミットステータスとチェックランの両方を取得
+**出力形式**: JSON（sha, overall_state, statuses配列, check_runs配列）。`pr-checks.sh` との違いはコミットステータスも含む点と、JSON形式で出力する点
 
 **MCPツール版**:
 
-`mcp__github__pull_request_read`（method: 'get_status'）を使用
+CI状態取得と同じ `mcp__github__pull_request_read`（method: 'get_status'）を使用。スクリプト版はコミットステータスも含む詳細情報を返す
 
 ### PRマージ
 

@@ -95,7 +95,8 @@ API_URL="https://api.github.com/search/issues?q=${ENCODED_QUERY}"
 
 echo "PRを検索中..." >&2
 
-# curl実行（github-rest.shは使わず直接curlを実行）
+# curl実行（github-rest.shはエンドポイントパスのみ受け付けるため、
+# クエリパラメータ付きURLが必要な Search API では直接curlを使用）
 set +e
 response=$(curl -s \
     -H "Authorization: Bearer $GH_TOKEN" \
