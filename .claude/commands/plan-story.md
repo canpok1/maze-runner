@@ -16,7 +16,7 @@ description: ユーザーストーリーをGitHub Issueとして作成します�
         - なぜ必要か（その機能による価値・目的）
         - 受け入れ条件（どうなれば完了か）
 2. `document-specialist` エージェントに依頼してユーザーストーリーの本文を「Issue作成ルール」に従って生成する。
-3. `github` スキル（mcp__github__issue_write, method: 'create'）を使用してIssueを作成する。
+3. `github` スキル（`issue-create.sh`）を使用してIssueを作成する。
 4. 作成したIssueのタイトルとURLをユーザーに報告する。
 5. タスク細分化が必要か確認し、必要であれば `/breakdown-story` コマンドの利用を案内する。
 

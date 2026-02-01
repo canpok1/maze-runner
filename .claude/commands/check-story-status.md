@@ -17,13 +17,13 @@ argument-hint: [ユーザーストーリーのIssue番号]
     - `$ARGUMENTS` で指定されている場合、この手順はスキップする。
     - 指定されていない場合はユーザーに確認する。
 2. リポジトリのオーナーとリポジトリ名を `git remote` から取得する。
-3. `mcp__github__issue_read`（method: 'get_sub_issues'）でサブIssue一覧を取得する。
+3. `github` スキル（`issue-sub-issues.sh`）でサブIssue一覧を取得する。
 4. 各サブIssueについて以下の情報を取得する:
-    - `mcp__github__issue_read`（method: 'get'）でIssue詳細（state, labels, body）を取得する。
-    - `mcp__github__search_pull_requests` で対応するPRを検索する（クエリ: `is:pr repo:owner/repo {サブIssue番号} in:title`）。
+    - `github` スキル（`issue-get.sh`）でIssue詳細（state, labels, body）を取得する。
+    - `github` スキル（`pr-search.sh`）で対応するPRを検索する（クエリ: `is:pr repo:owner/repo {サブIssue番号} in:title`）。
     - 複数PRがヒットした場合は、openな最新PRを対象とする。
-    - PRが存在する場合、`mcp__github__pull_request_read`（method: 'get'）でPR詳細を取得する。
-    - PRが存在する場合、`mcp__github__pull_request_read`（method: 'get_status'）でCI状態を取得する。
+    - PRが存在する場合、`github` スキル（`pr-get.sh`）でPR詳細を取得する。
+    - PRが存在する場合、`github` スキル（`pr-status.sh`）でCI状態を取得する。
 
 ### フェーズ2: 状態分類
 
@@ -64,7 +64,7 @@ argument-hint: [ユーザーストーリーのIssue番号]
 
 1. 「PR作成済み・マージ可能」に分類されたPRの一覧を提示する:
     - Issue番号、タイトル、PR番号、PR URL
-2. `mcp__github__merge_pull_request` でマージする:
+2. `github` スキル（`pr-merge.sh`）でマージする:
     - merge_method: 'squash' を使用する。
 3. マージ結果を記録する（成功/失敗）。
 
@@ -78,9 +78,9 @@ argument-hint: [ユーザーストーリーのIssue番号]
 1. 「未着手・着手可能」に分類されたタスクの一覧を提示する:
     - Issue番号、タイトル、URL
 2. 以下を実行する:
-    - `mcp__github__issue_read`（method: 'get'）で現在のラベル一覧を取得する。
+    - `github` スキル（`issue-get.sh`）で現在のラベル一覧を取得する。
     - 既存ラベルに `assign-to-claude` を追加した配列を作成する。
-    - `mcp__github__issue_write`（method: 'update', labels）でラベルを更新する。
+    - `github` スキル（`issue-update.sh`）でラベルを更新する。
 3. ラベル付与結果を記録する（成功/失敗）。
 
 ### フェーズ5: ステータス報告
@@ -109,15 +109,15 @@ argument-hint: [ユーザーストーリーのIssue番号]
     - 充足している条件: チェックマーク付きで一覧表示
     - 未充足の条件: 理由とともに一覧表示
 4. 未充足の受け入れ条件がある場合:
-    - 未充足の条件を満たすための追加タスクIssueを作成する（`mcp__github__issue_write` method: 'create'）。
+    - 未充足の条件を満たすための追加タスクIssueを作成する（`github` スキル（`issue-create.sh`））。
       - タイトル: 受け入れ条件の内容を反映した簡潔なタスク名
       - 本文: 未充足の理由、必要な対応内容、親ストーリーへの参照を含める
-    - 作成したIssueをサブIssueとして親ストーリーに追加する（`mcp__github__sub_issue_write` method: 'add'）。
+    - 作成したIssueをサブIssueとして親ストーリーに追加する（`github` スキル（`sub-issue-add.sh`））。
     - 作成したIssueに `assign-to-claude` ラベルを付与してよいかユーザーに確認する（AskUserQuestion を使用）。
     - ユーザーが承認した場合、以下を実行する:
-      - `mcp__github__issue_read`（method: 'get'）で現在のラベル一覧を取得する。
+      - `github` スキル（`issue-get.sh`）で現在のラベル一覧を取得する。
       - 既存ラベルに `assign-to-claude` を追加した配列を作成する。
-      - `mcp__github__issue_write`（method: 'update', labels）でラベルを更新する。
+      - `github` スキル（`issue-update.sh`）でラベルを更新する。
 5. 全受け入れ条件が充足している場合:
     - ユーザーストーリーの完了をユーザーに報告する。
     - コマンドを実行したユーザーを、ユーザーストーリーの github issue の assignees に追加する。
