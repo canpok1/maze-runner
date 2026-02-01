@@ -16,10 +16,13 @@ description: |
 
 ## 複数行テキストの取り扱いルール
 
-PR・Issueの作成・更新で本文（body）に複数行テキストを含む場合、MCPツールの `body` パラメータには渡さないこと。
-代わりに `gh` CLI + HEREDOCを使用すること。MCPツールの `body` パラメータでは `\n` が改行として解釈されず、リテラル文字列として登録されてしまうため。
+PR・Issueの作成・更新で本文（body）に複数行テキストを含む場合、以下のいずれかの方法を使用すること。
 
-### コマンド例: PR作成
+### 推奨: `gh` CLI + HEREDOC
+
+`gh` CLI が利用可能な環境では、`gh` コマンドと HEREDOC を使用する方法を推奨。
+
+#### コマンド例: PR作成
 
 ```bash
 gh pr create --title "タイトル" --body-file - <<'EOF'
@@ -31,7 +34,7 @@ gh pr create --title "タイトル" --body-file - <<'EOF'
 EOF
 ```
 
-### コマンド例: PR更新
+#### コマンド例: PR更新
 
 ```bash
 gh pr edit <PR番号> --body-file - <<'EOF'
@@ -43,7 +46,7 @@ gh pr edit <PR番号> --body-file - <<'EOF'
 EOF
 ```
 
-### コマンド例: Issue作成
+#### コマンド例: Issue作成
 
 ```bash
 gh issue create --title "タイトル" --body-file - <<'EOF'
@@ -56,7 +59,7 @@ Issueの詳細な説明
 EOF
 ```
 
-### コマンド例: Issue更新
+#### コマンド例: Issue更新
 
 ```bash
 gh issue edit <Issue番号> --body-file - <<'EOF'
@@ -68,6 +71,50 @@ Issueの詳細な説明
 - 条件2
 EOF
 ```
+
+### 代替: MCPツールの `body` パラメータ
+
+`gh` CLI が利用できない環境では、MCPツール（`mcp__github__create_pull_request`、`mcp__github__issue_write` 等）の `body` パラメータに直接テキストを渡す。
+
+**注意**: `body` パラメータには実際の改行（リテラル改行）を含めること。`\n` というエスケープシーケンスを使用すると、改行として解釈されずリテラル文字列 `\n` としてそのまま登録されてしまう。
+
+#### 正しい例: PR作成（MCPツール）
+
+`mcp__github__create_pull_request` を呼び出す際、`body` パラメータにはリテラル改行を含む文字列を渡す:
+
+```text
+// bodyパラメータの値
+## Summary
+- 変更内容の説明
+
+## Test plan
+- テスト計画
+```
+
+#### 正しい例: Issue作成（MCPツール）
+
+`mcp__github__issue_write` を呼び出す際、`body` パラメータにはリテラル改行を含む文字列を渡す:
+
+```text
+// bodyパラメータの値
+## 概要
+Issueの詳細な説明
+
+## 受け入れ条件
+- 条件1
+- 条件2
+```
+
+#### 誤った例
+
+`body` パラメータに `\n` エスケープシーケンスを含む文字列を渡してはいけない:
+
+```text
+// bodyパラメータの値（誤り: \n は改行として解釈されない）
+## Summary\n- 変更内容の説明\n\n## Test plan\n- テスト計画
+```
+
+上記のように `\n` を含む文字列を渡すと、改行されずにリテラル文字列として登録される。
 
 ## 操作タイプの選択
 
