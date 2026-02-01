@@ -19,7 +19,7 @@ description: |
 PR・Issueの作成・更新で本文（body）に複数行テキストを含む場合、MCPツールの `body` パラメータには渡さないこと。
 代わりに `gh` CLI + HEREDOCを使用すること。MCPツールの `body` パラメータでは `\n` が改行として解釈されず、リテラル文字列として登録されてしまうため。
 
-### PR作成
+### コマンド例: PR作成
 
 ```bash
 gh pr create --title "タイトル" --body "$(cat <<'EOF'
@@ -32,7 +32,7 @@ EOF
 )"
 ```
 
-### PR更新
+### コマンド例: PR更新
 
 ```bash
 gh pr edit <PR番号> --body "$(cat <<'EOF'
@@ -45,7 +45,7 @@ EOF
 )"
 ```
 
-### Issue作成
+### コマンド例: Issue作成
 
 ```bash
 gh issue create --title "タイトル" --body "$(cat <<'EOF'
@@ -59,7 +59,7 @@ EOF
 )"
 ```
 
-### Issue更新
+### コマンド例: Issue更新
 
 ```bash
 gh issue edit <Issue番号> --body "$(cat <<'EOF'
