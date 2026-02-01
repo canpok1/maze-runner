@@ -1,5 +1,7 @@
 #!/bin/bash
-# ユーザーストーリーを監視し、サブIssueがないissueに対して自動的にストーリー分解を実行するスクリプト
+# ユーザーストーリーを監視し、以下の処理を自動的に実行するスクリプト:
+#   1. サブIssueがないissueに対してストーリー分解を実行
+#   2. 未アサインのサブタスクが存在する場合にタスクアサインを実行
 #
 # 使用方法:
 #   ./scripts/watch-stories.sh
@@ -56,6 +58,39 @@ while true; do
             fi
           else
             echo "エラー: issue #${issue_number} へのラベル付与に失敗しました。スキップします。" >&2
+          fi
+        else
+          # サブIssueが存在する場合、未アサインのサブタスクをチェック
+          # 条件: open状態、かつ assign-to-claude/in-progress-by-claude/draft ラベルなし
+          if unassigned_count=$(gh api "/repos/${REPO_OWNER}/${REPO_NAME}/issues/${issue_number}/sub_issues" \
+            --jq '[.[] | select(.state == "open") | select(((.labels // []) | map(.name) | any(. == "assign-to-claude" or . == "in-progress-by-claude" or . == "draft")) | not)] | length' 2>/dev/null); then
+
+            if [ "$unassigned_count" != "0" ] && [ "$unassigned_count" != "null" ] && [ -n "$unassigned_count" ]; then
+              echo "対象issue #${issue_number} を処理します（未アサインサブタスク ${unassigned_count}件）"
+
+              # 処理開始：in-progress-by-claudeラベルをアトミックに付与してロック
+              if gh issue edit "$issue_number" --add-label "$IN_PROGRESS_LABEL"; then
+                echo "issue #${issue_number} に $IN_PROGRESS_LABEL ラベルを付与しました"
+
+                # タスクアサインを実行
+                if claude --remote "/assign-tasks ${issue_number}"; then
+                  echo "issue #${issue_number} のタスクアサインが完了しました"
+
+                  # 処理成功時のみラベルを除去
+                  if gh issue edit "$issue_number" --remove-label "$IN_PROGRESS_LABEL"; then
+                    echo "issue #${issue_number} から $IN_PROGRESS_LABEL ラベルを除去しました"
+                  else
+                    echo "警告: issue #${issue_number} からのラベル除去に失敗しました" >&2
+                  fi
+                else
+                  echo "エラー: issue #${issue_number} のタスクアサインに失敗しました。無限ループを防ぐため、$IN_PROGRESS_LABEL ラベルは除去されません。" >&2
+                fi
+              else
+                echo "エラー: issue #${issue_number} へのラベル付与に失敗しました。スキップします。" >&2
+              fi
+            fi
+          else
+            echo "警告: issue #${issue_number} の未アサインサブタスク確認に失敗しました。スキップします。" >&2
           fi
         fi
       else
