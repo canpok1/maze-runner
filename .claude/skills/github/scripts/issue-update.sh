@@ -55,15 +55,15 @@ EOF
     exit 1
 }
 
-# 必要なコマンドの存在確認
-for cmd in git curl jq; do
+# 必要なコマンドの存在確認（ラベル削除でcurlを直接使用するため）
+for cmd in curl jq; do
     if ! command -v "$cmd" &> /dev/null; then
         echo "エラー: ${cmd}コマンドが見つかりません。インストールしてください。" >&2
         exit 1
     fi
 done
 
-# GH_TOKEN環境変数のチェック
+# GH_TOKEN環境変数のチェック（ラベル削除でcurlを直接使用するため）
 if [[ -z "${GH_TOKEN:-}" ]]; then
     echo "エラー: GH_TOKEN環境変数が設定されていません。" >&2
     exit 1

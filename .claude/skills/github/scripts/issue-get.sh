@@ -18,12 +18,6 @@ set -euo pipefail
 # スクリプトディレクトリの取得
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# jq コマンドの存在確認（レスポンスの検証に使用）
-if ! command -v jq &> /dev/null; then
-    echo "エラー: jq コマンドが見つかりません。インストールしてください。" >&2
-    exit 1
-fi
-
 # 使用方法を表示
 usage() {
     echo -e "使用方法: $0 <Issue番号>\n例: $0 123" >&2

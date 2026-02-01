@@ -34,8 +34,13 @@ SUB_NUMBER="$2"
 REPLACE_PARENT=false
 
 # オプション引数の処理
-if [[ $# -ge 3 && "$3" == "--replace-parent" ]]; then
-    REPLACE_PARENT=true
+if [[ $# -ge 3 ]]; then
+    if [[ "$3" == "--replace-parent" ]]; then
+        REPLACE_PARENT=true
+    else
+        echo "エラー: 不明なオプション: $3" >&2
+        usage
+    fi
 fi
 
 # Issue番号が数値かチェック
