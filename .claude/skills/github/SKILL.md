@@ -20,7 +20,7 @@ PR・Issueの作成・更新で本文（body）に複数行テキストを含む
 
 ### `gh` CLI + HEREDOC
 
-`gh` CLI と HEREDOC を使用してテキストを渡します。
+`gh` CLI と HEREDOC を使用してテキストを渡すこと。
 
 #### コマンド例: PR作成
 
