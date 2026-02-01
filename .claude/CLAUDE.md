@@ -34,11 +34,7 @@
 - `npm run dev:server` - フロントエンドビルド + バックエンド開発サーバー起動
 - `npm run build` - TypeScriptコンパイル + Viteビルド
 
-## GitHub操作のフォールバック指針
+## GitHub操作
 
-- MCPツールによるGitHub操作が権限エラー等で失敗した場合、`.claude/skills/github/SKILL.md` を参照してスクリプト版での代替手段を確認すること
-- 以下の操作はMCPツール版が対応不可のため、最初からスクリプト版を使用すること:
-  - スレッド返信（`thread-reply.sh`）
-  - スレッド解決（`thread-resolve.sh`）
-  - ワークフローログ取得（`workflow-log.sh`）
-- スクリプト版での代替も不可能な場合のみ、最終手段としてユーザーに手動介入を依頼すること
+- GitHub操作は `.claude/skills/github/SKILL.md` を参照して `gh` コマンド/スクリプトを使用すること
+- スクリプトでの操作が不可能な場合のみ、最終手段としてユーザーに手動介入を依頼すること

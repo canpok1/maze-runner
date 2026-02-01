@@ -15,8 +15,8 @@ argument-hint: [ユーザーストーリーのIssue番号]
 3. ユーザーストーリーを元に「タスク細分化の原則」に従ってタスクを細分化する。
 4. 細分化した各タスクについて以下を実行する:
     - `document-specialist` エージェントに依頼してタスクのIssue本文を「タスクIssue作成ルール」に従って生成する。
-    - `github` スキル（mcp__github__issue_write, method: 'create'）でIssueを作成する。
-    - mcp__github__sub_issue_write（method: 'add'）でユーザーストーリーIssueのサブissueとして登録する。
+    - `github` スキル（`issue-create.sh`）でIssueを作成する。
+    - `github` スキル（`sub-issue-add.sh`）でユーザーストーリーIssueのサブissueとして登録する。
 5. 作成したタスクIssueの一覧（タイトル・URL・依存関係）をユーザーに報告する。
 
 ## タスクIssue作成ルール
