@@ -133,7 +133,7 @@ EOF
 ./.claude/skills/github/scripts/issue-update.sh <Issue番号> --body-file body.txt
 
 # ラベルの追加・削除
-./.claude/skills/github/scripts/issue-update.sh <Issue番号> --add-label bug --remove-label draft
+./.claude/skills/github/scripts/issue-update.sh <Issue番号> --add-label bug --remove-label enhancement
 ```
 
 **注意**: 本文に複数行テキストを含む場合は[複数行テキストの取り扱いルール](#複数行テキストの取り扱いルール)を参照

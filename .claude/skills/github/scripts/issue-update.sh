@@ -19,7 +19,7 @@
 # 例:
 #   $0 123 --title "新しいタイトル" --state closed --state-reason completed
 #   $0 123 --body-file body.txt --add-label bug --add-label priority-high
-#   echo "Issue本文" | $0 123 --body-file - --remove-label draft
+#   echo "Issue本文" | $0 123 --body-file - --remove-label story
 #
 # 注意事項:
 #   - GH_TOKEN 環境変数が必要です
@@ -50,7 +50,7 @@ usage() {
 例:
   $0 123 --title "新しいタイトル" --state closed --state-reason completed
   $0 123 --body-file body.txt --add-label bug --add-label priority-high
-  echo "Issue本文" | $0 123 --body-file - --remove-label draft
+  echo "Issue本文" | $0 123 --body-file - --remove-label story
 EOF
     exit 1
 }
