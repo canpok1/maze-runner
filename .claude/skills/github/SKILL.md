@@ -14,6 +14,61 @@ description: |
 - 環境変数 `GH_TOKEN` が設定されている必要があります
 - 必要なコマンド: `curl`, `jq`, `git`
 
+## 複数行テキストの取り扱いルール
+
+PR・Issueの作成・更新で本文（body）に複数行テキストを含む場合、MCPツールの `body` パラメータには渡さないこと。
+代わりに `gh` CLI + HEREDOCを使用すること。MCPツールの `body` パラメータでは `\n` が改行として解釈されず、リテラル文字列として登録されてしまうため。
+
+### コマンド例: PR作成
+
+```bash
+gh pr create --title "タイトル" --body-file - <<'EOF'
+## Summary
+- 変更内容の説明
+
+## Test plan
+- テスト計画
+EOF
+```
+
+### コマンド例: PR更新
+
+```bash
+gh pr edit <PR番号> --body-file - <<'EOF'
+## Summary
+- 変更内容の説明
+
+## Test plan
+- テスト計画
+EOF
+```
+
+### コマンド例: Issue作成
+
+```bash
+gh issue create --title "タイトル" --body-file - <<'EOF'
+## 概要
+Issueの詳細な説明
+
+## 受け入れ条件
+- 条件1
+- 条件2
+EOF
+```
+
+### コマンド例: Issue更新
+
+```bash
+gh issue edit <Issue番号> --body-file - <<'EOF'
+## 概要
+Issueの詳細な説明
+
+## 受け入れ条件
+- 条件1
+- 条件2
+EOF
+```
+
 ## 操作タイプの選択
 
 1. **Issue操作** → [Issue操作](#issue操作)
@@ -48,9 +103,13 @@ MCPツール `mcp__github__issue_write` を使用（method: 'create'）
 
 **推奨**: document-specialistエージェントで説明文を生成してから使用
 
+**注意**: 本文に複数行テキストを含む場合は[複数行テキストの取り扱いルール](#複数行テキストの取り扱いルール)を参照
+
 ### Issue更新
 
 MCPツール `mcp__github__issue_write` を使用（method: 'update'）
+
+**注意**: 本文に複数行テキストを含む場合は[複数行テキストの取り扱いルール](#複数行テキストの取り扱いルール)を参照
 
 ## PR操作
 
@@ -70,6 +129,7 @@ MCPツール `mcp__github__issue_write` を使用（method: 'update'）
 - mainブランチからは実行不可
 - PRタイトルにissue番号を含めない
 - 本文には `fixed #<issue番号>` を含める
+- 本文に複数行テキストを含む場合は[複数行テキストの取り扱いルール](#複数行テキストの取り扱いルール)を参照
 
 ### 現在のブランチのPR番号取得
 
