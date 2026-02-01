@@ -4,7 +4,7 @@ description: |
   GitHub操作の統合スキル。issue操作、PR操作、レビュースレッド操作を提供。
   使用ケース:（1）リポジトリ情報取得、（2）issue取得/作成/更新、（3）PR作成（事前チェック統合）、
   （4）レビューコメント取得、（5）スレッド返信、（6）スレッド解決（resolve）、
-  （7）PRのCI状態取得、（8）ワークフローのログ取得
+  （7）PRのCI状態取得、（8）ワークフローのログ取得、（9）PR検索、（10）PR詳細取得、（11）PRマージ
 ---
 
 # GitHub操作スキル
@@ -241,6 +241,36 @@ MCPツール `mcp__github__sub_issue_write` を使用（method: 'add'）
 
 ## PR操作
 
+### PR検索
+
+**スクリプト版**:
+
+```bash
+./.claude/skills/github/scripts/pr-search.sh <検索クエリ>
+```
+
+**出力形式**: NDJSON（各行がJSON）。例: `{"number":123,"title":"Add feature","state":"open","author":"canpok1","url":"..."}`
+
+**備考**: クエリに `is:pr repo:OWNER/REPO` は自動付加されるため不要
+
+**MCPツール版**:
+
+`mcp__github__search_pull_requests` を使用
+
+### PR詳細取得
+
+**スクリプト版**:
+
+```bash
+./.claude/skills/github/scripts/pr-get.sh <PR番号>
+```
+
+**出力形式**: JSON（number, title, state, merged, author, head_branch, base_branch, body, html_url, created_at, updated_at）
+
+**MCPツール版**:
+
+`mcp__github__pull_request_read`（method: 'get'）を使用
+
 ### PR作成
 
 **スクリプト版**:
@@ -288,6 +318,36 @@ MCPツール `mcp__github__sub_issue_write` を使用（method: 'add'）
 `mcp__github__pull_request_read`（method: 'get_status'）を使用
 
 **制限事項**: コミットステータスのみ取得可能。詳細なチェックリストが必要な場合はスクリプト版を使用
+
+### CI状態取得（詳細版）
+
+**スクリプト版**:
+
+```bash
+./.claude/skills/github/scripts/pr-status.sh <PR番号>
+```
+
+**出力形式**: JSON（sha, overall_state, statuses配列, check_runs配列）。`pr-checks.sh` との違いはコミットステータスも含む点と、JSON形式で出力する点
+
+**MCPツール版**:
+
+CI状態取得と同じ `mcp__github__pull_request_read`（method: 'get_status'）を使用。スクリプト版はコミットステータスも含む詳細情報を返す
+
+### PRマージ
+
+**スクリプト版**:
+
+```bash
+./.claude/skills/github/scripts/pr-merge.sh <PR番号> [マージ方式]
+```
+
+**引数**: マージ方式は `merge`, `squash`, `rebase` のいずれか（デフォルト: `squash`）
+
+**出力形式**: JSON（sha, message）
+
+**MCPツール版**:
+
+`mcp__github__merge_pull_request` を使用
 
 ## Thread操作
 
