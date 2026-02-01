@@ -3,8 +3,14 @@ description: GitHub Issueを対応します。
 argument-hint: [GitHub Issueの番号]
 ---
 ## 手順
-1. GitHub Issueの番号をユーザーに確認する。
-    - 引数で指定されている場合、この手順はスキップする。
+1. GitHub Issueの番号を決定する。
+    - 引数で指定されている場合、その番号を使用する。
+    - 引数が未指定の場合、以下の条件でIssueを自動選択する:
+        - `assign-to-claude` ラベルが付いている
+        - `in-progress-by-claude` ラベルが付いていない
+        - open状態である
+        - 上記条件に合致するIssueから最も古いものを1件選択する
+    - 自動選択の対象Issueがない場合は「対象タスクがありません」とユーザーに通知し、処理を終了する。
 2. `github` スキルでGitHub Issueの内容を把握する。
 3. 対応計画を立てる。
 4. ユーザーに対応計画を確認し、承認を得る。
