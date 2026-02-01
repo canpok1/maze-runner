@@ -22,33 +22,31 @@ PR・Issueの作成・更新で本文（body）に複数行テキストを含む
 ### コマンド例: PR作成
 
 ```bash
-gh pr create --title "タイトル" --body "$(cat <<'EOF'
+gh pr create --title "タイトル" --body-file - <<'EOF'
 ## Summary
 - 変更内容の説明
 
 ## Test plan
 - テスト計画
 EOF
-)"
 ```
 
 ### コマンド例: PR更新
 
 ```bash
-gh pr edit <PR番号> --body "$(cat <<'EOF'
+gh pr edit <PR番号> --body-file - <<'EOF'
 ## Summary
 - 変更内容の説明
 
 ## Test plan
 - テスト計画
 EOF
-)"
 ```
 
 ### コマンド例: Issue作成
 
 ```bash
-gh issue create --title "タイトル" --body "$(cat <<'EOF'
+gh issue create --title "タイトル" --body-file - <<'EOF'
 ## 概要
 Issueの詳細な説明
 
@@ -56,13 +54,12 @@ Issueの詳細な説明
 - 条件1
 - 条件2
 EOF
-)"
 ```
 
 ### コマンド例: Issue更新
 
 ```bash
-gh issue edit <Issue番号> --body "$(cat <<'EOF'
+gh issue edit <Issue番号> --body-file - <<'EOF'
 ## 概要
 Issueの詳細な説明
 
@@ -70,7 +67,6 @@ Issueの詳細な説明
 - 条件1
 - 条件2
 EOF
-)"
 ```
 
 ## 操作タイプの選択
