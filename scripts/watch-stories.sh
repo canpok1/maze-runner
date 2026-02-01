@@ -131,21 +131,21 @@ merge_eligible_prs() {
 }
 
 while true; do
-  # draftラベルなし・in-progress-by-claudeラベルなし・open状態のissueを1件取得
+  # storyラベルあり・in-progress-by-claudeラベルなし・open状態のissueを1件取得
   # 競合状態を防ぐため、1件ずつ取得してアトミックにロックする
-  if issue_number=$(gh issue list --search "-label:draft -label:$IN_PROGRESS_LABEL" --state open --limit 1 --json number --jq '.[0].number'); then
+  if issue_number=$(gh issue list --search "label:story -label:$IN_PROGRESS_LABEL" --state open --limit 1 --json number --jq '.[0].number'); then
     if [ -n "$issue_number" ] && [ "$issue_number" != "null" ]; then
       # サブIssueの件数を取得
       if sub_issue_count=$(gh api "/repos/${REPO_OWNER}/${REPO_NAME}/issues/${issue_number}/sub_issues" --jq 'length' 2>/dev/null); then
-        # サブIssueがない場合のみ処理
+        # サブIssueがない場合：ストーリー分解を実行
         if [ "$sub_issue_count" = "0" ]; then
           echo "対象issue #${issue_number} を処理します（サブIssueなし）"
           process_issue_with_lock "$issue_number" "breakdown-story" "ストーリー分解"
         else
           # サブIssueが存在する場合、未アサインのサブタスクをチェック
-          # 条件: open状態、かつ assign-to-claude/in-progress-by-claude/draft ラベルなし
+          # 条件: open状態、かつ assign-to-claude/in-progress-by-claude ラベルなし
           if unassigned_count=$(gh api "/repos/${REPO_OWNER}/${REPO_NAME}/issues/${issue_number}/sub_issues" \
-            --jq '[.[] | select(.state == "open") | select(((.labels // []) | map(.name) | any(. == "assign-to-claude" or . == "in-progress-by-claude" or . == "draft")) | not)] | length' 2>/dev/null); then
+            --jq '[.[] | select(.state == "open") | select(((.labels // []) | map(.name) | any(. == "assign-to-claude" or . == "in-progress-by-claude")) | not)] | length' 2>/dev/null); then
 
             if [ "$unassigned_count" -gt 0 ] 2>/dev/null; then
               echo "対象issue #${issue_number} を処理します（未アサインサブタスク ${unassigned_count}件）"
