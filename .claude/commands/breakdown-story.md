@@ -15,7 +15,7 @@ argument-hint: [ユーザーストーリーのIssue番号]
 3. ユーザーストーリーを元に「タスク細分化の原則」に従ってタスクを細分化する。
 4. 細分化した各タスクについて以下を実行する:
     - `document-specialist` エージェントに依頼してタスクのIssue本文を「タスクIssue作成ルール」に従って生成する。
-    - `github` スキル（`issue-create.sh`）でIssueを作成する。
+    - `github` スキル（`issue-create.sh`）でIssueを作成する。`--label task` オプションを付与して `task` ラベルを自動付与すること。
     - `github` スキル（`sub-issue-add.sh`）でユーザーストーリーIssueのサブissueとして登録する。
 5. 作成したタスクIssueの一覧（タイトル・URL・依存関係）をユーザーに報告する。
 
@@ -59,4 +59,4 @@ argument-hint: [ユーザーストーリーのIssue番号]
 - サブissue機能でユーザーストーリーとタスクを紐づけること。
 - docs/document-rules.md の規約に従った高品質なIssue本文を作成すること。
 - 作成したIssue番号とURLは必ず記録し、ユーザーに報告すること。
-- タスクIssue（サブIssue）には `story` ラベルを付けないこと。`story` ラベルの運用方針は CLAUDE.md を参照。
+- タスクIssue（サブIssue）には `task` ラベルを付与し、`story` ラベルは付けないこと。ラベルの運用方針は CLAUDE.md を参照。
