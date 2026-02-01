@@ -16,10 +16,8 @@
 
 ## ラベルの運用方針
 
-- `story` ラベルはストーリー（親Issue）に付与し、タスクIssue（サブIssue）と区別する。
-- タスクIssue（サブIssue）には `story` ラベルを付与しない。
-- `task` ラベルはタスクIssue（サブIssue）に付与し、ストーリー（親Issue）と区別する。
-- ストーリー（親Issue）には `task` ラベルを付与しない。
+- `story` ラベルは、ストーリー（親Issue）にのみ付与します。
+- `task` ラベルは、タスクIssue（サブIssue）にのみ付与します。
 
 ## npmスクリプト
 

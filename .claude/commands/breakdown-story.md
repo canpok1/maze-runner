@@ -59,5 +59,4 @@ argument-hint: [ユーザーストーリーのIssue番号]
 - サブissue機能でユーザーストーリーとタスクを紐づけること。
 - docs/document-rules.md の規約に従った高品質なIssue本文を作成すること。
 - 作成したIssue番号とURLは必ず記録し、ユーザーに報告すること。
-- タスクIssue（サブIssue）には `story` ラベルを付けないこと。`story` ラベルの運用方針は CLAUDE.md を参照。
-- タスクIssue（サブIssue）には `task` ラベルを付与すること。`task` ラベルの運用方針は CLAUDE.md を参照。
+- タスクIssue（サブIssue）には `task` ラベルを付与し、`story` ラベルは付けないこと。ラベルの運用方針は CLAUDE.md を参照。
