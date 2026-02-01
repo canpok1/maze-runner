@@ -142,9 +142,42 @@ MCPツールの多くは `owner` と `repo` パラメータを必要とします
 
 ### Issue取得
 
+**スクリプト版**:
+
+```bash
+./.claude/skills/github/scripts/issue-get.sh <Issue番号>
+```
+
+**出力**: Issue詳細のJSON
+
+**MCPツール版**:
+
 MCPツール `mcp__github__issue_read` を使用（method: 'get'）
 
 ### Issue作成
+
+**スクリプト版**:
+
+```bash
+# 本文を直接指定
+./.claude/skills/github/scripts/issue-create.sh --title "タイトル" --body "本文"
+
+# 本文をファイルから読み込み
+./.claude/skills/github/scripts/issue-create.sh --title "タイトル" --body-file body.txt
+
+# 本文をstdinから読み込み（HEREDOC方式）
+./.claude/skills/github/scripts/issue-create.sh --title "タイトル" --body-file - <<'EOF'
+## 概要
+Issueの詳細な説明
+EOF
+
+# ラベル付き
+./.claude/skills/github/scripts/issue-create.sh --title "タイトル" --body "本文" --label bug --label priority-high
+```
+
+**出力**: 作成されたIssueのJSON
+
+**MCPツール版**:
 
 MCPツール `mcp__github__issue_write` を使用（method: 'create'）
 
@@ -154,9 +187,57 @@ MCPツール `mcp__github__issue_write` を使用（method: 'create'）
 
 ### Issue更新
 
+**スクリプト版**:
+
+```bash
+# タイトルと状態を更新
+./.claude/skills/github/scripts/issue-update.sh <Issue番号> --title "新タイトル" --state closed --state-reason completed
+
+# 本文をファイルから更新
+./.claude/skills/github/scripts/issue-update.sh <Issue番号> --body-file body.txt
+
+# ラベルの追加・削除
+./.claude/skills/github/scripts/issue-update.sh <Issue番号> --add-label bug --remove-label draft
+```
+
+**MCPツール版**:
+
 MCPツール `mcp__github__issue_write` を使用（method: 'update'）
 
 **注意**: 本文に複数行テキストを含む場合は[複数行テキストの取り扱いルール](#複数行テキストの取り扱いルール)を参照
+
+### サブIssue一覧取得
+
+**スクリプト版**:
+
+```bash
+./.claude/skills/github/scripts/issue-sub-issues.sh <Issue番号>
+```
+
+**出力形式** (NDJSON):
+```json
+{"id": "...", "number": 123, "title": "...", "state": "OPEN", "url": "...", "labels": ["label1"]}
+```
+
+**MCPツール版**:
+
+MCPツール `mcp__github__issue_read` を使用（method: 'get_sub_issues'）
+
+### サブIssue追加
+
+**スクリプト版**:
+
+```bash
+# 基本的な使用法
+./.claude/skills/github/scripts/sub-issue-add.sh <親Issue番号> <サブIssue番号>
+
+# 既存の親Issueを置換する場合
+./.claude/skills/github/scripts/sub-issue-add.sh <親Issue番号> <サブIssue番号> --replace-parent
+```
+
+**MCPツール版**:
+
+MCPツール `mcp__github__sub_issue_write` を使用（method: 'add'）
 
 ## PR操作
 
