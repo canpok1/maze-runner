@@ -106,10 +106,7 @@ fi
 if [[ -n "$BODY_FILE" ]]; then
     if [[ "$BODY_FILE" == "-" ]]; then
         # 標準入力から読み込み
-        BODY=""
-        while IFS= read -r line || [[ -n "$line" ]]; do
-            BODY+="${BODY:+$'\n'}${line}"
-        done
+        BODY=$(cat)
     else
         # ファイルから読み込み
         if [[ ! -f "$BODY_FILE" ]]; then
@@ -132,19 +129,10 @@ echo "リポジトリ: $OWNER/$REPO" >&2
 echo "Issue を作成中..." >&2
 
 # JSON ペイロードを作成
+JSON_PAYLOAD=$(jq -n --arg title "$TITLE" --arg body "$BODY" '{title: $title, body: $body}')
 if [[ ${#LABELS[@]} -gt 0 ]]; then
-    # ラベルがある場合
-    JSON_PAYLOAD=$(jq -n \
-        --arg title "$TITLE" \
-        --arg body "$BODY" \
-        --argjson labels "$(printf '%s\n' "${LABELS[@]}" | jq -R . | jq -s .)" \
-        '{title: $title, body: $body, labels: $labels}')
-else
-    # ラベルがない場合
-    JSON_PAYLOAD=$(jq -n \
-        --arg title "$TITLE" \
-        --arg body "$BODY" \
-        '{title: $title, body: $body}')
+    LABELS_JSON=$(printf '%s\n' "${LABELS[@]}" | jq -R . | jq -s .)
+    JSON_PAYLOAD=$(echo "$JSON_PAYLOAD" | jq --argjson labels "$LABELS_JSON" '. + {labels: $labels}')
 fi
 
 # GitHub API を使用して Issue を作成
