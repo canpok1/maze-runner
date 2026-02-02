@@ -78,7 +78,7 @@ argument-hint: [ユーザーストーリーのIssue番号]
     - フェーズ1で収集した各サブIssueとPRの対応関係から、該当するIssue番号を取得する。
     - `github` スキル（`issue-get.sh`）でIssueのstateを確認する。
     - Issueがまだオープンの場合:
-        - `github` スキル（`github-rest.sh`）でIssueにコメント（例: "Merged via PR #{マージしたPR番号}"）を追加する。エンドポイント: `/repos/{owner}/{repo}/issues/{issue_number}/comments`（POSTメソッド）。
+        - `github` スキル（`issue-add-comment.sh`）でIssueにコメント（例: "Merged via PR #{マージしたPR番号}"）を追加する。
         - `github` スキル（`issue-update.sh`）でIssueをクローズする（`--state closed --state-reason completed`）。
     - Issueが既にクローズ済みの場合は何もしない。
 
