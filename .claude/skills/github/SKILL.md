@@ -5,17 +5,23 @@ description: |
   全操作がスクリプト版（.claude/skills/github/scripts/）で提供される。
   使用ケース:
   （1）リポジトリ情報取得 → repo-info.sh
-  （2）issue取得/作成/更新 → issue-get.sh / issue-create.sh / issue-update.sh
-  （3）サブIssue操作 → issue-sub-issues.sh / sub-issue-add.sh
-  （4）PR作成（事前チェック統合） → pr-create.sh
-  （5）PR検索/詳細取得 → pr-search.sh / pr-get.sh
-  （6）現在ブランチのPR番号取得 → pr-number.sh
-  （7）PRのCI状態取得 → pr-checks.sh / pr-status.sh
-  （8）PRマージ → pr-merge.sh
-  （9）レビュースレッド一覧/詳細取得 → thread-list.sh / thread-details.sh
-  （10）スレッド返信 → thread-reply.sh
-  （11）スレッド解決（resolve） → thread-resolve.sh
-  （12）ワークフローのログ取得 → workflow-log.sh
+  （2）issue取得 → issue-get.sh
+  （3）issue作成 → issue-create.sh
+  （4）issue更新 → issue-update.sh
+  （5）サブIssue一覧取得 → issue-sub-issues.sh
+  （6）サブIssue追加 → sub-issue-add.sh
+  （7）PR作成（事前チェック統合） → pr-create.sh
+  （8）PR検索 → pr-search.sh
+  （9）PR詳細取得 → pr-get.sh
+  （10）現在ブランチのPR番号取得 → pr-number.sh
+  （11）PRのCI状態取得 → pr-checks.sh
+  （12）PRのステータス取得 → pr-status.sh
+  （13）PRマージ → pr-merge.sh
+  （14）レビュースレッド一覧取得 → thread-list.sh
+  （15）レビュースレッド詳細取得 → thread-details.sh
+  （16）スレッド返信 → thread-reply.sh
+  （17）スレッド解決（resolve） → thread-resolve.sh
+  （18）ワークフローのログ取得 → workflow-log.sh
   注意: PR・Issueの本文に複数行テキストを含む場合はgh CLI + HEREDOCを使用すること
 ---
 
