@@ -117,6 +117,36 @@ merge_eligible_prs() {
       continue
     fi
 
+    # 未解決レビューコメントのチェック
+    if ! review_threads_json=$(gh api graphql -f query='
+      query($owner: String!, $name: String!, $number: Int!) {
+        repository(owner: $owner, name: $name) {
+          pullRequest(number: $number) {
+            reviewThreads(first: 100) {
+              nodes {
+                isResolved
+              }
+            }
+          }
+        }
+      }
+    ' -f owner="$REPO_OWNER" -f name="$REPO_NAME" -F number="$pr_number" 2>&1); then
+      echo "  スキップ: レビューコメントの取得に失敗しました"
+      continue
+    fi
+
+    unresolved_count=$(echo "$review_threads_json" | jq -r '.data.repository.pullRequest.reviewThreads.nodes | map(select(.isResolved == false)) | length' 2>/dev/null || echo "error")
+
+    if [ "$unresolved_count" = "error" ]; then
+      echo "  スキップ: レビューコメントの取得に失敗しました"
+      continue
+    fi
+
+    if [ "$unresolved_count" -gt 0 ] 2>/dev/null; then
+      echo "  スキップ: 未解決レビューコメントあり（${unresolved_count}件）"
+      continue
+    fi
+
     # すべての条件を満たしたのでマージ実行
     echo "  ✓ すべての条件を満たしました（${elapsed_seconds}秒経過、${check_count}件のチェックpass）"
     echo "  マージを実行します..."
