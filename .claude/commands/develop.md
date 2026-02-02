@@ -1,5 +1,5 @@
 ---
-description: GitHub Issueの実装・テスト・自己レビューを行う。
+description: GitHub Issueを解決するため、実装・テスト・自己レビューを行います。
 argument-hint: [GitHub Issueの番号]
 ---
 ## 手順
