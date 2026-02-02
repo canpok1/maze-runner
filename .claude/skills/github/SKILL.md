@@ -2,9 +2,21 @@
 name: github
 description: |
   GitHub操作の統合スキル。issue操作、PR操作、レビュースレッド操作を提供。
-  使用ケース:（1）リポジトリ情報取得、（2）issue取得/作成/更新、（3）PR作成（事前チェック統合）、
-  （4）レビューコメント取得、（5）スレッド返信、（6）スレッド解決（resolve）、
-  （7）PRのCI状態取得、（8）ワークフローのログ取得、（9）PR検索、（10）PR詳細取得、（11）PRマージ
+  全操作がスクリプト版（.claude/skills/github/scripts/）で提供される。
+  使用ケース:
+  （1）リポジトリ情報取得 → repo-info.sh
+  （2）issue取得/作成/更新 → issue-get.sh / issue-create.sh / issue-update.sh
+  （3）サブIssue操作 → issue-sub-issues.sh / sub-issue-add.sh
+  （4）PR作成（事前チェック統合） → pr-create.sh
+  （5）PR検索/詳細取得 → pr-search.sh / pr-get.sh
+  （6）現在ブランチのPR番号取得 → pr-number.sh
+  （7）PRのCI状態取得 → pr-checks.sh / pr-status.sh
+  （8）PRマージ → pr-merge.sh
+  （9）レビュースレッド一覧/詳細取得 → thread-list.sh / thread-details.sh
+  （10）スレッド返信 → thread-reply.sh
+  （11）スレッド解決（resolve） → thread-resolve.sh
+  （12）ワークフローのログ取得 → workflow-log.sh
+  注意: PR・Issueの本文に複数行テキストを含む場合はgh CLI + HEREDOCを使用すること
 ---
 
 # GitHub操作スキル
