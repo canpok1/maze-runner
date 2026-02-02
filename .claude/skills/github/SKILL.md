@@ -308,9 +308,7 @@ MCP GitHubの `issue_write` ツールには、ラベルの除去（クリア）�
 **回避策**: REST APIを直接使用してラベルを削除してください。
 
 ```bash
-# 特定のラベルを削除
+# すべてのラベルを削除
 read OWNER REPO < <(./.claude/skills/github/scripts/repo-info.sh)
-curl -s -X DELETE \
-  -H "Authorization: token $GH_TOKEN" \
-  "https://api.github.com/repos/${OWNER}/${REPO}/issues/{number}/labels/{label_name}"
+./.claude/skills/github/scripts/github-rest.sh "/repos/${OWNER}/${REPO}/issues/{number}/labels" "DELETE"
 ```
