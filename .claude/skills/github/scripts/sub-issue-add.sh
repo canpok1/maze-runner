@@ -2,11 +2,10 @@
 # GitHub Issue にサブIssueを追加するスクリプト
 #
 # 使用方法:
-#   $0 <親Issue番号> <サブIssue番号> [--replace-parent]
+#   $0 <親Issue番号> <サブIssue番号>
 #
 # 例:
 #   $0 100 101
-#   $0 100 101 --replace-parent
 
 set -euo pipefail
 
@@ -15,11 +14,10 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # 使用方法を表示
 usage() {
-    echo "使用方法: $0 <親Issue番号> <サブIssue番号> [--replace-parent]" >&2
+    echo "使用方法: $0 <親Issue番号> <サブIssue番号>" >&2
     echo "" >&2
     echo "例:" >&2
     echo "  $0 100 101" >&2
-    echo "  $0 100 101 --replace-parent" >&2
     exit 1
 }
 
@@ -31,17 +29,6 @@ fi
 
 PARENT_NUMBER="$1"
 SUB_NUMBER="$2"
-REPLACE_PARENT=false
-
-# オプション引数の処理
-if [[ $# -ge 3 ]]; then
-    if [[ "$3" == "--replace-parent" ]]; then
-        REPLACE_PARENT=true
-    else
-        echo "エラー: 不明なオプション: $3" >&2
-        usage
-    fi
-fi
 
 # Issue番号が数値かチェック
 if ! [[ "$PARENT_NUMBER" =~ ^[0-9]+$ ]]; then
@@ -60,7 +47,6 @@ read -r OWNER REPO < <("$SCRIPT_DIR/repo-info.sh")
 echo "サブIssueを追加中..." >&2
 echo "親Issue: #$PARENT_NUMBER" >&2
 echo "サブIssue: #$SUB_NUMBER" >&2
-echo "既存の親Issueを置換: $REPLACE_PARENT" >&2
 
 # Step 1: 親IssueとサブIssueのNode IDを取得
 GRAPHQL_QUERY='query($owner: String!, $name: String!, $parentNumber: Int!, $subNumber: Int!) {
@@ -113,8 +99,8 @@ echo "親IssueのNode ID: $PARENT_ID" >&2
 echo "サブIssueのNode ID: $SUB_ID" >&2
 
 # Step 2: サブIssue追加のmutationを実行
-GRAPHQL_MUTATION='mutation($parentId: ID!, $subIssueId: ID!, $replaceParent: Boolean!) {
-  addSubIssue(input: {issueId: $parentId, subIssueId: $subIssueId, replaceParentIssue: $replaceParent}) {
+GRAPHQL_MUTATION='mutation($parentId: ID!, $subIssueId: ID!) {
+  addSubIssue(input: {issueId: $parentId, subIssueId: $subIssueId}) {
     issue {
       id
       number
@@ -131,8 +117,7 @@ GRAPHQL_MUTATION='mutation($parentId: ID!, $subIssueId: ID!, $replaceParent: Boo
 MUTATION_VARIABLES=$(jq -n \
     --arg parentId "$PARENT_ID" \
     --arg subIssueId "$SUB_ID" \
-    --argjson replaceParent "$REPLACE_PARENT" \
-    '{parentId: $parentId, subIssueId: $subIssueId, replaceParent: $replaceParent}')
+    '{parentId: $parentId, subIssueId: $subIssueId}')
 
 set +e
 MUTATION_RESULT=$("$SCRIPT_DIR/github-graphql.sh" "$GRAPHQL_MUTATION" "$MUTATION_VARIABLES")
