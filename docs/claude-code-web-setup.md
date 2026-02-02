@@ -29,18 +29,39 @@ GitHub APIを使用するために、Personal Access Token（PAT）を作成し�
 
 #### 2.1 Personal Access Token の作成
 
+GitHubのPersonal Access Tokenには「Fine-grained tokens」と「Tokens (classic)」の2種類があります。セキュリティの観点から、リポジトリ単位で権限を細かく設定できる **Fine-grained tokens** の利用を推奨します。
+
+> **参考**: [Fine-grained personal access tokensについて](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#about-fine-grained-personal-access-tokens)
+
+##### Fine-grained tokens（推奨）
+
 1. GitHubにログイン
 2. 画面右上のプロフィールアイコンをクリックし、**Settings** を選択
 3. 左サイドバーの **Developer settings** をクリック
-4. **Personal access tokens** → **Tokens (classic)** を選択
-5. **Generate new token** → **Generate new token (classic)** をクリック
+4. **Personal access tokens** → **Fine-grained tokens** を選択
+5. **Generate new token** をクリック
 6. トークンの設定を行う:
-   - **Note**: トークンの用途を記入（例: `Claude Code on the Web - gh CLI`）
+   - **Token name**: トークンの用途を記入（例: `Claude Code on the Web - gh CLI`）
    - **Expiration**: 有効期限を設定（セキュリティのため、適切な期間を設定）
-   - **Select scopes**: 最低限 **`repo`** スコープにチェックを入れる
-     - プライベートリポジトリへのフルアクセスが必要な場合は `repo` のすべてのサブスコープを含める
+   - **Repository access**: 対象リポジトリを選択
+   - **Permissions**: 必要な権限のみを付与（例: Contents - Read and write、Pull requests - Read and write）
 7. **Generate token** ボタンをクリック
 8. 生成されたトークンをコピーして安全な場所に保存（この画面を離れると再表示できません）
+
+##### Tokens (classic)（代替手段）
+
+Fine-grained tokensが利用できない場合は、classicトークンを使用します。
+
+1. **Personal access tokens** → **Tokens (classic)** を選択
+2. **Generate new token** → **Generate new token (classic)** をクリック
+3. トークンの設定を行う:
+   - **Note**: トークンの用途を記入（例: `Claude Code on the Web - gh CLI`）
+   - **Expiration**: 有効期限を設定
+   - **Select scopes**: **最小権限の原則**に従い、必要なスコープのみを選択
+     - **注意**: `repo` スコープはリポジトリへのフルアクセスを許可する強力な権限です。セキュリティリスクを考慮し、慎重に利用してください
+     - プライベートリポジトリへのフルアクセスが必要な場合に `repo` を選択します。それ以外の場合は、より限定的なスコープ（例: `public_repo`）を検討してください
+4. **Generate token** ボタンをクリック
+5. 生成されたトークンをコピーして安全な場所に保存（この画面を離れると再表示できません）
 
 #### 2.2 環境変数の設定
 
@@ -68,8 +89,8 @@ GitHub CLIが正常に動作するために、GitHub関連のドメインへの�
 
 1. **Add allowed domain** をクリック
 2. 以下のドメインを追加:
-   - `github.com` - GitHub APIへのアクセス
-   - `api.github.com` - GitHub REST API
+   - `github.com` - Web認証フローなどへのアクセス
+   - `api.github.com` - GitHub API (REST/GraphQL) へのアクセス
    - `release-assets.githubusercontent.com` - GitHub CLIのインストールとアップデート
 3. 各ドメインを追加後、**Save** をクリック
 
@@ -108,9 +129,9 @@ gh version X.X.X (YYYY-MM-DD)
 **解決方法**:
 1. 環境変数 `GITHUB_TOKEN` が設定されているか確認:
    ```bash
-   echo $GITHUB_TOKEN
+   if [ -n "$GITHUB_TOKEN" ]; then echo "GITHUB_TOKEN is set."; else echo "GITHUB_TOKEN is not set."; fi
    ```
-2. トークンが空白の場合、カスタム環境設定で `GITHUB_TOKEN` を再設定
+2. 設定されていない場合、カスタム環境設定で `GITHUB_TOKEN` を再設定
 3. トークンに `repo` スコープが含まれているか確認
 4. トークンの有効期限が切れていないか確認
 
