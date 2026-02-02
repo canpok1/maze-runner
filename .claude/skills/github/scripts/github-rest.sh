@@ -56,7 +56,7 @@ fi
 
 # エラーハンドリング付きでcurl実行
 set +e
-response=$(curl "${curl_args[@]}" "$api_url")
+response=$(curl "${curl_args[@]}" -w '\n%{http_code}' "$api_url")
 curl_exit_code=$?
 set -e
 
@@ -66,12 +66,22 @@ if [[ $curl_exit_code -ne 0 ]]; then
     exit 1
 fi
 
-# APIエラーレスポンスのチェック (.messageフィールドの有無)
-if echo "$response" | jq -e '.message' &> /dev/null; then
-    echo "エラー: GitHub APIがエラーを返しました:" >&2
-    echo "$response" | jq -r '.message' >&2
+# レスポンスからHTTPステータスコードとボディを分離
+http_code="${response##*$'\n'}"
+response_body="${response%$'\n'*}"
+
+# HTTPステータスコードに基づくエラー判定
+if [[ "$http_code" -ge 200 && "$http_code" -lt 300 ]]; then
+    # 2xx系: 成功
+    echo "$response_body"
+else
+    # 4xx/5xx系: エラー
+    echo "エラー: GitHub APIがエラーを返しました (HTTP $http_code):" >&2
+    message=$(echo "$response_body" | jq -r '.message' 2>/dev/null)
+    if [[ -n "$message" && "$message" != "null" ]]; then
+        echo "$message" >&2
+    else
+        echo "$response_body" >&2
+    fi
     exit 1
 fi
-
-# 成功時はレスポンスをstdoutに出力
-echo "$response"
