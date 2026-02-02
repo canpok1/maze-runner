@@ -75,9 +75,10 @@ argument-hint: [ユーザーストーリーのIssue番号]
     - merge_method: 'squash' を使用する。
 3. マージ結果を記録する（成功/失敗）。
 4. マージに成功したPRに対応するIssueについて、自動クローズ処理を行う:
+    - フェーズ1で収集した各サブIssueとPRの対応関係から、該当するIssue番号を取得する。
     - `github` スキル（`issue-get.sh`）でIssueのstateを確認する。
     - Issueがまだオープンの場合:
-        - `github` スキル（`github-rest.sh`）でIssueにコメント（例: "Merged via PR #xxx"）を追加する。
+        - `github` スキル（`github-rest.sh`）でIssueにコメント（例: "Merged via PR #{マージしたPR番号}"）を追加する。エンドポイント: `/repos/{owner}/{repo}/issues/{issue_number}/comments`（POSTメソッド）。
         - `github` スキル（`issue-update.sh`）でIssueをクローズする（`--state closed --state-reason completed`）。
     - Issueが既にクローズ済みの場合は何もしない。
 
@@ -148,4 +149,5 @@ argument-hint: [ユーザーストーリーのIssue番号]
 - 依存関係の解析は Issue本文の「依存関係」セクションに基づいて行うこと。
 - CI状態の確認では、すべてのチェックがpassしていることを確認すること（チェックが0件の場合もpassとみなす）。
 - 未解決レビューコメントの確認では、`thread-list.sh` でスレッド一覧を取得し、`thread-details.sh` で各スレッドの解決状態を確認すること。
+- PRマージ後のIssue自動クローズでは、Issueが既にクローズ済みの場合はスキップすること。
 - エラーが発生した場合は、詳細な情報をユーザーに報告すること。
