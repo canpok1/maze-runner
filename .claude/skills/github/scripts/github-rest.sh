@@ -67,8 +67,8 @@ if [[ $curl_exit_code -ne 0 ]]; then
 fi
 
 # レスポンスからHTTPステータスコードとボディを分離
-http_code=$(echo "$response" | tail -n 1)
-response_body=$(echo "$response" | sed '$d')
+http_code="${response##*$'\n'}"
+response_body="${response%$'\n'*}"
 
 # HTTPステータスコードに基づくエラー判定
 if [[ "$http_code" -ge 200 && "$http_code" -lt 300 ]]; then
@@ -76,11 +76,11 @@ if [[ "$http_code" -ge 200 && "$http_code" -lt 300 ]]; then
     echo "$response_body"
 else
     # 4xx/5xx系: エラー
-    if echo "$response_body" | jq -e '.message' &> /dev/null; then
-        echo "エラー: GitHub APIがエラーを返しました (HTTP $http_code):" >&2
-        echo "$response_body" | jq -r '.message' >&2
+    echo "エラー: GitHub APIがエラーを返しました (HTTP $http_code):" >&2
+    message=$(echo "$response_body" | jq -r '.message' 2>/dev/null)
+    if [[ -n "$message" && "$message" != "null" ]]; then
+        echo "$message" >&2
     else
-        echo "エラー: GitHub APIがエラーを返しました (HTTP $http_code):" >&2
         echo "$response_body" >&2
     fi
     exit 1
