@@ -6,7 +6,7 @@ argument-hint: [ユーザーストーリーのIssue番号]
 ## 概要
 
 ユーザーストーリーのサブIssue（タスク）の進捗状況を確認し、以下のアクションを実行するスキルです:
-- マージ可能なPRの自動マージ（ユーザー確認後）
+- マージ可能なPRの自動マージ（ユーザー確認不要）
 - 着手可能タスクへの `assign-to-claude` ラベル付与（ユーザー確認後）
 
 ## 手順
@@ -69,11 +69,16 @@ argument-hint: [ユーザーストーリーのIssue番号]
 
 #### ステップ4-1: マージ可能PRの処理
 
-1. 「PR作成済み・マージ可能」に分類されたPRの一覧を提示する:
-    - Issue番号、タイトル、PR番号、PR URL
-2. `github` スキル（`pr-merge.sh`）でマージする:
-    - merge_method: 'squash' を使用する。
-3. マージ結果を記録する（成功/失敗）。
+1. 「PR作成済み・マージ可能」に分類されたPRを自動でマージする（ユーザー確認不要）:
+    - `github` スキル（`pr-merge.sh`）でマージする。merge_method: 'squash' を使用する。
+    - マージ結果を記録する。成功したPRの一覧（Issue番号、タイトル、PR番号、PR URL）と、失敗したPRがあればその理由を報告する。
+2. マージに成功したPRに対応するIssueについて、自動クローズ処理を行う:
+    - フェーズ1で収集した各サブIssueとPRの対応関係から、該当するIssue番号を取得する。
+    - `github` スキル（`issue-get.sh`）でIssueのstateを確認する。
+    - Issueがまだオープンの場合:
+        - `github` スキル（`issue-add-comment.sh`）でIssueにコメント（例: "Merged via PR #{マージしたPR番号}"）を追加する。
+        - `github` スキル（`issue-update.sh`）でIssueをクローズする（`--state closed --state-reason completed`）。
+    - Issueが既にクローズ済みの場合は何もしない。
 
 #### ステップ4-2: 着手可能タスクの再評価
 
@@ -134,7 +139,7 @@ argument-hint: [ユーザーストーリーのIssue番号]
 
 ## 注意点
 
-- マージおよびラベル付与は必ずユーザー確認後に実行すること（AskUserQuestion を使用）。
+- ラベル付与は必ずユーザー確認後に実行すること（AskUserQuestion を使用）。
 - ラベル付与時は既存のラベルを保持して `assign-to-claude` を追加すること。
 - PR検索で複数ヒットした場合は、openな最新PRを対象とすること。
 - マージには merge_method: 'squash' を使用すること。
@@ -142,4 +147,5 @@ argument-hint: [ユーザーストーリーのIssue番号]
 - 依存関係の解析は Issue本文の「依存関係」セクションに基づいて行うこと。
 - CI状態の確認では、すべてのチェックがpassしていることを確認すること（チェックが0件の場合もpassとみなす）。
 - 未解決レビューコメントの確認では、`thread-list.sh` でスレッド一覧を取得し、`thread-details.sh` で各スレッドの解決状態を確認すること。
+- PRマージ後のIssue自動クローズでは、Issueが既にクローズ済みの場合はスキップすること。
 - エラーが発生した場合は、詳細な情報をユーザーに報告すること。

@@ -156,6 +156,14 @@ EOF
 
 **注意**: 本文に複数行テキストを含む場合は[複数行テキストの取り扱いルール](#複数行テキストの取り扱いルール)を参照
 
+### Issueコメント追加
+
+```bash
+./.claude/skills/github/scripts/issue-add-comment.sh <Issue番号> "コメント内容"
+```
+
+**出力**: 作成されたコメントのJSON
+
 ### サブIssue一覧取得
 
 ```bash
