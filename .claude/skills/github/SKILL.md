@@ -296,3 +296,21 @@ EOF
 | `repo-info.sh` | gitリモートURLからowner/repo情報を抽出（詳細: [リポジトリ情報の取得](#リポジトリ情報の取得)） |
 | `github-rest.sh` | GitHub REST API呼び出しの共通処理 |
 | `github-graphql.sh` | GitHub GraphQL API呼び出しの共通処理 |
+
+## 制限事項
+
+### MCPツール `issue_write` のラベル操作制限
+
+MCP GitHubの `issue_write` ツールには、ラベルの除去（クリア）ができない制限があります。
+
+**症状**: `labels: []` を指定してもラベルが除去されない（サイレント失敗）
+
+**回避策**: REST APIを直接使用してラベルを削除してください。
+
+```bash
+# 特定のラベルを削除
+read OWNER REPO < <(./.claude/skills/github/scripts/repo-info.sh)
+curl -s -X DELETE \
+  -H "Authorization: token $GH_TOKEN" \
+  "https://api.github.com/repos/${OWNER}/${REPO}/issues/{number}/labels/{label_name}"
+```
