@@ -1,5 +1,5 @@
 ---
-description: GitHub Issueを対応します。
+description: GitHub Issueの実装・テスト・自己レビューを行う。
 argument-hint: [GitHub Issueの番号]
 ---
 ## 手順
@@ -16,12 +16,6 @@ argument-hint: [GitHub Issueの番号]
 4. `/review` スキルを実行する。
     - 自己レビューを実施する。
 5. レビューで指摘事項があれば修正を行う。
-6. `/create-pr` スキルを実行する。
-    - プルリクエストを作成する。
-    - PR作成後、続けて必ず手順7を実行してください。
-7. `/fix-pr` スキルを実行する。
-    - CI状況やレビューコメントを確認して対応する。
-    - この手順は、手順6のPR作成とセットで実行します。
 
 ## 注意点
 - 計画実行は `coding-specialist` エージェントが行う前提で計画すること。
