@@ -25,7 +25,8 @@ argument-hint: [ユーザーストーリーのIssue番号]
     - PRが存在する場合、`github` スキル（`pr-get.sh`）でPR詳細を取得する。
     - PRが存在する場合、`github` スキル（`pr-status.sh`）でCI状態を取得する。
     - PRが存在する場合、`github` スキル（`thread-list.sh`）でレビューコメントのスレッド一覧を取得する。
-    - 未解決のスレッドが存在するか確認する（`thread-details.sh` で各スレッドの解決状態を取得）。
+    - `github` スキル（`thread-details.sh`）で各スレッドの解決状態を取得する。
+    - 未解決のスレッドが存在するか確認する。
 
 ### フェーズ2: 状態分類
 
