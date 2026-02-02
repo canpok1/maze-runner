@@ -20,7 +20,9 @@ argument-hint: [ユーザーストーリーのIssue番号]
 3. `github` スキル（`issue-sub-issues.sh`）でサブIssue一覧を取得する。
 4. 各サブIssueについて以下の情報を取得する:
     - `github` スキル（`issue-get.sh`）でIssue詳細（state, labels, body）を取得する。
-    - `github` スキル（`pr-search.sh`）で対応するPRを検索する（クエリ: `is:pr repo:owner/repo {サブIssue番号} in:title`）。
+    - `github` スキル（`pr-search.sh`）で対応するPRを検索する。以下の順序でフォールバック検索を行い、最初にヒットした結果を使用する:
+        1. タイトル検索: クエリ `{サブIssue番号} in:title`
+        2. 本文検索: クエリ `{サブIssue番号} in:body`（PRの本文に `fixed #{番号}` や `closes #{番号}` が含まれるケースに対応）
     - 複数PRがヒットした場合は、openな最新PRを対象とする。
     - PRが存在する場合、`github` スキル（`pr-get.sh`）でPR詳細を取得する。
     - PRが存在する場合、`github` スキル（`pr-status.sh`）でCI状態を取得する。
