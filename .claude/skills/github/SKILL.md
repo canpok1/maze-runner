@@ -152,11 +152,7 @@ EOF
 ### サブIssue追加
 
 ```bash
-# 基本的な使用法
 ./.claude/skills/github/scripts/sub-issue-add.sh <親Issue番号> <サブIssue番号>
-
-# 既存の親Issueを置換する場合
-./.claude/skills/github/scripts/sub-issue-add.sh <親Issue番号> <サブIssue番号> --replace-parent
 ```
 
 ## PR操作
