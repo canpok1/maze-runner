@@ -135,14 +135,15 @@ merge_eligible_prs() {
       continue
     fi
 
-    unresolved_count=$(echo "$review_threads_json" | jq -r '.data.repository.pullRequest.reviewThreads.nodes | map(select(.isResolved == false)) | length' 2>/dev/null || echo "error")
+    unresolved_count=$(echo "$review_threads_json" | jq -r '.data.repository.pullRequest.reviewThreads.nodes | map(select(.isResolved == false)) | length' 2>/dev/null)
 
-    if [ "$unresolved_count" = "error" ]; then
-      echo "  スキップ: レビューコメントの取得に失敗しました"
+    # jqの失敗などで数値が取得できなかった場合を考慮
+    if ! [[ "$unresolved_count" =~ ^[0-9]+$ ]]; then
+      echo "  スキップ: レビューコメントの解析に失敗しました"
       continue
     fi
 
-    if [ "$unresolved_count" -gt 0 ] 2>/dev/null; then
+    if [ "$unresolved_count" -gt 0 ]; then
       echo "  スキップ: 未解決レビューコメントあり（${unresolved_count}件）"
       continue
     fi
