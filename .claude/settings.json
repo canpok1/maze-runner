@@ -88,6 +88,19 @@
   "enabledPlugins": {
     "typescript-lsp@claude-plugins-official": true
   },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./.claude/hooks/install-gh.sh",
+            "timeout": 120
+          }
+        ]
+      }
+    ]
+  },
   "statusLine": {
     "type": "command",
     "command": "./.claude/statusline.sh"
