@@ -74,6 +74,12 @@ argument-hint: [ユーザーストーリーのIssue番号]
 2. `github` スキル（`pr-merge.sh`）でマージする:
     - merge_method: 'squash' を使用する。
 3. マージ結果を記録する（成功/失敗）。
+4. マージに成功したPRに対応するIssueについて、自動クローズ処理を行う:
+    - `github` スキル（`issue-get.sh`）でIssueのstateを確認する。
+    - Issueがまだオープンの場合:
+        - `github` スキル（`github-rest.sh`）でIssueにコメント（例: "Merged via PR #xxx"）を追加する。
+        - `github` スキル（`issue-update.sh`）でIssueをクローズする（`--state closed --state-reason completed`）。
+    - Issueが既にクローズ済みの場合は何もしない。
 
 #### ステップ4-2: 着手可能タスクの再評価
 
