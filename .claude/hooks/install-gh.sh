@@ -2,8 +2,10 @@
 
 set -euo pipefail
 
+TEMP_DIR=""
+
 cleanup() {
-  if [[ -n "${TEMP_DIR:-}" ]] && [[ -d "${TEMP_DIR}" ]]; then
+  if [[ -n "${TEMP_DIR}" ]] && [[ -d "${TEMP_DIR}" ]]; then
     rm -rf "${TEMP_DIR}"
   fi
 }
@@ -16,6 +18,10 @@ if command -v gh &> /dev/null; then
 fi
 
 VERSION="${GH_SETUP_VERSION:-2.83.2}"
+if [[ ! "${VERSION}" =~ ^[0-9.]+$ ]]; then
+  echo "Error: Invalid version format: ${VERSION}" >&2
+  exit 1
+fi
 
 # GitHub CLIのリリースはx86_64をamd64、aarch64をarm64として配布しているため変換
 ARCH=$(uname -m)
@@ -51,9 +57,9 @@ if ! tar -xzf gh.tar.gz; then
   exit 1
 fi
 
-GH_BINARY=$(find . -type f -name gh -path "*/bin/gh" | head -n 1)
-if [[ -z "${GH_BINARY}" ]]; then
-  echo "Error: gh binary not found in downloaded archive" >&2
+GH_BINARY="gh_${VERSION}_${OS}_${ARCH}/bin/gh"
+if [[ ! -f "${GH_BINARY}" ]]; then
+  echo "Error: gh binary not found in downloaded archive at expected path: ./${GH_BINARY}" >&2
   exit 1
 fi
 
@@ -69,7 +75,7 @@ export PATH="${INSTALL_DIR}:${PATH}"
 
 # セッション間でPATHを維持するため環境ファイルに永続化
 if [[ -n "${CLAUDE_ENV_FILE:-}" ]]; then
-  if ! grep -q "${INSTALL_DIR}" "${CLAUDE_ENV_FILE}" 2>/dev/null; then
+  if ! grep -q "export PATH=.*${INSTALL_DIR}" "${CLAUDE_ENV_FILE}" 2>/dev/null; then
     echo "export PATH=\"${INSTALL_DIR}:\${PATH}\"" >> "${CLAUDE_ENV_FILE}"
     echo "PATH setting persisted to ${CLAUDE_ENV_FILE}"
   fi
