@@ -1,4 +1,5 @@
 ---
+name: develop
 description: GitHub Issueを解決するため、実装・テスト・自己レビューを行います。
 argument-hint: [GitHub Issueの番号]
 ---
