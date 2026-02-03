@@ -147,9 +147,10 @@ graph LR
 
 ```mermaid
 graph LR
-    A[running-refinement<br/>リファインメント] --> B[optimizing-issue-labels<br/>ラベル最適化]
-    B --> C[breaking-down-story<br/>ストーリー細分化]
-    C --> D[assigning-tasks<br/>タスクアサイン]
+    subgraph "running-refinement<br/>リファインメント"
+        A[optimizing-issue-labels<br/>ラベル最適化] --> B[breaking-down-story<br/>ストーリー細分化]
+        B --> C[assigning-tasks<br/>タスクアサイン]
+    end
 ```
 
 **使用シーン:**
