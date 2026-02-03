@@ -9,9 +9,14 @@ description: リポジトリ全体のバックログリファインメントを�
 
 ## 手順
 
+### 事前準備
+
+1. `github` スキル（`repo-info.sh`）でリポジトリ情報（owner/repo）を取得し、`OWNER` と `REPO` 変数に格納する（`read OWNER REPO < <(./.claude/skills/github/scripts/repo-info.sh)`）。
+2. 以降のフェーズで使用する `gh issue list` コマンドには、必ず `--repo "${OWNER}/${REPO}"` オプションを指定する。
+
 ### フェーズ1: ラベル最適化
 
-1. `github` スキルを使用してオープン状態のIssue一覧を取得する（`gh issue list --state open --json number,title,labels --limit 100`）。
+1. `github` スキルを使用してオープン状態のIssue一覧を取得する（`gh issue list --repo "${OWNER}/${REPO}" --state open --json number,title,labels --limit 100`）。
 2. `story` または `task` ラベルが付与されていないIssueを抽出する。
 3. 対象Issueの一覧をユーザーに提示し、処理を続行するか確認する。
    - 対象が0件の場合は「対象なし」と報告し、フェーズ2に進む。
@@ -32,7 +37,7 @@ description: リポジトリ全体のバックログリファインメントを�
 
 ### フェーズ2: ストーリー細分化
 
-1. `github` スキルを使用して `story` ラベル付きのオープンIssue一覧を取得する（`gh issue list --state open --label story --json number,title --limit 100`）。
+1. `github` スキルを使用して `story` ラベル付きのオープンIssue一覧を取得する（`gh issue list --repo "${OWNER}/${REPO}" --state open --label story --json number,title --limit 100`）。
 2. 各ストーリーについて `github` スキル（`issue-sub-issues.sh`）でサブIssueの有無を確認する。
 3. サブIssueを持たないストーリーを抽出する。
 4. 対象ストーリーの一覧をユーザーに提示し、処理を続行するか確認する。
@@ -50,7 +55,7 @@ description: リポジトリ全体のバックログリファインメントを�
 
 ### フェーズ3: タスクアサイン
 
-1. `github` スキルを使用して `task` ラベル付きのオープンIssue一覧を取得する（`gh issue list --state open --label task --json number,title,labels,state --limit 100`）。
+1. `github` スキルを使用して `task` ラベル付きのオープンIssue一覧を取得する（`gh issue list --repo "${OWNER}/${REPO}" --state open --label task --json number,title,labels,state --limit 100`）。
 2. 以下の条件に該当するIssueは除外する:
    - 既に `assign-to-claude` ラベル付与済み
    - 既に `in-progress-by-claude` ラベル付与済み
