@@ -1,6 +1,6 @@
 ---
 name: running-dev
-description: タスクIssueの実装からPR作成・レビュー対応・振り返りまでを一括実行する
+description: タスクIssueの実装からPR作成・レビュー対応・振り返りまでを一括実行します。タスクIssueを自動的に完了させる場合に使用してください。
 argument-hint: [GitHub IssueのURLまたは番号]
 ---
 ## 手順

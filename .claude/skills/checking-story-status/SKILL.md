@@ -1,6 +1,6 @@
 ---
 name: checking-story-status
-description: ユーザーストーリーの各タスクの対応状況を確認し、マージ可能なPRのマージと着手可能タスクへのラベル付与を行います。
+description: ユーザーストーリーの各サブIssueの進捗状況を確認し、マージ可能なPRを自動マージして着手可能タスクに `assign-to-claude` ラベルを付与します。ストーリーの進捗確認やタスクの自動化を行う場合に使用してください。
 argument-hint: [ユーザーストーリーのIssue番号]
 ---
 
