@@ -229,6 +229,14 @@ EOF
 
 **出力形式**: タブ区切り（チェック名、状態、結論、URL）
 
+### CI待機（watchモード）
+
+```bash
+./.claude/skills/github/scripts/pr-checks-watch.sh <PR番号>
+```
+
+**備考**: `gh pr checks --watch` のラッパー。リポジトリ情報を自動付与してプロキシ環境でも動作する。
+
 ### CI状態取得（詳細版）
 
 ```bash
