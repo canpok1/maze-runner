@@ -1,7 +1,6 @@
 ---
 name: plan-issue
-description: |
-  GitHub Issueを作成します。story/taskラベルを内容に応じて自動付与します。
+description: GitHub Issueを作成します。story/taskラベルを内容に応じて自動付与します。
 ---
 
 ## 概要
