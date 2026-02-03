@@ -1,6 +1,6 @@
 ---
 name: optimizing-issue-labels
-description: GitHub Issueのラベル（story/task）を内容に基づいて最適化します。Issueのラベルが未設定または誤っている場合に使用してください。
+description: GitHub Issueのラベル（`story`/`task`）を内容に基づいて最適化します。Issueのラベルが未設定または誤っている場合に使用してください。
 argument-hint: "<Issue番号...>"
 ---
 
