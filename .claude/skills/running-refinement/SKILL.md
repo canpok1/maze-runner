@@ -9,6 +9,15 @@ description: リポジトリ全体のバックログリファインメント（�
 
 ## 手順
 
+このチェックリストをコピーし、進行状況の追跡に使用してください：
+
+タスク進捗：
+- [ ] 事前準備：リポジトリ情報の取得
+- [ ] フェーズ1：ラベル最適化
+- [ ] フェーズ2：ストーリー細分化
+- [ ] フェーズ3：タスクアサイン
+- [ ] 最終報告
+
 ### 事前準備
 
 1. `github` スキル（`repo-info.sh`）でリポジトリ情報（owner/repo）を取得し、`OWNER` と `REPO` 変数に格納する（`read OWNER REPO < <(./.claude/skills/managing-github/scripts/repo-info.sh)`）。
