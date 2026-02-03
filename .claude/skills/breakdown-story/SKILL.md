@@ -1,6 +1,8 @@
 ---
-description: ユーザーストーリーを実装タスクに細分化し、GitHub Issueとして登録します。
-argument-hint: [ユーザーストーリーのIssue番号]
+name: breakdown-story
+description: |
+  ユーザーストーリーを実装タスクに細分化し、GitHub Issueとして登録します。
+argument-hint: "[ユーザーストーリーのIssue番号]"
 ---
 
 ## 概要
