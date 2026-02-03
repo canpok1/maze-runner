@@ -1,6 +1,7 @@
 ---
+name: assign-tasks
 description: ユーザーストーリーのサブIssueにassign-to-claudeラベルを付与してClaudeにアサインします。
-argument-hint: [ユーザーストーリーのIssue番号]
+argument-hint: "[ユーザーストーリーのIssue番号]"
 ---
 
 ## 概要
