@@ -1,5 +1,5 @@
 ---
-name: refinement
+name: running-refinement
 description: リポジトリ全体のバックログリファインメントを一括実行します。
 ---
 
@@ -11,7 +11,7 @@ description: リポジトリ全体のバックログリファインメントを�
 
 ### 事前準備
 
-1. `github` スキル（`repo-info.sh`）でリポジトリ情報（owner/repo）を取得し、`OWNER` と `REPO` 変数に格納する（`read OWNER REPO < <(./.claude/skills/github/scripts/repo-info.sh)`）。
+1. `github` スキル（`repo-info.sh`）でリポジトリ情報（owner/repo）を取得し、`OWNER` と `REPO` 変数に格納する（`read OWNER REPO < <(./.claude/skills/managing-github/scripts/repo-info.sh)`）。
 2. 以降のフェーズで使用する `gh issue list` コマンドには、必ず `--repo "${OWNER}/${REPO}"` オプションを指定する。
 
 ### フェーズ1: ラベル最適化

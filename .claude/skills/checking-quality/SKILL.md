@@ -1,5 +1,5 @@
 ---
-name: quality
+name: checking-quality
 description: |
   コード品質チェックスキル。ビルド、リント、フォーマット、テストを実行してエラーがないことを確認する。
   使用ケース：コーディング完了後の品質確認

@@ -1,5 +1,5 @@
 ---
-name: develop
+name: coding
 description: GitHub Issueを解決するため、実装・テスト・自己レビューを行います。
 argument-hint: [GitHub Issueの番号]
 ---
@@ -9,14 +9,11 @@ argument-hint: [GitHub Issueの番号]
     - 引数が未指定の場合は「GitHub Issueの番号を指定してください」とユーザーに通知し、処理を終了する。
 2. `github` スキルでGitHub Issueの内容を把握する。
 3. 対応を行う。
-4. `/review` スキルを実行する。
-    - 自己レビューを実施する。
-5. レビューで指摘事項があれば修正を行う。
 
 ## 注意点
 - 計画実行は `coding-specialist` エージェントが行う前提で計画すること。
 - 可能な限り複数エージェントで並列実行できるよう考慮すること。
 - 複数エージェントが作業する際は次の作業などで競合するため注意。
-    - `quality` スキルの実行。
+    - `checking-quality` スキルの実行。
     - 同一ファイルの編集。
 - 適度な粒度でコミットすること。
