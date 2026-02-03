@@ -1,4 +1,5 @@
 ---
+name: solve-task
 description: タスクIssueの実装からPR作成・レビュー対応・振り返りまでを一括実行する
 argument-hint: [GitHub IssueのURLまたは番号]
 ---
