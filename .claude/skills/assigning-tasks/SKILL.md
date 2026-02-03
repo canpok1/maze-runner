@@ -1,6 +1,6 @@
 ---
 name: assigning-tasks
-description: ユーザーストーリーのサブIssueにassign-to-claudeラベルを付与してClaudeにアサインします。
+description: ユーザーストーリーのサブIssueに `assign-to-claude` ラベルを付与し、Claudeに自動対応させます。`/breaking-down-story` 実行後にタスクをClaudeに割り当てる場合に使用してください。
 argument-hint: "[ユーザーストーリーのIssue番号]"
 ---
 

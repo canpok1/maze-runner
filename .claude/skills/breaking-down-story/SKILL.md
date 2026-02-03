@@ -1,6 +1,6 @@
 ---
 name: breaking-down-story
-description: ユーザーストーリーを実装タスクに細分化し、GitHub Issueとして登録します。
+description: ユーザーストーリーIssueを並列実行可能な実装タスクに細分化し、サブIssueとして登録します。ユーザーストーリーをタスクに分割する場合や、`/breaking-down-story` コマンドが実行された場合に使用してください。
 argument-hint: "[ユーザーストーリーのIssue番号]"
 ---
 
