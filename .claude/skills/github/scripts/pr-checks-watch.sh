@@ -44,5 +44,10 @@ fi
 # リポジトリ情報を取得
 read -r OWNER REPO < <("$SCRIPT_DIR/repo-info.sh")
 
+if [[ -z "$OWNER" || -z "$REPO" ]]; then
+    echo "エラー: リポジトリ情報の取得に失敗しました。" >&2
+    exit 1
+fi
+
 # PRのチェックをwatchモードで監視
 gh pr checks "$PR_NUMBER" --watch --repo "$OWNER/$REPO"
