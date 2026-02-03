@@ -3,43 +3,28 @@ name: reviewing
 description: コーディング規約、テスト配置、ファイル構造、ドキュメント品質の観点からコードレビューを実行します。実装完了後のコードレビューやPR作成前の最終確認で使用してください。
 ---
 
-# コードレビュースキル
+実装完了後、以下のエージェントにレビューを依頼してください。
 
-実装が完了したら、以下のspecialistエージェントにレビューを依頼してください。
+## コーディング規約
 
-## レビュー項目
+`coding-specialist` エージェント
+**参照:** `docs/coding-rules.md`
 
-### 1. コーディング規約の確認
+## テストルール
 
-`coding-specialist` エージェントに依頼してください。
+`testing-specialist` エージェント
+**参照:** `docs/testing-rules.md`
 
-**参照ドキュメント:** `docs/coding-rules.md`
+## 構造ルール
 
-### 2. テストルールの確認
+`structure-specialist` エージェント
+**参照:** `docs/structure-rules.md`
 
-`testing-specialist` エージェントに依頼してください。
+## ドキュメント品質
 
-**参照ドキュメント:** `docs/testing-rules.md`
-
-### 3. 構造ルールの確認
-
-`structure-specialist` エージェントに依頼してください。
-
-**参照ドキュメント:** `docs/structure-rules.md`
-
-### 4. ドキュメント品質の確認
-
-`document-specialist` エージェントに依頼してください。
-
-**参照ドキュメント:** `docs/document-rules.md`
-
-**レビュー観点:**
-- コードコメントの品質と一貫性
-- READMEの品質と一貫性
-- APIドキュメントの品質と一貫性
+`document-specialist` エージェント
+**参照:** `docs/document-rules.md`
 
 ## 注意事項
 
-- このスキルは静的なチェックです
-- 実際のコード品質チェック（ビルド、リント、テスト実行）は `checking-quality` スキルを使用してください
-- ルールの詳細については、各参照ドキュメントを確認してください
+実際のコード品質チェック（ビルド、リント、テスト実行）は `checking-quality` スキルを使用してください。
