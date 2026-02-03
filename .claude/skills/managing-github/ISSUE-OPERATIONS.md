@@ -31,7 +31,7 @@ EOF
 
 **推奨**: document-specialistエージェントで説明文を生成してから使用
 
-**注意**: 本文に複数行テキストを含む場合は[COMMON.md](COMMON.md)の複数行テキストの取り扱いルールを参照
+**注意**: 本文に複数行テキストを含む場合はCOMMON.mdの複数行テキストの取り扱いルールを参照
 
 ## Issue更新
 
@@ -46,7 +46,7 @@ EOF
 ./.claude/skills/managing-github/scripts/issue-update.sh <Issue番号> --add-label bug --remove-label enhancement
 ```
 
-**注意**: 本文に複数行テキストを含む場合は[COMMON.md](COMMON.md)の複数行テキストの取り扱いルールを参照
+**注意**: 本文に複数行テキストを含む場合はCOMMON.mdの複数行テキストの取り扱いルールを参照
 
 ## Issueコメント追加
 
