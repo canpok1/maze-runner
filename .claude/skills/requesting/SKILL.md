@@ -1,6 +1,6 @@
 ---
 name: requesting
-description: GitHub Issueを作成します。story/taskラベルを内容に応じて自動付与します。
+description: GitHub Issueを作成します。story/taskラベルを内容に応じて自動付与します。新しい要望やタスクをIssueとして登録する場合に使用してください。
 ---
 
 ## 概要
