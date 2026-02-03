@@ -52,3 +52,4 @@ argument-hint: "[ユーザーストーリーのIssue番号]"
 ## 注意点
 
 - docs/document-rules.md の規約に従った高品質なIssue本文を作成すること。
+- このスキルでは `assign-to-claude` ラベルを付与しない。タスクへのラベル付与は `assigning-tasks` スキルで行う。
