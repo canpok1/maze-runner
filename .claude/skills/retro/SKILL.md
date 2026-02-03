@@ -1,4 +1,5 @@
 ---
+name: retro
 description: 作業セッションを振り返り、.claude/配下の設定改善点を分析してGitHub Issueを作成する
 ---
 
