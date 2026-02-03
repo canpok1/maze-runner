@@ -1,5 +1,5 @@
 ---
-name: create-pr
+name: creating-pr
 description: プルリクエストを作成する
 ---
 ## 手順

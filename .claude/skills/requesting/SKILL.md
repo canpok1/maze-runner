@@ -1,5 +1,5 @@
 ---
-name: plan-issue
+name: requesting
 description: GitHub Issueを作成します。story/taskラベルを内容に応じて自動付与します。
 ---
 
@@ -31,7 +31,7 @@ Issue の種別（story/task）に応じて適切なラベルを自動付与し�
     - **storyの場合**: `--label story` を指定
     - **taskの場合**: `--label task` を指定
 5. 作成したIssueのタイトルとURLをユーザーに報告する。
-6. storyラベルの場合のみ、タスク細分化が必要か確認し、必要であれば `/breakdown-story` コマンドの利用を案内する。
+6. storyラベルの場合のみ、タスク細分化が必要か確認し、必要であれば `/breaking-down-story` コマンドの利用を案内する。
 
 ## Issue作成ルール
 

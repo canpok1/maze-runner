@@ -1,8 +1,8 @@
 ---
-name: github
+name: managing-github
 description: |
   GitHub操作の統合スキル。issue操作、PR操作、レビュースレッド操作を提供。
-  全操作がスクリプト版（.claude/skills/github/scripts/）で提供される。
+  全操作がスクリプト版（.claude/skills/managing-github/scripts/）で提供される。
   使用ケース:
   （1）リポジトリ情報取得 → repo-info.sh
   （2）issue取得 → issue-get.sh
@@ -101,7 +101,7 @@ EOF
 以下のコマンドで取得できます。
 
 ```bash
-./.claude/skills/github/scripts/repo-info.sh
+./.claude/skills/managing-github/scripts/repo-info.sh
 ```
 
 **出力形式**: スペース区切り（owner repo）。例: `canpok1 maze-runner`
@@ -111,7 +111,7 @@ EOF
 ### Issue取得
 
 ```bash
-./.claude/skills/github/scripts/issue-get.sh <Issue番号>
+./.claude/skills/managing-github/scripts/issue-get.sh <Issue番号>
 ```
 
 **出力**: Issue詳細のJSON
@@ -120,19 +120,19 @@ EOF
 
 ```bash
 # 本文を直接指定
-./.claude/skills/github/scripts/issue-create.sh --title "タイトル" --body "本文"
+./.claude/skills/managing-github/scripts/issue-create.sh --title "タイトル" --body "本文"
 
 # 本文をファイルから読み込み
-./.claude/skills/github/scripts/issue-create.sh --title "タイトル" --body-file body.txt
+./.claude/skills/managing-github/scripts/issue-create.sh --title "タイトル" --body-file body.txt
 
 # 本文をstdinから読み込み（HEREDOC方式）
-./.claude/skills/github/scripts/issue-create.sh --title "タイトル" --body-file - <<'EOF'
+./.claude/skills/managing-github/scripts/issue-create.sh --title "タイトル" --body-file - <<'EOF'
 ## 概要
 Issueの詳細な説明
 EOF
 
 # ラベル付き
-./.claude/skills/github/scripts/issue-create.sh --title "タイトル" --body "本文" --label bug --label priority-high
+./.claude/skills/managing-github/scripts/issue-create.sh --title "タイトル" --body "本文" --label bug --label priority-high
 ```
 
 **出力**: 作成されたIssueのJSON
@@ -145,13 +145,13 @@ EOF
 
 ```bash
 # タイトルと状態を更新
-./.claude/skills/github/scripts/issue-update.sh <Issue番号> --title "新タイトル" --state closed --state-reason completed
+./.claude/skills/managing-github/scripts/issue-update.sh <Issue番号> --title "新タイトル" --state closed --state-reason completed
 
 # 本文をファイルから更新
-./.claude/skills/github/scripts/issue-update.sh <Issue番号> --body-file body.txt
+./.claude/skills/managing-github/scripts/issue-update.sh <Issue番号> --body-file body.txt
 
 # ラベルの追加・削除
-./.claude/skills/github/scripts/issue-update.sh <Issue番号> --add-label bug --remove-label enhancement
+./.claude/skills/managing-github/scripts/issue-update.sh <Issue番号> --add-label bug --remove-label enhancement
 ```
 
 **注意**: 本文に複数行テキストを含む場合は[複数行テキストの取り扱いルール](#複数行テキストの取り扱いルール)を参照
@@ -159,7 +159,7 @@ EOF
 ### Issueコメント追加
 
 ```bash
-./.claude/skills/github/scripts/issue-add-comment.sh <Issue番号> "コメント内容"
+./.claude/skills/managing-github/scripts/issue-add-comment.sh <Issue番号> "コメント内容"
 ```
 
 **出力**: 作成されたコメントのJSON
@@ -167,7 +167,7 @@ EOF
 ### サブIssue一覧取得
 
 ```bash
-./.claude/skills/github/scripts/issue-sub-issues.sh <Issue番号>
+./.claude/skills/managing-github/scripts/issue-sub-issues.sh <Issue番号>
 ```
 
 **出力形式** (NDJSON):
@@ -178,7 +178,7 @@ EOF
 ### サブIssue追加
 
 ```bash
-./.claude/skills/github/scripts/sub-issue-add.sh <親Issue番号> <サブIssue番号>
+./.claude/skills/managing-github/scripts/sub-issue-add.sh <親Issue番号> <サブIssue番号>
 ```
 
 ## PR操作
@@ -186,7 +186,7 @@ EOF
 ### PR検索
 
 ```bash
-./.claude/skills/github/scripts/pr-search.sh <検索クエリ>
+./.claude/skills/managing-github/scripts/pr-search.sh <検索クエリ>
 ```
 
 **出力形式**: NDJSON（各行がJSON）。例: `{"number":123,"title":"Add feature","state":"open","author":"canpok1","url":"..."}`
@@ -196,7 +196,7 @@ EOF
 ### PR詳細取得
 
 ```bash
-./.claude/skills/github/scripts/pr-get.sh <PR番号>
+./.claude/skills/managing-github/scripts/pr-get.sh <PR番号>
 ```
 
 **出力形式**: JSON（number, title, state, merged, author, head_branch, base_branch, body, html_url, created_at, updated_at）
@@ -204,7 +204,7 @@ EOF
 ### PR作成
 
 ```bash
-./.claude/skills/github/scripts/pr-create.sh <タイトル> <本文>
+./.claude/skills/managing-github/scripts/pr-create.sh <タイトル> <本文>
 ```
 
 **注意事項**:
@@ -216,7 +216,7 @@ EOF
 ### 現在のブランチのPR番号取得
 
 ```bash
-./.claude/skills/github/scripts/pr-number.sh
+./.claude/skills/managing-github/scripts/pr-number.sh
 ```
 
 **出力**: PR番号のみ（例: `123`）
@@ -224,7 +224,7 @@ EOF
 ### CI状態取得
 
 ```bash
-./.claude/skills/github/scripts/pr-checks.sh <PR番号>
+./.claude/skills/managing-github/scripts/pr-checks.sh <PR番号>
 ```
 
 **出力形式**: タブ区切り（チェック名、状態、結論、URL）
@@ -232,7 +232,7 @@ EOF
 ### CI待機（watchモード）
 
 ```bash
-./.claude/skills/github/scripts/pr-checks-watch.sh <PR番号>
+./.claude/skills/managing-github/scripts/pr-checks-watch.sh <PR番号>
 ```
 
 **備考**: `gh pr checks --watch` のラッパー。リポジトリ情報を自動付与してプロキシ環境でも動作する。
@@ -240,7 +240,7 @@ EOF
 ### CI状態取得（詳細版）
 
 ```bash
-./.claude/skills/github/scripts/pr-status.sh <PR番号>
+./.claude/skills/managing-github/scripts/pr-status.sh <PR番号>
 ```
 
 **出力形式**: JSON（sha, overall_state, statuses配列, check_runs配列）。`pr-checks.sh` との違いはコミットステータスも含む点と、JSON形式で出力する点
@@ -248,7 +248,7 @@ EOF
 ### PRマージ
 
 ```bash
-./.claude/skills/github/scripts/pr-merge.sh <PR番号> [マージ方式]
+./.claude/skills/managing-github/scripts/pr-merge.sh <PR番号> [マージ方式]
 ```
 
 **引数**: マージ方式は `merge`, `squash`, `rebase` のいずれか（デフォルト: `squash`）
@@ -260,7 +260,7 @@ EOF
 ### スレッド一覧取得
 
 ```bash
-./.claude/skills/github/scripts/thread-list.sh <PR番号>
+./.claude/skills/managing-github/scripts/thread-list.sh <PR番号>
 ```
 
 **出力形式** (NDJSON):
@@ -271,7 +271,7 @@ EOF
 ### スレッド詳細取得
 
 ```bash
-./.claude/skills/github/scripts/thread-details.sh <スレッドID> [スレッドID...]
+./.claude/skills/managing-github/scripts/thread-details.sh <スレッドID> [スレッドID...]
 ```
 
 **出力情報**:
@@ -281,7 +281,7 @@ EOF
 ### スレッド返信
 
 ```bash
-./.claude/skills/github/scripts/thread-reply.sh <スレッドID> "コメント内容"
+./.claude/skills/managing-github/scripts/thread-reply.sh <スレッドID> "コメント内容"
 ```
 
 **注意**: 返信先の対象者には `@ユーザー名` 形式でメンションを付与すること
@@ -289,7 +289,7 @@ EOF
 ### スレッド解決
 
 ```bash
-./.claude/skills/github/scripts/thread-resolve.sh <スレッドID>
+./.claude/skills/managing-github/scripts/thread-resolve.sh <スレッドID>
 ```
 
 ## ワークフロー操作
@@ -297,7 +297,7 @@ EOF
 ### ログ取得
 
 ```bash
-./.claude/skills/github/scripts/workflow-log.sh <run-id>
+./.claude/skills/managing-github/scripts/workflow-log.sh <run-id>
 ```
 
 `pr-checks.sh` で表示されるURLから `<run-id>` を取得して使用します。
@@ -324,11 +324,11 @@ MCP GitHubの `issue_write` ツールには、ラベルの除去（クリア）�
 **回避策**: REST APIを直接使用してラベルを削除してください。
 
 ```bash
-read OWNER REPO < <(./.claude/skills/github/scripts/repo-info.sh)
+read OWNER REPO < <(./.claude/skills/managing-github/scripts/repo-info.sh)
 
 # 特定のラベルを削除（例: Issue #123 から "bug" ラベルを削除）
-./.claude/skills/github/scripts/github-rest.sh "/repos/${OWNER}/${REPO}/issues/123/labels/bug" "DELETE"
+./.claude/skills/managing-github/scripts/github-rest.sh "/repos/${OWNER}/${REPO}/issues/123/labels/bug" "DELETE"
 
 # すべてのラベルを削除（例: Issue #123 からすべてのラベルを削除）
-./.claude/skills/github/scripts/github-rest.sh "/repos/${OWNER}/${REPO}/issues/123/labels" "DELETE"
+./.claude/skills/managing-github/scripts/github-rest.sh "/repos/${OWNER}/${REPO}/issues/123/labels" "DELETE"
 ```

@@ -1,5 +1,5 @@
 ---
-name: check-story-status
+name: checking-story-status
 description: ユーザーストーリーの各タスクの対応状況を確認し、マージ可能なPRのマージと着手可能タスクへのラベル付与を行います。
 argument-hint: [ユーザーストーリーのIssue番号]
 ---
