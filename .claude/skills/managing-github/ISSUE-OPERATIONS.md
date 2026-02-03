@@ -31,8 +31,6 @@ EOF
 
 **推奨**: document-specialistエージェントで説明文を生成してから使用
 
-**注意**: 本文に複数行テキストを含む場合はCOMMON.mdの複数行テキストの取り扱いルールを参照
-
 ## Issue更新
 
 ```bash
@@ -42,11 +40,15 @@ EOF
 # 本文をファイルから更新
 ./.claude/skills/managing-github/scripts/issue-update.sh <Issue番号> --body-file body.txt
 
+# 本文をstdinから更新（HEREDOC方式）
+./.claude/skills/managing-github/scripts/issue-update.sh <Issue番号> --body-file - <<'EOF'
+## 概要
+更新されたIssueの詳細な説明
+EOF
+
 # ラベルの追加・削除
 ./.claude/skills/managing-github/scripts/issue-update.sh <Issue番号> --add-label bug --remove-label enhancement
 ```
-
-**注意**: 本文に複数行テキストを含む場合はCOMMON.mdの複数行テキストの取り扱いルールを参照
 
 ## Issueコメント追加
 
