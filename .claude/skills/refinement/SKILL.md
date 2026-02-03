@@ -1,4 +1,5 @@
 ---
+name: refinement
 description: リポジトリ全体のバックログリファインメントを一括実行します。
 ---
 
