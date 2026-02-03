@@ -18,7 +18,7 @@ argument-hint: [GitHub IssueのURLまたは番号]
         - `github` スキルの `github-graphql.sh` を使用して親Issueを取得する（GraphQLの `parentIssue` フィールドを使用）。
         - 親Issueが存在し、かつクローズ済みの場合は「対応不要の可能性あり」と判断する。
     - **マージ済みPRによる重複確認**:
-        - `github` スキルの `pr-search.sh` を使用して、Issue番号に関連するマージ済みPRを検索する（検索クエリ例: `is:merged <Issue番号>`）。
+        - `github` スキルの `pr-search.sh` を使用して、Issue番号に関連するマージ済みPRを検索する（検索クエリ例: `is:merged "#<Issue番号>"`）。
         - 該当するPRが見つかった場合、PRの内容を確認し、同等の変更が既にマージされていないか検証する。
     - **コードベースとの整合性確認**:
         - Issueの内容（受け入れ条件や変更対象）を現在のコードベースと照らし合わせる。
