@@ -15,7 +15,7 @@ argument-hint: [GitHub IssueのURLまたは番号]
 2. Issueの有効性チェックを行う。
     - 手順1で取得したIssueについて、着手前に以下の観点で有効性を検証する。
     - **親Issue（ストーリー）の状態確認**:
-        - `github` スキルの `github-graphql.sh` を使用して親Issueを取得する（GraphQLの `parentIssue` フィールドを使用）。
+        - `github` スキルの `github-graphql.sh` を使用して親Issueを取得する（GraphQLの `trackedInIssues` フィールドを使用）。
         - 親Issueが存在し、かつクローズ済みの場合は「対応不要の可能性あり」と判断する。
     - **マージ済みPRによる重複確認**:
         - `github` スキルの `pr-search.sh` を使用して、Issue番号に関連するマージ済みPRを検索する（検索クエリ例: `is:merged "#<Issue番号>"`）。
