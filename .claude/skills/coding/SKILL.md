@@ -1,6 +1,7 @@
 ---
 name: coding
 description: GitHub Issueの内容を把握し、実装・テスト・自己レビューを行ってIssueを解決します。GitHub Issueの対応が必要な場合や、`assign-to-claude` ラベルのついたIssueに対応する場合に使用してください。
+layer: feature
 argument-hint: [GitHub Issueの番号]
 ---
 ## 手順
