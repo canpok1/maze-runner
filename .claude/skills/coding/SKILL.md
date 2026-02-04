@@ -9,3 +9,7 @@ argument-hint: [GitHub Issueの番号]
     - 引数が未指定の場合は「GitHub Issueの番号を指定してください」とユーザーに通知し、処理を終了する。
 2. `github` スキルでGitHub Issueの内容を把握する。
 3. 対応を行う。
+    - Issue内容に基づいて実装計画を策定する。
+    - `coding-specialist` エージェントと協力して実装を行う。
+    - `checking-quality` スキルで品質チェックを実施する。
+    - 修正内容をコミット・プッシュする。
