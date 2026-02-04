@@ -1,6 +1,7 @@
 ---
 name: running-refinement
 description: リポジトリ全体のバックログリファインメント（ラベル最適化、ストーリー細分化、タスクアサイン）を一括実行します。バックログを整理してClaude自動対応の準備を整える場合に使用してください。
+layer: workflow
 ---
 
 ## 手順

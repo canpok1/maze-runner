@@ -1,6 +1,7 @@
 ---
 name: breaking-down-story
 description: ユーザーストーリーIssueを並列実行可能な実装タスクに細分化し、サブIssueとして登録します。ユーザーストーリーをタスクに分割する場合や、`/breaking-down-story` コマンドが実行された場合に使用してください。
+layer: feature
 argument-hint: "[ユーザーストーリーのIssue番号]"
 ---
 

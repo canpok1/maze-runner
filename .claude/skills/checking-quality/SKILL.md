@@ -1,6 +1,7 @@
 ---
 name: checking-quality
 description: ビルド、リント、フォーマット、テストを実行してエラーがないことを確認します。コーディング完了後の品質確認に使用してください。
+layer: foundation
 ---
 
 以下のコマンドを順番に実行する。
