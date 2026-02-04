@@ -11,5 +11,5 @@ argument-hint: [GitHub Issueの番号]
 3. 対応を行う。
     - Issue内容に基づいて実装計画を策定する。
     - `coding-specialist` エージェントと協力して実装を行う。
-    - `checking-quality` スキルで品質チェックを実施する。
+    - `checking-quality` スキルで品質チェックを実施し、問題があれば実装の修正に戻る。
     - 修正内容をコミット・プッシュする。
