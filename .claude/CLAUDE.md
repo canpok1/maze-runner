@@ -58,7 +58,7 @@
 |---|---|---|
 | ワークフロー層（workflow） | ユーザー起動専用。他スキルを組み合わせて実行する統合スキル | `running-dev`, `running-refinement` |
 | 基盤層（foundation） | 他スキルから共通利用されるインフラスキル | `managing-github`, `checking-quality` |
-| 機能層（feature） | 独立した単機能スキル | `coding`, `reviewing`, `creating-pr`, `fixing-pr`, `requesting`, `breaking-down-story`, `assigning-tasks`, `optimizing-issue-labels`, `running-retro` |
+| 機能層（feature） | 独立した単機能スキル | `coding`, `reviewing`, `creating-pr`, `fixing-pr`, `requesting`, <br>`breaking-down-story`, `assigning-tasks`, <br>`optimizing-issue-labels`, `running-retro` |
 
 ### 依存ルール
 
