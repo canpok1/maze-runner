@@ -8,7 +8,7 @@ argument-hint: "[ユーザーストーリーのIssue番号]"
 
 1. ユーザーストーリーのIssue番号を確認する。
 2. `github` スキル（`issue-sub-issues.sh`）でサブIssueの一覧を取得する。
-3. サブIssueが存在しない場合はエラーを報告する。
+3. サブIssueが存在しない場合はエラーを報告し、タスクの細分化が必要な可能性があることを伝える。
 4. 各サブIssueの状態を確認し、以下の条件に該当するIssueはアサイン対象から除外する:
     - 既に `assign-to-claude` ラベルが付与されている
     - 既に `in-progress-by-claude` ラベルが付与されている
