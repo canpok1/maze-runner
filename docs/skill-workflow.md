@@ -2,7 +2,7 @@
 
 ## 目的
 
-このドキュメントは、14個のスキルの役割と呼び出し関係を整理し、開発ワークフローの全体像を図示することで、開発者がスキルを効果的に活用できるようにします。
+このドキュメントは、13個のスキルの役割と呼び出し関係を整理し、開発ワークフローの全体像を図示することで、開発者がスキルを効果的に活用できるようにします。
 
 ## 前提知識
 
@@ -36,7 +36,6 @@
 | breaking-down-story | `/breaking-down-story` | ストーリーIssueを実装タスクに細分化してサブIssue化 |
 | assigning-tasks | `/assigning-tasks` | 細分化したタスクにassign-to-claudeラベルを付与して自動対応可能にする |
 | optimizing-issue-labels | `/optimizing-issue-labels` | Issueのstory/taskラベルを内容に基づいて最適化 |
-| checking-story-status | `/checking-story-status` | ストーリーの進捗確認、マージ可能PR自動マージ、着手可能タスク自動アサイン |
 
 ### メタスキル
 
@@ -68,7 +67,6 @@ graph TD
         BD[breaking-down-story<br/>ストーリー細分化]
         AT[assigning-tasks<br/>タスクアサイン]
         OL[optimizing-issue-labels<br/>ラベル最適化]
-        CS[checking-story-status<br/>ストーリー状況確認]
     end
 
     subgraph "メタスキル"
@@ -90,7 +88,6 @@ graph TD
     BD --> DS
     AT --> MG
     OL --> MG
-    CS --> MG
 
     RD --> CD
     RD --> RV
@@ -103,9 +100,6 @@ graph TD
     RF --> AT
     RF --> MG
     RF --> DS
-
-    CS --> FP
-    CS --> AT
 ```
 
 ## 主要ワークフロー
@@ -162,31 +156,6 @@ graph LR
    - フェーズ1: ラベル最適化
    - フェーズ2: ストーリー細分化
    - フェーズ3: タスクアサイン
-
-### ワークフロー C: ストーリー状況確認フロー
-
-進行中のストーリーの進捗を管理するフローです。
-
-```mermaid
-graph LR
-    A[checking-story-status<br/>ストーリー状況確認] --> B{マージ可能PR<br/>あり?}
-    B -->|Yes| C[fixing-pr<br/>自動マージ]
-    B -->|No| D{着手可能タスク<br/>あり?}
-    C --> D
-    D -->|Yes| E[assigning-tasks<br/>タスクアサイン]
-    D -->|No| F[終了]
-    E --> F
-```
-
-**使用シーン:**
-- ストーリーの進捗を確認したい場合
-- マージ可能なPRを自動マージしたい場合
-- 次に着手できるタスクを探したい場合
-
-**実行手順:**
-1. `/checking-story-status` - ストーリー状況を確認
-   - マージ可能なPRを自動マージ
-   - 着手可能なタスクに自動アサイン
 
 ## スキルの使い分け
 
