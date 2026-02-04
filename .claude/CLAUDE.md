@@ -5,7 +5,7 @@
 - ソースコードの実装は `coding-specialist` エージェントに依頼すること
     - 可能な限り複数エージェントで並列実行すること
     - 複数エージェントが作業する際は次の作業などで競合するため注意
-        - `checking-quality` スキルの実行。
+        - 品質チェック手順の実行。
         - 同一ファイルの編集。
 - 文章（プルリクエストやタスクの内容など）を考える際は `document-specialist` エージェントに依頼すること
 - スキル（`.claude/skills/` 配下の定義）の作成・レビュー・改善は `skill-specialist` エージェントに依頼すること
@@ -45,6 +45,14 @@
 - `npm run dev:server` - フロントエンドビルド + バックエンド開発サーバー起動
 - `npm run build` - TypeScriptコンパイル + Viteビルド
 
+## 品質チェック手順
+
+コーディング完了後、以下のコマンドを順番に実行すること。
+
+1. ビルド: `npm run build`
+2. リント・フォーマット: `npm run lint:fix`
+3. テスト: `npm test`
+
 ## GitHub操作
 
 - GitHub操作は `.claude/skills/managing-github/SKILL.md` を参照して `gh` コマンド/スクリプトを使用すること
@@ -57,7 +65,7 @@
 | 層 | 説明 | 対象スキル |
 |---|---|---|
 | ワークフロー層（workflow） | ユーザー起動専用。他スキルを組み合わせて実行する統合スキル | `running-dev`, `running-refinement` |
-| 基盤層（foundation） | 他スキルから共通利用されるインフラスキル | `managing-github`, `checking-quality` |
+| 基盤層（foundation） | 他スキルから共通利用されるインフラスキル | `managing-github` |
 | 機能層（feature） | 独立した単機能スキル | `coding`, `reviewing`, `creating-pr`, `fixing-pr`, `requesting`, <br>`breaking-down-story`, `assigning-tasks`, <br>`optimizing-issue-labels`, `running-retro` |
 
 ### 依存ルール
