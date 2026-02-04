@@ -1,6 +1,6 @@
 ---
 name: assigning-tasks
-description: ユーザーストーリーのサブIssueに `assign-to-claude` ラベルを付与し、Claudeに自動対応させます。`/breaking-down-story` 実行後にタスクをClaudeに割り当てる場合に使用してください。
+description: ユーザーストーリーのサブIssueに `assign-to-claude` ラベルを付与し、Claudeに自動対応させます。タスクの細分化後にタスクをClaudeに割り当てる場合に使用してください。
 argument-hint: "[ユーザーストーリーのIssue番号]"
 ---
 
@@ -8,7 +8,7 @@ argument-hint: "[ユーザーストーリーのIssue番号]"
 
 1. ユーザーストーリーのIssue番号を確認する。
 2. `github` スキル（`issue-sub-issues.sh`）でサブIssueの一覧を取得する。
-3. サブIssueが存在しない場合はエラーを報告し、`/breaking-down-story` の実行を案内する。
+3. サブIssueが存在しない場合はエラーを報告する。
 4. 各サブIssueの状態を確認し、以下の条件に該当するIssueはアサイン対象から除外する:
     - 既に `assign-to-claude` ラベルが付与されている
     - 既に `in-progress-by-claude` ラベルが付与されている
