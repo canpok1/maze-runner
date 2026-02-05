@@ -264,47 +264,41 @@ assign_tasks() {
 # サブタスクが100%完了しているストーリーを対象に受け入れ確認を実施する
 # 対象条件: storyラベル、open状態、assigneesが空、サブタスク完了率100%
 # 最も古いストーリーから順に処理し、1件見つかったら確認スキルを実行する
-# 受け入れ確認が実行されたら0、対象なし・エラーの場合は1を返す
+# 受け入れ確認が実行された場合、または対象がなかった場合は0、エラーの場合は1を返す
 verify_acceptance() {
   log "受け入れ確認をチェックします..."
 
-  # storyラベル、open状態、assigneesが空のIssueを取得（作成日の古い順）
-  if ! stories_json=$(gh issue list --label story --state open --search "no:assignee" --sort created --limit 100 --json number,createdAt 2>&1); then
-    log "ストーリー一覧の取得に失敗しました: $stories_json" >&2
+  # storyラベル、open状態、assigneeなし、作成日昇順でIssueとサブタスク完了率を1回のAPIコールで取得
+  local query
+  query=$(cat <<'EOF'
+query($owner: String!, $name: String!) {
+  repository(owner: $owner, name: $name) {
+    issues(
+      first: 100,
+      filterBy: {labels: ["story"], states: [OPEN], assignee: null},
+      orderBy: {field: CREATED_AT, direction: ASC}
+    ) {
+      nodes {
+        number
+        subIssuesSummary {
+          percentCompleted
+        }
+      }
+    }
+  }
+}
+EOF
+)
+
+  local response_json
+  if ! response_json=$(gh api graphql -f query="$query" -f owner="$REPO_OWNER" -f name="$REPO_NAME" 2>&1); then
+    log "ストーリー一覧の取得に失敗しました: $response_json" >&2
     return 1
   fi
 
-  # 各ストーリーについてサブイシューの完了率をチェック
-  local target_story=""
-  while IFS=$'\t' read -r story_number created_at; do
-    [ -z "$story_number" ] || [ "$story_number" = "null" ] && continue
-
-    # GraphQL APIでサブイシューのサマリーを取得
-    if ! summary_json=$(gh api graphql -f query='
-      query($owner: String!, $name: String!, $number: Int!) {
-        repository(owner: $owner, name: $name) {
-          issue(number: $number) {
-            subIssuesSummary {
-              percentCompleted
-            }
-          }
-        }
-      }
-    ' -f owner="$REPO_OWNER" -f name="$REPO_NAME" -F number="$story_number" 2>&1); then
-      log "警告: ストーリー #${story_number} のサブイシューサマリー取得に失敗しました" >&2
-      continue
-    fi
-
-    # percentCompletedを取得
-    local percent_completed
-    percent_completed=$(echo "$summary_json" | jq -r '.data.repository.issue.subIssuesSummary.percentCompleted' 2>/dev/null || echo "null")
-
-    # 100%完了している場合、対象ストーリーとして選択
-    if [ "$percent_completed" = "100" ]; then
-      target_story="$story_number"
-      break
-    fi
-  done < <(echo "$stories_json" | jq -r 'sort_by(.createdAt) | .[] | "\(.number)\t\(.createdAt)"' 2>/dev/null)
+  # 100%完了している最も古いストーリーを1件見つける
+  local target_story
+  target_story=$(echo "$response_json" | jq -r '.data.repository.issues.nodes[] | select(.subIssuesSummary.percentCompleted == 100) | .number' | head -n 1)
 
   # 対象ストーリーが見つからない場合
   if [ -z "$target_story" ]; then
