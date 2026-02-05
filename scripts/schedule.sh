@@ -2,11 +2,10 @@
 # 定期実行スクリプト
 #
 # 以下の処理を統合して定期的に実行します：
-#   1. PR自動マージ（マージ可能なPRの検出・自動マージ）
-#   2. ラベル最適化（story/taskラベルのないIssueにclaudeコマンドでチケット内容を分析してラベル付与）
-#   3. 受け入れ確認（サブタスク完了済みストーリーの受け入れ確認）
-#   4. タスクアサイン（進行中ストーリー・未着手ストーリー・親なしタスクの優先順制御）
-#   5. ストーリー細分化（storyラベル付きでサブIssueのないストーリーを分解）
+#   1. ラベル最適化（story/taskラベルのないIssueにclaudeコマンドでチケット内容を分析してラベル付与）
+#   2. 受け入れ確認（サブタスク完了済みストーリーの受け入れ確認）
+#   3. タスクアサイン（進行中ストーリー・未着手ストーリー・親なしタスクの優先順制御）
+#   4. ストーリー細分化（storyラベル付きでサブIssueのないストーリーを分解）
 #
 # 使用方法:
 #   ./scripts/schedule.sh
@@ -15,6 +14,7 @@
 #   - gh コマンドがインストール・認証済みであること
 #   - claude コマンドがインストール・設定済みであること
 #   - jq コマンドがインストールされていること
+set -euo pipefail
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
@@ -29,7 +29,6 @@ read -r REPO_OWNER REPO_NAME <<< "$repo_info"
 IN_PROGRESS_LABEL="in-progress-by-claude"
 ASSIGN_LABEL="assign-to-claude"
 POLL_INTERVAL=30
-MERGE_DELAY_SECONDS=300
 
 # 依存コマンド確認
 for cmd in gh claude jq; do
@@ -323,118 +322,24 @@ verify_acceptance() {
   fi
 }
 
-# PR自動マージ関数
-merge_eligible_prs() {
-  log "マージ可能なPRをチェックします..."
-
-  if ! prs_json=$(gh pr list --state open --json number,createdAt,statusCheckRollup,mergeable --limit 100 2>&1); then
-    log "PR一覧の取得に失敗しました: $prs_json" >&2
-    return 1
-  fi
-
-  pr_count=$(echo "$prs_json" | jq '. | length' 2>/dev/null || echo "0")
-  if [ "$pr_count" -eq 0 ]; then
-    return 0
-  fi
-
-  log "${pr_count}件のPRを確認します"
-
-  while IFS=$'\t' read -r pr_number created_at mergeable status_check_rollup; do
-    log "PR #${pr_number} をチェック中..."
-
-    if [ -z "$created_at" ] || [ "$created_at" = "null" ]; then
-      log "  スキップ: 作成日時が取得できません"
-      continue
-    fi
-
-    created_timestamp=$(date -d "$created_at" +%s 2>/dev/null || echo "0")
-    current_timestamp=$(date +%s)
-    elapsed_seconds=$((current_timestamp - created_timestamp))
-
-    if [ "$elapsed_seconds" -lt "$MERGE_DELAY_SECONDS" ]; then
-      log "  スキップ: PR作成から5分未満（${elapsed_seconds}秒経過）"
-      continue
-    fi
-
-    if [ "$mergeable" != "MERGEABLE" ]; then
-      log "  スキップ: マージ可能な状態ではありません（mergeable: $mergeable）"
-      continue
-    fi
-
-    read -r all_checks_passed check_count < <(echo "$status_check_rollup" | jq -r 'if . == null or . == [] then "false 0" else [(all(.[]; (.state // .conclusion) == "SUCCESS")), length] | @tsv end')
-
-    if [ "$check_count" -eq 0 ]; then
-      log "  スキップ: CIチェックが設定されていないか、結果を取得できません"
-      continue
-    fi
-
-    if [ "$all_checks_passed" != "true" ]; then
-      log "  スキップ: CIチェックがpassしていません"
-      continue
-    fi
-
-    if ! review_threads_json=$(gh api graphql -f query='
-      query($owner: String!, $name: String!, $number: Int!) {
-        repository(owner: $owner, name: $name) {
-          pullRequest(number: $number) {
-            reviewThreads(first: 100) {
-              nodes {
-                isResolved
-              }
-            }
-          }
-        }
-      }
-    ' -f owner="$REPO_OWNER" -f name="$REPO_NAME" -F number="$pr_number" 2>&1); then
-      log "  スキップ: レビューコメントの取得に失敗しました"
-      continue
-    fi
-
-    unresolved_count=$(echo "$review_threads_json" | jq -r '.data.repository.pullRequest.reviewThreads.nodes | map(select(.isResolved == false)) | length' 2>/dev/null)
-
-    if ! [[ "$unresolved_count" =~ ^[0-9]+$ ]]; then
-      log "  スキップ: レビューコメントの解析に失敗しました"
-      continue
-    fi
-
-    if [ "$unresolved_count" -gt 0 ]; then
-      log "  スキップ: 未解決レビューコメントあり（${unresolved_count}件）"
-      continue
-    fi
-
-    log "  すべての条件を満たしました（${elapsed_seconds}秒経過、${check_count}件のチェックpass）"
-    log "  マージを実行します..."
-    if ! output=$(gh pr merge "$pr_number" --squash 2>&1); then
-      log "  PR #${pr_number} のマージに失敗しました: $output" >&2
-    else
-      log "  PR #${pr_number} を正常にマージしました"
-    fi
-  done < <(echo "$prs_json" | jq -r '.[] | "\(.number)\t\(.createdAt)\t\(.mergeable)\t\(.statusCheckRollup | tostring)"' 2>/dev/null || echo "")
-
-  log "PRチェック完了"
-}
-
 # メインループ
 log "定期実行スクリプトを開始します (リポジトリ: ${REPO_OWNER}/${REPO_NAME}, 間隔: ${POLL_INTERVAL}秒)"
 
 while true; do
-  # 1. PR自動マージ
-  merge_eligible_prs || true
-
-  # 2. ラベル最適化
+  # 1. ラベル最適化
   optimize_labels || true
 
-  # 3. 受け入れ確認
+  # 2. 受け入れ確認
   verify_acceptance || true
 
-  # 4. タスクアサイン
+  # 3. タスクアサイン
   if assign_tasks; then
     # アサインが発生したらループ1回分の処理を終了（ストーリー細分化をスキップ）
     sleep "$POLL_INTERVAL"
     continue
   fi
 
-  # 5. ストーリー細分化
+  # 4. ストーリー細分化
   breakdown_stories || true
 
   sleep "$POLL_INTERVAL"
