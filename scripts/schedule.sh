@@ -181,6 +181,14 @@ assign_tasks() {
 
     if [ -n "$available_task" ] && [ "$available_task" != "null" ]; then
       log "タスク #${available_task} にアサインします（進行中ストーリー #${in_progress_story} の子タスク）"
+
+      # タスクにin-progress-by-claudeラベルを付与
+      if ! ./.claude/skills/managing-github/scripts/issue-update.sh "${available_task}" --add-label "$IN_PROGRESS_LABEL" >/dev/null 2>&1; then
+        log "エラー: タスク #${available_task} へのラベル付与に失敗しました" >&2
+        return 1
+      fi
+      log "タスク #${available_task} にin-progress-by-claudeラベルを付与しました"
+
       claude --remote "/running-dev ${available_task}"
       log "タスク #${available_task} のアサインが完了しました"
       return 0
@@ -245,6 +253,14 @@ assign_tasks() {
 
     if [ -n "$available_task" ] && [ "$available_task" != "null" ]; then
       log "タスク #${available_task} にアサインします（未着手ストーリー #${target_number} の子タスク）"
+
+      # タスクにin-progress-by-claudeラベルを付与
+      if ! ./.claude/skills/managing-github/scripts/issue-update.sh "${available_task}" --add-label "$IN_PROGRESS_LABEL" >/dev/null 2>&1; then
+        log "エラー: タスク #${available_task} へのラベル付与に失敗しました" >&2
+        return 1
+      fi
+      log "タスク #${available_task} にin-progress-by-claudeラベルを付与しました"
+
       claude --remote "/running-dev ${available_task}"
       log "タスク #${available_task} のアサインが完了しました"
       return 0
@@ -254,6 +270,14 @@ assign_tasks() {
     return 1
   else
     log "親なしタスク #${target_number} にアサインします"
+
+    # タスクにin-progress-by-claudeラベルを付与
+    if ! ./.claude/skills/managing-github/scripts/issue-update.sh "${target_number}" --add-label "$IN_PROGRESS_LABEL" >/dev/null 2>&1; then
+      log "エラー: タスク #${target_number} へのラベル付与に失敗しました" >&2
+      return 1
+    fi
+    log "タスク #${target_number} にin-progress-by-claudeラベルを付与しました"
+
     claude --remote "/running-dev ${target_number}"
     log "タスク #${target_number} のアサインが完了しました"
     return 0
