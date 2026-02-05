@@ -16,7 +16,15 @@ argument-hint: "<Issue番号...>"
    - `github` スキル（`issue-sub-issues.sh`）でサブIssueの有無を確認
 
 3. 各Issueの判定
-   以下の基準で story/task を判定する:
+   以下の基準で story/task を判定する。
+
+   **ラベルの定義**:
+   - `story` ラベルは、ストーリー（親Issue）にのみ付与する
+       - ユーザーの要望やユーザーに提供する価値が記載されているIssue（WHYが中心）
+   - `task` ラベルは、タスクIssue（サブIssue）にのみ付与する
+       - 作業者に依頼できるくらいに実装方法が具体化されているIssue（HOWが中心）
+
+   **構造的な判定基準**:
 
    **story候補の条件**:
    - サブIssueが1つ以上存在する
