@@ -94,7 +94,7 @@ optimize_labels() {
         # サブIssueがある場合はstoryラベルを付与
         log "issue #${issue_number} にstoryラベルを付与します（サブIssue ${sub_issue_count}件）"
         if gh issue edit "$issue_number" --add-label "story" 2>/dev/null; then
-          ((processed++))
+          processed=$((processed + 1))
         else
           log "警告: issue #${issue_number} へのラベル付与に失敗しました" >&2
         fi
@@ -102,7 +102,7 @@ optimize_labels() {
         # サブIssueがない場合はtaskラベルを付与
         log "issue #${issue_number} にtaskラベルを付与します（サブIssueなし）"
         if gh issue edit "$issue_number" --add-label "task" 2>/dev/null; then
-          ((processed++))
+          processed=$((processed + 1))
         else
           log "警告: issue #${issue_number} へのラベル付与に失敗しました" >&2
         fi
@@ -147,7 +147,7 @@ assign_tasks() {
       if [ -n "$issue_number" ] && [ "$issue_number" != "null" ]; then
         log "issue #${issue_number} に assign-to-claude ラベルを付与します"
         if gh issue edit "$issue_number" --add-label "$ASSIGN_LABEL" 2>/dev/null; then
-          ((assigned++))
+          assigned=$((assigned + 1))
         else
           log "警告: issue #${issue_number} へのラベル付与に失敗しました" >&2
         fi
