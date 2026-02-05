@@ -109,9 +109,9 @@ breakdown_stories() {
 assign_tasks() {
   log "タスクアサインをチェックします..."
 
-  # 全openストーリーを取得（作成日の古い順）
+  # assigneesが設定されていないopenストーリーを取得（作成日の古い順）
   local stories_json
-  if ! stories_json=$(gh issue list --label story --state open --limit 100 --json number,createdAt 2>&1); then
+  if ! stories_json=$(gh issue list --label story --state open --search "no:assignee" --limit 100 --json number,createdAt 2>&1); then
     log "ストーリー一覧の取得に失敗しました: $stories_json" >&2
     return 1
   fi
