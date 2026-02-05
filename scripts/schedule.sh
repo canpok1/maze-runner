@@ -93,7 +93,7 @@ optimize_labels() {
 
   # Issue番号をスペース区切りで結合
   local numbers_arg
-  numbers_arg=$(echo "$issue_numbers" | tr '\n' ' ' | sed 's/ $//')
+  numbers_arg=$(echo "$issue_numbers" | xargs)
 
   log "対象Issue: ${numbers_arg}"
 
