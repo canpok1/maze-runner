@@ -15,6 +15,8 @@
 #   --state-reason <completed|not_planned|reopened>  状態理由
 #   --add-label <ラベル>        ラベル追加（複数回指定可）
 #   --remove-label <ラベル>     ラベル削除（複数回指定可）
+#   --add-assignee <ユーザー名> Assignee追加（複数回指定可）
+#   --remove-assignee <ユーザー名> Assignee削除（複数回指定可）
 #
 # 例:
 #   $0 123 --title "新しいタイトル" --state closed --state-reason completed
@@ -46,6 +48,8 @@ usage() {
   --state-reason <completed|not_planned|reopened>  状態理由
   --add-label <ラベル>        ラベル追加（複数回指定可）
   --remove-label <ラベル>     ラベル削除（複数回指定可）
+  --add-assignee <ユーザー名> Assignee追加（複数回指定可）
+  --remove-assignee <ユーザー名> Assignee削除（複数回指定可）
 
 例:
   $0 123 --title "新しいタイトル" --state closed --state-reason completed
@@ -91,6 +95,8 @@ STATE=""
 STATE_REASON=""
 ADD_LABELS=()
 REMOVE_LABELS=()
+ADD_ASSIGNEES=()
+REMOVE_ASSIGNEES=()
 
 # オプション引数の解析
 while [[ $# -gt 0 ]]; do
@@ -165,6 +171,22 @@ while [[ $# -gt 0 ]]; do
                 usage
             fi
             REMOVE_LABELS+=("$2")
+            shift 2
+            ;;
+        --add-assignee)
+            if [[ $# -lt 2 ]]; then
+                echo "エラー: --add-assignee にはユーザー名が必要です" >&2
+                usage
+            fi
+            ADD_ASSIGNEES+=("$2")
+            shift 2
+            ;;
+        --remove-assignee)
+            if [[ $# -lt 2 ]]; then
+                echo "エラー: --remove-assignee にはユーザー名が必要です" >&2
+                usage
+            fi
+            REMOVE_ASSIGNEES+=("$2")
             shift 2
             ;;
         *)
@@ -281,6 +303,34 @@ if [[ ${#REMOVE_LABELS[@]} -gt 0 ]]; then
     done
 
     echo "ラベルの削除が完了しました" >&2
+fi
+
+# Assignee追加（--add-assigneeが指定された場合）
+if [[ ${#ADD_ASSIGNEES[@]} -gt 0 ]]; then
+    echo "Assigneeを追加中: ${ADD_ASSIGNEES[*]}" >&2
+
+    # JSONペイロードを構築（assigneeの配列）
+    ASSIGNEES_JSON=$(printf '%s\n' "${ADD_ASSIGNEES[@]}" | jq -R . | jq -s '{assignees: .}')
+
+    # GitHub API を使用してAssigneeを追加
+    ENDPOINT="/repos/$OWNER/$REPO/issues/$ISSUE_NUMBER/assignees"
+    "$SCRIPT_DIR/github-rest.sh" "$ENDPOINT" "POST" "$ASSIGNEES_JSON" > /dev/null
+
+    echo "Assigneeの追加が完了しました" >&2
+fi
+
+# Assignee削除（--remove-assigneeが指定された場合）
+if [[ ${#REMOVE_ASSIGNEES[@]} -gt 0 ]]; then
+    echo "Assigneeを削除中: ${REMOVE_ASSIGNEES[*]}" >&2
+
+    # JSONペイロードを構築（assigneeの配列）
+    ASSIGNEES_JSON=$(printf '%s\n' "${REMOVE_ASSIGNEES[@]}" | jq -R . | jq -s '{assignees: .}')
+
+    # GitHub API を使用してAssigneeを削除
+    ENDPOINT="/repos/$OWNER/$REPO/issues/$ISSUE_NUMBER/assignees"
+    "$SCRIPT_DIR/github-rest.sh" "$ENDPOINT" "DELETE" "$ASSIGNEES_JSON" > /dev/null
+
+    echo "Assigneeの削除が完了しました" >&2
 fi
 
 echo "すべての更新が完了しました" >&2
