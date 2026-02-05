@@ -60,16 +60,18 @@ model: sonnet
 
 ## スキル層構造
 
-スキルは以下の3層に分類されます。各スキルのSKILL.mdの `layer` フィールドで層を定義しています。
+スキルおよび自動化スクリプトは以下の4層に分類されます。各スキルのSKILL.mdの `layer` フィールドで層を定義しています。
 
-| 層 | 説明 | 対象スキル |
+| 層 | 説明 | 対象 |
 |---|---|---|
+| 呼び出し層（invocation） | 外部からスキルを起動する自動化スクリプト | `scripts/schedule.sh` |
 | ワークフロー層（workflow） | ユーザー起動専用。他スキルを組み合わせて実行する統合スキル | `running-dev`, `running-refinement` |
+| 機能層（feature） | 独立した単機能スキル | `coding`, `reviewing`, `creating-pr`, `fixing-pr`, <br> `requesting`, `breaking-down-story`, `optimizing-issue-labels`, `running-retro`, `solving-issue` |
 | 基盤層（foundation） | 他スキルから共通利用されるインフラスキル | `managing-github` |
-| 機能層（feature） | 独立した単機能スキル | `coding`, `reviewing`, `creating-pr`, `fixing-pr`, <br> `requesting`, `breaking-down-story`, `optimizing-issue-labels`, `running-retro` |
 
 ### 依存ルール
 
+- 呼び出し層はワークフロー層と機能層に依存可能
 - ワークフロー層は機能層と基盤層に依存可能
 - 機能層は基盤層にのみ依存可能（機能層同士の依存は禁止）
 - 基盤層は他の層に依存しない
