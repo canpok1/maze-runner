@@ -66,7 +66,7 @@ model: sonnet
 |---|---|---|
 | 呼び出し層（invocation） | 外部からスキルを起動する自動化スクリプト | `scripts/schedule.sh` |
 | ワークフロー層（workflow） | ユーザー起動専用。他スキルを組み合わせて実行する統合スキル | `running-dev`, `running-refinement` |
-| 機能層（feature） | 独立した単機能スキル | `coding`, `reviewing`, `creating-pr`, `fixing-pr`, <br> `requesting`, `breaking-down-story`, `optimizing-issue-labels`, `running-retro`, `solving-issue` |
+| 機能層（feature） | 独立した単機能スキル | `coding`, `reviewing`, `creating-pr`, `fixing-pr`, `requesting`, `breaking-down-story`, `optimizing-issue-labels`, `running-retro`, `solving-issue` |
 | 基盤層（foundation） | 他スキルから共通利用されるインフラスキル | `managing-github` |
 
 ### 依存ルール
