@@ -8,23 +8,19 @@ layer: feature
 
 ## コーディング規約
 
-`coding-specialist` エージェント
-**参照:** `docs/coding-rules.md`
+`coding-specialist` エージェントにプロジェクトの規約に従ったレビューを依頼してください。
 
 ## テストルール
 
-`testing-specialist` エージェント
-**参照:** `docs/testing-rules.md`
+`testing-specialist` エージェントにプロジェクトの規約に従ったレビューを依頼してください。
 
 ## 構造ルール
 
-`structure-specialist` エージェント
-**参照:** `docs/structure-rules.md`
+`structure-specialist` エージェントにプロジェクトの規約に従ったレビューを依頼してください。
 
 ## ドキュメント品質
 
-`document-specialist` エージェント
-**参照:** `docs/document-rules.md`
+`document-specialist` エージェントにプロジェクトの規約に従ったレビューを依頼してください。
 
 ## 注意事項
 
