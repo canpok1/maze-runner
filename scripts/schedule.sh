@@ -320,6 +320,9 @@ EOF
 log "定期実行スクリプトを開始します (リポジトリ: ${REPO_OWNER}/${REPO_NAME}, 間隔: ${POLL_INTERVAL}秒)"
 
 while true; do
+  log "$POLL_INTERVAL 秒待機します..."
+  sleep "$POLL_INTERVAL"
+
   # 1. ラベル最適化
   optimize_labels || true
 
@@ -329,12 +332,9 @@ while true; do
   # 3. タスクアサイン
   if assign_tasks; then
     # アサインが発生したらループ1回分の処理を終了（ストーリー細分化をスキップ）
-    sleep "$POLL_INTERVAL"
     continue
   fi
 
   # 4. ストーリー細分化
   breakdown_stories || true
-
-  sleep "$POLL_INTERVAL"
 done
