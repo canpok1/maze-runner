@@ -88,7 +88,7 @@ breakdown_stories() {
       if sub_issue_count=$(gh api "/repos/${REPO_OWNER}/${REPO_NAME}/issues/${issue_number}/sub_issues" --jq 'length' 2>/dev/null); then
         if [ "$sub_issue_count" = "0" ]; then
           log "対象issue #${issue_number} を処理します（サブIssueなし）"
-          if claude "/breaking-down-story ${issue_number}"; then
+          if claude -p "/breaking-down-story ${issue_number}"; then
             log "ストーリー分解が完了しました: #${issue_number}"
           else
             log "エラー: ストーリー分解に失敗しました: #${issue_number}" >&2
@@ -111,7 +111,7 @@ assign_tasks() {
 
   # 全openストーリーを取得（作成日の古い順）
   local stories_json
-  if ! stories_json=$(gh issue list --label story --state open --sort created --limit 100 --json number,createdAt 2>&1); then
+  if ! stories_json=$(gh issue list --label story --state open --limit 100 --json number,createdAt 2>&1); then
     log "ストーリー一覧の取得に失敗しました: $stories_json" >&2
     return 1
   fi
@@ -195,7 +195,7 @@ assign_tasks() {
 
   # 全openタスク（taskラベル、assign-to-claudeとin-progress-by-claudeのどちらもなし）を取得
   local all_tasks_json
-  if ! all_tasks_json=$(gh issue list --label task --search "-label:$ASSIGN_LABEL -label:$IN_PROGRESS_LABEL" --state open --sort created --limit 100 --json number,createdAt 2>&1); then
+  if ! all_tasks_json=$(gh issue list --label task --search "-label:$ASSIGN_LABEL -label:$IN_PROGRESS_LABEL" --state open --limit 100 --json number,createdAt 2>&1); then
     log "タスク一覧の取得に失敗しました: $all_tasks_json" >&2
     return 1
   fi
@@ -308,7 +308,7 @@ EOF
 
   # 受け入れ確認スキルを実行
   log "ストーリー #${target_story} の受け入れ確認を実行します"
-  if claude "/verifying-acceptance ${target_story}"; then
+  if claude -p "/verifying-acceptance ${target_story}"; then
     log "ストーリー #${target_story} の受け入れ確認が完了しました"
   else
     log "エラー: 受け入れ確認に失敗しました: #${target_story}" >&2
