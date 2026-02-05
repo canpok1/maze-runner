@@ -11,17 +11,17 @@ argument-hint: "[ストーリーのIssue番号]"
     - 引数で指定されている場合、その番号を使用する。
     - 引数が未指定の場合は「ストーリーのIssue番号を指定してください」とユーザーに通知し、処理を終了する。
 
-2. `github` スキルでストーリーIssueの情報を取得する。
+2. `managing-github` スキルでストーリーIssueの情報を取得する。
     - Issue本文から受け入れ条件（チェックボックス形式 `- [ ]`）を抽出する。
     - 受け入れ条件が存在しない場合は「受け入れ条件が定義されていません」とユーザーに通知し、処理を終了する。
 
-3. `github` スキル（`issue-sub-issues.sh`）でサブIssueの一覧を取得する。
+3. `managing-github` スキルの `issue-sub-issues.sh` でサブIssueの一覧を取得する。
     - 各サブIssueのタイトル、状態（OPEN/CLOSED）、本文を確認する。
 
 4. 実装されたソースコードを確認する。
     - サブIssueで言及されているファイルや変更内容を確認する。
     - 最近のコミット履歴を確認する（`git log` コマンド）。
-    - 関連するPRがあればその内容を確認する。
+    - 関連するPRがあれば `managing-github` スキルの `pr-get.sh` で内容を確認する。
 
 5. 各受け入れ条件について、満たされているか判定する。
     - 完了したサブIssueの実装内容を元に判定する。
@@ -31,14 +31,14 @@ argument-hint: "[ストーリーのIssue番号]"
 6. 判定結果に応じて処理を実行する。
     - **満たされていない受け入れ条件がある場合**:
         - 満たされていない各条件について、追加タスクを作成する必要があるか検討する。
-        - 追加タスクが必要な場合、`document-specialist` エージェントに依頼してタスクのIssue本文を「追加タスクIssue作成ルール」に従って生成する。
-        - `github` スキル（`issue-create.sh`）でIssueを作成する。`--label task` オプションを付与して `task` ラベルを自動付与すること。
-        - `github` スキル（`sub-issue-add.sh`）でストーリーIssueのサブissueとして登録する。
+        - 追加タスクが必要な場合、タスクのIssue本文を「追加タスクIssue作成ルール」に従って生成する。
+        - `managing-github` スキルの `issue-create.sh` でIssueを作成する。`--label task` オプションを付与して `task` ラベルを自動付与すること。
+        - `managing-github` スキルの `sub-issue-add.sh` でストーリーIssueのサブissueとして登録する。
         - 作成した追加タスクの一覧（タイトル・URL・理由）をユーザーに報告する。
     - **すべての受け入れ条件を満たしている場合**:
         - 現在のGitHubユーザー名を取得する（`gh api user --jq '.login'` コマンド）。
-        - `github` スキル（`issue-update.sh`）でストーリーIssueにユーザーをassigneeとして追加する（`--add-assignee` オプション）。
-        - `github` スキル（`issue-add-comment.sh`）でストーリーIssueに受け入れ完了のコメントを追加する。コメント内容は以下の形式とする：
+        - `managing-github` スキルの `issue-update.sh` でストーリーIssueにユーザーをassigneeとして追加する（`--add-assignee` オプション）。
+        - `managing-github` スキルの `issue-add-comment.sh` でストーリーIssueに受け入れ完了のコメントを追加する。コメント内容は以下の形式とする：
             ```
             ## 受け入れ確認完了
 
