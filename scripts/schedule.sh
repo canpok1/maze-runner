@@ -116,12 +116,16 @@ assign_tasks() {
     return 1
   fi
 
-  # 優先順位1: 進行中ストーリーを探す
-  local in_progress_stories=()
+  # 1パスで全ストーリーを分類し、子タスク番号も収集する
+  local in_progress_story=""
+  local in_progress_sub_issues=""
+  local first_unstarted_story=""
+  local first_unstarted_created=""
+  local first_unstarted_sub_issues=""
+  local all_child_numbers=""
+
   while IFS=$'\t' read -r story_number created_at; do
-    if [ -z "$story_number" ] || [ "$story_number" = "null" ]; then
-      continue
-    fi
+    [ -z "$story_number" ] || [ "$story_number" = "null" ] && continue
 
     # 子タスクを取得
     local sub_issues_json
@@ -130,73 +134,64 @@ assign_tasks() {
       continue
     fi
 
-    # 子タスクのいずれかがassign-to-claudeまたはin-progress-by-claudeラベル付きか確認
-    local has_in_progress
-    has_in_progress=$(echo "$sub_issues_json" | jq -r --arg assign "$ASSIGN_LABEL" --arg progress "$IN_PROGRESS_LABEL" \
+    # 子タスク番号を収集（改行区切りの文字列に追加）
+    local child_nums
+    child_nums=$(echo "$sub_issues_json" | jq -r '.number' 2>/dev/null || echo "")
+    if [ -n "$child_nums" ]; then
+      if [ -n "$all_child_numbers" ]; then
+        all_child_numbers="${all_child_numbers}"$'\n'"${child_nums}"
+      else
+        all_child_numbers="$child_nums"
+      fi
+    fi
+
+    # 子タスク件数を確認
+    local child_count
+    child_count=$(echo "$sub_issues_json" | jq -s 'length' 2>/dev/null || echo "0")
+    [ "$child_count" -eq 0 ] && continue
+
+    # 子タスクのいずれかがアサイン済みか確認
+    local has_assigned
+    has_assigned=$(echo "$sub_issues_json" | jq -r --arg assign "$ASSIGN_LABEL" --arg progress "$IN_PROGRESS_LABEL" \
       'select(.labels != null) | select(.labels | map(. == $assign or . == $progress) | any) | .number' | head -n 1)
 
-    if [ -n "$has_in_progress" ]; then
-      in_progress_stories+=("$story_number"$'\t'"$created_at")
-    fi
-  done < <(echo "$stories_json" | jq -r '.[] | "\(.number)\t\(.createdAt)"' 2>/dev/null || echo "")
-
-  # 進行中ストーリーがあれば、最も古いものの子タスクから着手可能なものを探す
-  if [ "${#in_progress_stories[@]}" -gt 0 ]; then
-    # 作成日が最も早いもの（配列の先頭）を選択
-    local target_story_line="${in_progress_stories[0]}"
-    local target_story_number
-    target_story_number=$(echo "$target_story_line" | cut -f1)
-
-    log "進行中ストーリー #${target_story_number} から着手可能なタスクを探します"
-
-    # 子タスクを取得
-    local sub_issues_json
-    if ! sub_issues_json=$(.claude/skills/managing-github/scripts/issue-sub-issues.sh "$target_story_number" 2>/dev/null); then
-      log "エラー: ストーリー #${target_story_number} の子タスク取得に失敗しました" >&2
-      return 1
-    fi
-
-    # 着手可能なタスク（open状態で、assign-to-claudeとin-progress-by-claudeのどちらのラベルもないもの）を探す
-    local available_task
-    available_task=$(echo "$sub_issues_json" | jq -r --arg assign "$ASSIGN_LABEL" --arg progress "$IN_PROGRESS_LABEL" \
-      'select(.state == "OPEN") | select(.labels != null) | select(.labels | map(. == $assign or . == $progress) | any | not) | .number' | head -n 1)
-
-    if [ -n "$available_task" ] && [ "$available_task" != "null" ]; then
-      log "タスク #${available_task} にアサインします（進行中ストーリー #${target_story_number} の子タスク）"
-      if claude --remote "/running-dev ${available_task}"; then
-        log "タスク #${available_task} のアサインが完了しました"
-        return 0
-      else
-        log "エラー: タスク #${available_task} のアサインに失敗しました" >&2
-        return 1
+    if [ -n "$has_assigned" ]; then
+      # 進行中ストーリー（最初に見つかったもの = 最も古いもの）
+      if [ -z "$in_progress_story" ]; then
+        in_progress_story="$story_number"
+        in_progress_sub_issues="$sub_issues_json"
       fi
     else
-      log "進行中ストーリー #${target_story_number} に着手可能な子タスクがありません"
-      return 1
+      # 未着手ストーリー（最初に見つかったもの = 最も古いもの）
+      if [ -z "$first_unstarted_story" ]; then
+        first_unstarted_story="$story_number"
+        first_unstarted_created="$created_at"
+        first_unstarted_sub_issues="$sub_issues_json"
+      fi
     fi
+  done < <(echo "$stories_json" | jq -r 'sort_by(.createdAt) | .[] | "\(.number)\t\(.createdAt)"' 2>/dev/null)
+
+  # 優先順位1: 進行中ストーリーの子タスクから着手可能なものを探す
+  if [ -n "$in_progress_story" ]; then
+    log "進行中ストーリー #${in_progress_story} から着手可能なタスクを探します"
+
+    local available_task
+    available_task=$(echo "$in_progress_sub_issues" | jq -r --arg assign "$ASSIGN_LABEL" --arg progress "$IN_PROGRESS_LABEL" \
+      'select(.state == "OPEN") | select((.labels // []) | map(. == $assign or . == $progress) | any | not) | .number' | head -n 1)
+
+    if [ -n "$available_task" ] && [ "$available_task" != "null" ]; then
+      log "タスク #${available_task} にアサインします（進行中ストーリー #${in_progress_story} の子タスク）"
+      claude --remote "/running-dev ${available_task}"
+      log "タスク #${available_task} のアサインが完了しました"
+      return 0
+    fi
+
+    log "進行中ストーリー #${in_progress_story} に着手可能な子タスクがありません"
+    return 1
   fi
 
   # 優先順位2: 未着手ストーリーと親なしタスク
   log "未着手ストーリーと親なしタスクを探します"
-
-  # 全openストーリーの子タスク番号を収集
-  local all_child_numbers=()
-  while IFS= read -r story_number; do
-    if [ -z "$story_number" ] || [ "$story_number" = "null" ]; then
-      continue
-    fi
-
-    local sub_issues_json
-    if ! sub_issues_json=$(.claude/skills/managing-github/scripts/issue-sub-issues.sh "$story_number" 2>/dev/null); then
-      continue
-    fi
-
-    while IFS= read -r child_number; do
-      if [ -n "$child_number" ] && [ "$child_number" != "null" ]; then
-        all_child_numbers+=("$child_number")
-      fi
-    done < <(echo "$sub_issues_json" | jq -r '.number' 2>/dev/null || echo "")
-  done < <(echo "$stories_json" | jq -r '.[].number' 2>/dev/null || echo "")
 
   # 全openタスク（taskラベル、assign-to-claudeとin-progress-by-claudeのどちらもなし）を取得
   local all_tasks_json
@@ -205,117 +200,63 @@ assign_tasks() {
     return 1
   fi
 
-  # 親なしタスクを抽出
-  local orphan_tasks=()
+  # 親なしタスクの中で最も古いものを探す
+  local oldest_orphan_number=""
+  local oldest_orphan_created=""
   while IFS=$'\t' read -r task_number created_at; do
-    if [ -z "$task_number" ] || [ "$task_number" = "null" ]; then
-      continue
+    [ -z "$task_number" ] || [ "$task_number" = "null" ] && continue
+
+    # 子タスク番号リストに含まれていなければ親なしタスク
+    if [ -z "$all_child_numbers" ] || ! echo "$all_child_numbers" | grep -qx "$task_number"; then
+      oldest_orphan_number="$task_number"
+      oldest_orphan_created="$created_at"
+      break
     fi
+  done < <(echo "$all_tasks_json" | jq -r 'sort_by(.createdAt) | .[] | "\(.number)\t\(.createdAt)"' 2>/dev/null)
 
-    # 子タスク番号セットに含まれないものが親なしタスク
-    local is_child=false
-    for child_num in "${all_child_numbers[@]}"; do
-      if [ "$child_num" = "$task_number" ]; then
-        is_child=true
-        break
-      fi
-    done
+  # 未着手ストーリーと親なしタスクを比較して最も古いものを選択
+  local target_type=""
+  local target_number=""
 
-    if [ "$is_child" = false ]; then
-      orphan_tasks+=("$task_number"$'\t'"$created_at")
+  if [ -n "$first_unstarted_story" ] && [ -n "$oldest_orphan_number" ]; then
+    if [[ "$first_unstarted_created" < "$oldest_orphan_created" ]]; then
+      target_type="story"
+      target_number="$first_unstarted_story"
+    else
+      target_type="task"
+      target_number="$oldest_orphan_number"
     fi
-  done < <(echo "$all_tasks_json" | jq -r '.[] | "\(.number)\t\(.createdAt)"' 2>/dev/null || echo "")
-
-  # 未着手ストーリーを探す（子タスクの全てが未アサイン）
-  local unstarted_stories=()
-  while IFS=$'\t' read -r story_number created_at; do
-    if [ -z "$story_number" ] || [ "$story_number" = "null" ]; then
-      continue
-    fi
-
-    # 子タスクを取得
-    local sub_issues_json
-    if ! sub_issues_json=$(.claude/skills/managing-github/scripts/issue-sub-issues.sh "$story_number" 2>/dev/null); then
-      continue
-    fi
-
-    # 子タスクがあるか確認
-    local child_count
-    child_count=$(echo "$sub_issues_json" | jq -s 'length' 2>/dev/null || echo "0")
-    if [ "$child_count" -eq 0 ]; then
-      continue
-    fi
-
-    # 子タスクのいずれかがassign-to-claudeまたはin-progress-by-claudeラベル付きか確認
-    local has_assigned
-    has_assigned=$(echo "$sub_issues_json" | jq -r --arg assign "$ASSIGN_LABEL" --arg progress "$IN_PROGRESS_LABEL" \
-      'select(.labels != null) | select(.labels | map(. == $assign or . == $progress) | any) | .number' | head -n 1)
-
-    if [ -z "$has_assigned" ]; then
-      unstarted_stories+=("$story_number"$'\t'"$created_at")
-    fi
-  done < <(echo "$stories_json" | jq -r '.[] | "\(.number)\t\(.createdAt)"' 2>/dev/null || echo "")
-
-  # 未着手ストーリーと親なしタスクの中から最も古いものを選択
-  local candidates=("${unstarted_stories[@]}" "${orphan_tasks[@]}")
-  if [ "${#candidates[@]}" -eq 0 ]; then
+  elif [ -n "$first_unstarted_story" ]; then
+    target_type="story"
+    target_number="$first_unstarted_story"
+  elif [ -n "$oldest_orphan_number" ]; then
+    target_type="task"
+    target_number="$oldest_orphan_number"
+  else
     log "アサイン可能なタスクはありません"
     return 1
   fi
 
-  # 作成日でソートして最も古いものを選択
-  local oldest_candidate
-  oldest_candidate=$(printf '%s\n' "${candidates[@]}" | sort -t$'\t' -k2 | head -n 1)
-  local target_number
-  target_number=$(echo "$oldest_candidate" | cut -f1)
-
-  # 未着手ストーリーか親なしタスクか判定
-  local is_story=false
-  for story_line in "${unstarted_stories[@]}"; do
-    local story_num
-    story_num=$(echo "$story_line" | cut -f1)
-    if [ "$story_num" = "$target_number" ]; then
-      is_story=true
-      break
-    fi
-  done
-
-  if [ "$is_story" = true ]; then
+  if [ "$target_type" = "story" ]; then
     log "未着手ストーリー #${target_number} から着手可能なタスクを探します"
 
-    # 子タスクを取得
-    local sub_issues_json
-    if ! sub_issues_json=$(.claude/skills/managing-github/scripts/issue-sub-issues.sh "$target_number" 2>/dev/null); then
-      log "エラー: ストーリー #${target_number} の子タスク取得に失敗しました" >&2
-      return 1
-    fi
-
-    # open状態の子タスクの中から最も古いものを選択
     local available_task
-    available_task=$(echo "$sub_issues_json" | jq -r 'select(.state == "OPEN") | .number' | head -n 1)
+    available_task=$(echo "$first_unstarted_sub_issues" | jq -r 'select(.state == "OPEN") | .number' | head -n 1)
 
     if [ -n "$available_task" ] && [ "$available_task" != "null" ]; then
       log "タスク #${available_task} にアサインします（未着手ストーリー #${target_number} の子タスク）"
-      if claude --remote "/running-dev ${available_task}"; then
-        log "タスク #${available_task} のアサインが完了しました"
-        return 0
-      else
-        log "エラー: タスク #${available_task} のアサインに失敗しました" >&2
-        return 1
-      fi
-    else
-      log "未着手ストーリー #${target_number} に着手可能な子タスクがありません"
-      return 1
+      claude --remote "/running-dev ${available_task}"
+      log "タスク #${available_task} のアサインが完了しました"
+      return 0
     fi
+
+    log "未着手ストーリー #${target_number} に着手可能な子タスクがありません"
+    return 1
   else
     log "親なしタスク #${target_number} にアサインします"
-    if claude --remote "/running-dev ${target_number}"; then
-      log "タスク #${target_number} のアサインが完了しました"
-      return 0
-    else
-      log "エラー: タスク #${target_number} のアサインに失敗しました" >&2
-      return 1
-    fi
+    claude --remote "/running-dev ${target_number}"
+    log "タスク #${target_number} のアサインが完了しました"
+    return 0
   fi
 }
 
