@@ -14,6 +14,7 @@
 # 前提条件:
 #   - gh コマンドがインストール・認証済みであること
 #   - claude コマンドがインストール・設定済みであること
+#   - jq コマンドがインストールされていること
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
@@ -170,12 +171,7 @@ run_dev() {
   if issue_number=$(gh issue list --label "$ASSIGN_LABEL" --search "-label:$IN_PROGRESS_LABEL" --state open --limit 1 --json number --jq '.[0].number' 2>/dev/null); then
     if [ -n "$issue_number" ] && [ "$issue_number" != "null" ]; then
       log "対象issue #${issue_number} を処理します"
-      if gh issue edit "$issue_number" --add-label "$IN_PROGRESS_LABEL"; then
-        log "issue #${issue_number} に $IN_PROGRESS_LABEL ラベルを付与しました"
-        claude --remote "/running-dev ${issue_number}"
-      else
-        log "エラー: issue #${issue_number} へのラベル付与に失敗しました。スキップします。" >&2
-      fi
+      process_issue_with_lock "$issue_number" "running-dev" "開発処理"
       return 0
     fi
   fi
