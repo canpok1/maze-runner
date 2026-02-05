@@ -58,6 +58,22 @@ model: sonnet
 6. **品質チェック**: 作成後に自己チェックリストで検証
 7. **提出**: ユーザーに提示し、フィードバックを受ける
 
+## スキル層構造
+
+スキルは以下の3層に分類されます。各スキルのSKILL.mdの `layer` フィールドで層を定義しています。
+
+| 層 | 説明 | 対象スキル |
+|---|---|---|
+| ワークフロー層（workflow） | ユーザー起動専用。他スキルを組み合わせて実行する統合スキル | `running-dev`, `running-refinement` |
+| 基盤層（foundation） | 他スキルから共通利用されるインフラスキル | `managing-github` |
+| 機能層（feature） | 独立した単機能スキル | `coding`, `reviewing`, `creating-pr`, `fixing-pr`, `requesting`, `breaking-down-story`, `assigning-tasks`, `optimizing-issue-labels`, `running-retro` |
+
+### 依存ルール
+
+- ワークフロー層は機能層と基盤層に依存可能
+- 機能層は基盤層にのみ依存可能（機能層同士の依存は禁止）
+- 基盤層は他の層に依存しない
+
 ## ベストプラクティス チェックリスト
 
 ### 命名規則
