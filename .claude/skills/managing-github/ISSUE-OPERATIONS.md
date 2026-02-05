@@ -50,6 +50,14 @@ EOF
 ./.claude/skills/managing-github/scripts/issue-update.sh <Issue番号> --add-label bug --remove-label enhancement
 ```
 
+## Issueコメント取得
+
+```bash
+./.claude/skills/managing-github/scripts/issue-comments.sh <Issue番号>
+```
+
+**出力**: コメント一覧のJSON配列（各コメントに `author_login`, `author_association`, `created_at`, `body` を含む）
+
 ## Issueコメント追加
 
 ```bash
