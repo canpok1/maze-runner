@@ -43,7 +43,7 @@ fi
 read -r OWNER REPO < <("$SCRIPT_DIR/repo-info.sh")
 
 # Issueのコメント一覧を取得して、必要なフィールドだけを抽出
-"$SCRIPT_DIR/github-rest.sh" "/repos/$OWNER/$REPO/issues/$ISSUE_NUMBER/comments" | \
+"$SCRIPT_DIR/github-rest.sh" "/repos/$OWNER/$REPO/issues/$ISSUE_NUMBER/comments?per_page=100" | \
   jq 'map({
     author_login: .user.login,
     author_association: .author_association,
