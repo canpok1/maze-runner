@@ -19,7 +19,7 @@ layer: workflow
   - [ ] ストーリー間競合チェック
   - [ ] 競合分析とアサイン対象選定
   - [ ] ラベル付与
-  - [ ] 受け入れ条件チェック（アサイン対象が0件の場合のみ実行）
+  - [ ] 受け入れ条件チェック
 - [ ] 最終報告
 
 ### 事前準備
@@ -149,7 +149,7 @@ layer: workflow
    - `github` スキル（`issue-update.sh`）でラベルを更新
    - エラーが発生したIssueがあっても処理を継続する
 10. ラベル付与の結果を報告する（成功したIssue番号とURL、エラーがあればその詳細）。
-11. 受け入れ条件チェック（アサイン対象が0件の場合のみ実行）:
+11. 受け入れ条件チェック:
     1. `story` ラベル付きのオープンIssueのうち、全サブIssueが完了済みのストーリーを抽出する:
        - `github` スキルを使用して `story` ラベル付きのオープンIssue一覧を取得する（`gh issue list --repo "${OWNER}/${REPO}" --state open --label story --json number,title --limit 100`）。
        - 各ストーリーについて `github` スキル（`issue-sub-issues.sh`）でサブIssue一覧を取得する。
