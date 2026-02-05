@@ -4,8 +4,9 @@
 # 以下の処理を統合して定期的に実行します：
 #   1. PR自動マージ（マージ可能なPRの検出・自動マージ）
 #   2. ラベル最適化（story/taskラベルのないIssueにclaudeコマンドでチケット内容を分析してラベル付与）
-#   3. タスクアサイン（進行中ストーリー・未着手ストーリー・親なしタスクの優先順制御）
-#   4. ストーリー細分化（storyラベル付きでサブIssueのないストーリーを分解）
+#   3. 受け入れ確認（サブタスク完了済みストーリーの受け入れ確認）
+#   4. タスクアサイン（進行中ストーリー・未着手ストーリー・親なしタスクの優先順制御）
+#   5. ストーリー細分化（storyラベル付きでサブIssueのないストーリーを分解）
 #
 # 使用方法:
 #   ./scripts/schedule.sh
@@ -260,6 +261,64 @@ assign_tasks() {
   fi
 }
 
+# 受け入れ確認関数
+verify_acceptance() {
+  log "受け入れ確認をチェックします..."
+
+  # storyラベル、open状態、assigneesが空のIssueを取得（作成日の古い順）
+  if ! stories_json=$(gh issue list --label story --state open --search "no:assignee" --sort created --limit 100 --json number,createdAt 2>&1); then
+    log "ストーリー一覧の取得に失敗しました: $stories_json" >&2
+    return 1
+  fi
+
+  # 各ストーリーについてサブイシューの完了率をチェック
+  local target_story=""
+  while IFS=$'\t' read -r story_number created_at; do
+    [ -z "$story_number" ] || [ "$story_number" = "null" ] && continue
+
+    # GraphQL APIでサブイシューのサマリーを取得
+    if ! summary_json=$(gh api graphql -f query='
+      query($owner: String!, $name: String!, $number: Int!) {
+        repository(owner: $owner, name: $name) {
+          issue(number: $number) {
+            subIssuesSummary {
+              percentCompleted
+            }
+          }
+        }
+      }
+    ' -f owner="$REPO_OWNER" -f name="$REPO_NAME" -F number="$story_number" 2>&1); then
+      log "警告: ストーリー #${story_number} のサブイシューサマリー取得に失敗しました" >&2
+      continue
+    fi
+
+    # percentCompletedを取得
+    local percent_completed
+    percent_completed=$(echo "$summary_json" | jq -r '.data.repository.issue.subIssuesSummary.percentCompleted' 2>/dev/null || echo "null")
+
+    # 100%完了している場合、対象ストーリーとして選択
+    if [ "$percent_completed" = "100" ]; then
+      target_story="$story_number"
+      break
+    fi
+  done < <(echo "$stories_json" | jq -r 'sort_by(.createdAt) | .[] | "\(.number)\t\(.createdAt)"' 2>/dev/null)
+
+  # 対象ストーリーが見つからない場合
+  if [ -z "$target_story" ]; then
+    log "受け入れ確認対象のストーリーはありません"
+    return 0
+  fi
+
+  # 受け入れ確認スキルを実行
+  log "ストーリー #${target_story} の受け入れ確認を実行します"
+  if claude "/verifying-acceptance ${target_story}"; then
+    log "ストーリー #${target_story} の受け入れ確認が完了しました"
+  else
+    log "エラー: 受け入れ確認に失敗しました: #${target_story}" >&2
+    return 1
+  fi
+}
+
 # PR自動マージ関数
 merge_eligible_prs() {
   log "マージ可能なPRをチェックします..."
@@ -361,14 +420,17 @@ while true; do
   # 2. ラベル最適化
   optimize_labels || true
 
-  # 3. タスクアサイン
+  # 3. 受け入れ確認
+  verify_acceptance || true
+
+  # 4. タスクアサイン
   if assign_tasks; then
     # アサインが発生したらループ1回分の処理を終了（ストーリー細分化をスキップ）
     sleep "$POLL_INTERVAL"
     continue
   fi
 
-  # 4. ストーリー細分化
+  # 5. ストーリー細分化
   breakdown_stories || true
 
   sleep "$POLL_INTERVAL"
