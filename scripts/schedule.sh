@@ -43,6 +43,18 @@ log() {
   echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*"
 }
 
+# タスクにin-progress-by-claudeラベルを付与する関数
+# 成功したら0、失敗したら1を返す
+lock_task() {
+  local task_number=$1
+  if ! ./.claude/skills/managing-github/scripts/issue-update.sh "${task_number}" --add-label "$IN_PROGRESS_LABEL" >/dev/null 2>&1; then
+    log "エラー: タスク #${task_number} へのラベル付与に失敗しました" >&2
+    return 1
+  fi
+  log "タスク #${task_number} にin-progress-by-claudeラベルを付与しました"
+  return 0
+}
+
 # ラベル最適化関数
 optimize_labels() {
   log "ラベル最適化を開始します..."
@@ -183,11 +195,9 @@ assign_tasks() {
       log "タスク #${available_task} にアサインします（進行中ストーリー #${in_progress_story} の子タスク）"
 
       # タスクにin-progress-by-claudeラベルを付与
-      if ! ./.claude/skills/managing-github/scripts/issue-update.sh "${available_task}" --add-label "$IN_PROGRESS_LABEL" >/dev/null 2>&1; then
-        log "エラー: タスク #${available_task} へのラベル付与に失敗しました" >&2
+      if ! lock_task "${available_task}"; then
         return 1
       fi
-      log "タスク #${available_task} にin-progress-by-claudeラベルを付与しました"
 
       claude --remote "/running-dev ${available_task}"
       log "タスク #${available_task} のアサインが完了しました"
@@ -255,11 +265,9 @@ assign_tasks() {
       log "タスク #${available_task} にアサインします（未着手ストーリー #${target_number} の子タスク）"
 
       # タスクにin-progress-by-claudeラベルを付与
-      if ! ./.claude/skills/managing-github/scripts/issue-update.sh "${available_task}" --add-label "$IN_PROGRESS_LABEL" >/dev/null 2>&1; then
-        log "エラー: タスク #${available_task} へのラベル付与に失敗しました" >&2
+      if ! lock_task "${available_task}"; then
         return 1
       fi
-      log "タスク #${available_task} にin-progress-by-claudeラベルを付与しました"
 
       claude --remote "/running-dev ${available_task}"
       log "タスク #${available_task} のアサインが完了しました"
@@ -272,11 +280,9 @@ assign_tasks() {
     log "親なしタスク #${target_number} にアサインします"
 
     # タスクにin-progress-by-claudeラベルを付与
-    if ! ./.claude/skills/managing-github/scripts/issue-update.sh "${target_number}" --add-label "$IN_PROGRESS_LABEL" >/dev/null 2>&1; then
-      log "エラー: タスク #${target_number} へのラベル付与に失敗しました" >&2
+    if ! lock_task "${target_number}"; then
       return 1
     fi
-    log "タスク #${target_number} にin-progress-by-claudeラベルを付与しました"
 
     claude --remote "/running-dev ${target_number}"
     log "タスク #${target_number} のアサインが完了しました"
