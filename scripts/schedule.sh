@@ -27,7 +27,6 @@ read -r REPO_OWNER REPO_NAME <<< "$repo_info"
 IN_PROGRESS_LABEL="in-progress-by-claude"
 ASSIGN_LABEL="assign-to-claude"
 POLL_INTERVAL=30
-MERGE_DELAY_SECONDS=300
 
 # 依存コマンド確認
 for cmd in gh claude jq; do
