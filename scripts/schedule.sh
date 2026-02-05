@@ -3,8 +3,9 @@
 #
 # 以下の処理を統合して定期的に実行します：
 #   1. ラベル最適化（story/taskラベルのないIssueにclaudeコマンドでチケット内容を分析してラベル付与）
-#   2. タスクアサイン（進行中ストーリー・未着手ストーリー・親なしタスクの優先順制御）
-#   3. ストーリー細分化（storyラベル付きでサブIssueのないストーリーを分解）
+#   2. 受け入れ確認（サブタスク完了済みストーリーの受け入れ確認）
+#   3. タスクアサイン（進行中ストーリー・未着手ストーリー・親なしタスクの優先順制御）
+#   4. ストーリー細分化（storyラベル付きでサブIssueのないストーリーを分解）
 #
 # 使用方法:
 #   ./scripts/schedule.sh
@@ -13,6 +14,7 @@
 #   - gh コマンドがインストール・認証済みであること
 #   - claude コマンドがインストール・設定済みであること
 #   - jq コマンドがインストールされていること
+set -euo pipefail
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
@@ -258,6 +260,61 @@ assign_tasks() {
   fi
 }
 
+# 受け入れ確認関数
+# サブタスクが100%完了しているストーリーを対象に受け入れ確認を実施する
+# 対象条件: storyラベル、open状態、assigneesが空、サブタスク完了率100%
+# 最も古いストーリーから順に処理し、1件見つかったら確認スキルを実行する
+# 受け入れ確認が実行された場合、または対象がなかった場合は0、エラーの場合は1を返す
+verify_acceptance() {
+  log "受け入れ確認をチェックします..."
+
+  # storyラベル、open状態、assigneeなし、作成日昇順でIssueとサブタスク完了率を1回のAPIコールで取得
+  local query
+  query=$(cat <<'EOF'
+query($owner: String!, $name: String!) {
+  repository(owner: $owner, name: $name) {
+    issues(
+      first: 100,
+      filterBy: {labels: ["story"], states: [OPEN], assignee: null},
+      orderBy: {field: CREATED_AT, direction: ASC}
+    ) {
+      nodes {
+        number
+        subIssuesSummary {
+          percentCompleted
+        }
+      }
+    }
+  }
+}
+EOF
+)
+
+  local response_json
+  if ! response_json=$(gh api graphql -f query="$query" -f owner="$REPO_OWNER" -f name="$REPO_NAME" 2>&1); then
+    log "ストーリー一覧の取得に失敗しました: $response_json" >&2
+    return 1
+  fi
+
+  # 100%完了している最も古いストーリーを1件見つける
+  local target_story
+  target_story=$(echo "$response_json" | jq -r '.data.repository.issues.nodes[] | select(.subIssuesSummary.percentCompleted == 100) | .number' | head -n 1)
+
+  # 対象ストーリーが見つからない場合
+  if [ -z "$target_story" ]; then
+    log "受け入れ確認対象のストーリーはありません"
+    return 0
+  fi
+
+  # 受け入れ確認スキルを実行
+  log "ストーリー #${target_story} の受け入れ確認を実行します"
+  if claude "/verifying-acceptance ${target_story}"; then
+    log "ストーリー #${target_story} の受け入れ確認が完了しました"
+  else
+    log "エラー: 受け入れ確認に失敗しました: #${target_story}" >&2
+    return 1
+  fi
+}
 
 # メインループ
 log "定期実行スクリプトを開始します (リポジトリ: ${REPO_OWNER}/${REPO_NAME}, 間隔: ${POLL_INTERVAL}秒)"
@@ -266,14 +323,17 @@ while true; do
   # 1. ラベル最適化
   optimize_labels || true
 
-  # 2. タスクアサイン
+  # 2. 受け入れ確認
+  verify_acceptance || true
+
+  # 3. タスクアサイン
   if assign_tasks; then
     # アサインが発生したらループ1回分の処理を終了（ストーリー細分化をスキップ）
     sleep "$POLL_INTERVAL"
     continue
   fi
 
-  # 3. ストーリー細分化
+  # 4. ストーリー細分化
   breakdown_stories || true
 
   sleep "$POLL_INTERVAL"
