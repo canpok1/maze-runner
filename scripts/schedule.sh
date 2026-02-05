@@ -2,7 +2,7 @@
 # 定期実行スクリプト
 #
 # 以下の処理を統合して定期的に実行します：
-#   1. ラベル最適化（story/taskラベルのないIssueに構造的特徴で判定してラベル付与）
+#   1. ラベル最適化（story/taskラベルのないIssueにclaudeコマンドでチケット内容を判定してラベル付与）
 #   2. ストーリー細分化（storyラベル付きでサブIssueのないストーリーを分解）
 #   3. タスクアサイン（taskラベル付きで未アサインのタスクにassign-to-claudeラベル付与）
 #   4. running-dev呼び出し（assign-to-claudeラベル付きタスクの自動処理）
@@ -82,38 +82,28 @@ optimize_labels() {
     return 1
   fi
 
-  # story/taskラベルがないIssueを抽出
-  local processed=0
-  while read -r issue_number; do
-    if [ -z "$issue_number" ] || [ "$issue_number" = "null" ]; then
-      continue
-    fi
+  # story/taskラベルがないIssueの番号を抽出
+  local issue_numbers
+  issue_numbers=$(echo "$issues_json" | jq -r '.[] | select((.labels // []) | map(.name) | any(. == "story" or . == "task") | not) | .number' 2>/dev/null || echo "")
 
-    # サブIssueの件数を取得して構造的特徴を判定
-    if sub_issue_count=$(gh api "/repos/${REPO_OWNER}/${REPO_NAME}/issues/${issue_number}/sub_issues" --jq 'length' 2>/dev/null); then
-      if [ "$sub_issue_count" -gt 0 ]; then
-        # サブIssueがある場合はstoryラベルを付与
-        log "issue #${issue_number} にstoryラベルを付与します（サブIssue ${sub_issue_count}件）"
-        if gh issue edit "$issue_number" --add-label "story" 2>/dev/null; then
-          processed=$((processed + 1))
-        else
-          log "警告: issue #${issue_number} へのラベル付与に失敗しました" >&2
-        fi
-      else
-        # サブIssueがない場合はtaskラベルを付与
-        log "issue #${issue_number} にtaskラベルを付与します（サブIssueなし）"
-        if gh issue edit "$issue_number" --add-label "task" 2>/dev/null; then
-          processed=$((processed + 1))
-        else
-          log "警告: issue #${issue_number} へのラベル付与に失敗しました" >&2
-        fi
-      fi
-    else
-      log "警告: issue #${issue_number} のサブIssue確認に失敗しました。スキップします。" >&2
-    fi
-  done < <(echo "$issues_json" | jq -r '.[] | select((.labels // []) | map(.name) | any(. == "story" or . == "task") | not) | .number' 2>/dev/null || echo "")
+  if [ -z "$issue_numbers" ]; then
+    log "ラベル最適化対象のIssueはありません"
+    return 0
+  fi
 
-  log "ラベル最適化が完了しました（${processed}件処理）"
+  # Issue番号をスペース区切りで結合
+  local numbers_arg
+  numbers_arg=$(echo "$issue_numbers" | tr '\n' ' ' | sed 's/ $//')
+
+  log "対象Issue: ${numbers_arg}"
+
+  # claudeコマンドでチケット内容を分析してラベルを判定・付与
+  if claude -p "/optimizing-issue-labels ${numbers_arg}"; then
+    log "ラベル最適化が完了しました"
+  else
+    log "ラベル最適化中にエラーが発生しました" >&2
+    return 1
+  fi
 }
 
 # ストーリー細分化関数
