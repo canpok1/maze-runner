@@ -121,30 +121,15 @@ layer: workflow
    - 親タスクがオープン状態の場合は「依存先未完了」として除外する（親タスク完了後に再度アサイン対象となる）。
 6. 残ったIssueについて「ストーリー間競合チェック」を実施する:
    - `github` スキルを使用して `in-progress-by-claude` ラベル付きのオープンタスク一覧を取得する（`gh issue list --repo "${OWNER}/${REPO}" --state open --label in-progress-by-claude --json number,title,labels --limit 100`）。
+   - 進行中のタスクが存在しない場合は、このチェックをスキップして手順7に進む。
    - 進行中のタスクが存在する場合、以下を実施する:
-     - 各進行中タスクについて `github` スキルの `github-graphql.sh` を使用して親Issue（`trackedInIssues`）を取得する:
-       ```bash
-       ./.claude/skills/managing-github/scripts/github-graphql.sh \
-         'query($owner: String!, $repo: String!, $number: Int!) {
-           repository(owner: $owner, name: $repo) {
-             issue(number: $number) {
-               trackedInIssues(first: 10) {
-                 nodes {
-                   number
-                   title
-                   state
-                 }
-               }
-             }
-           }
-         }' \
-         "{\"owner\": \"${OWNER}\", \"repo\": \"${REPO}\", \"number\": <Issue番号>}"
-       ```
-     - 進行中のタスクが属する親ストーリー（`story` ラベル付きの親Issue）を特定し、リスト化する。
+     - 各進行中タスクについて `github` スキルの `github-graphql.sh` を使用して親Issue（`trackedInIssues`）を取得する（手順5と同様の方法）。
+     - 取得した親Issueのうち `story` ラベルが付与されているものを親ストーリーとして抽出し、リスト化する。親ストーリーが特定できない進行中タスクは、ストーリー間競合チェックの判定対象外とする。
    - アサイン候補タスクについても同様に親ストーリーを取得する。
    - 各アサイン候補タスクの親ストーリーを、進行中のストーリーリストと比較する:
-     - 親ストーリーが進行中のストーリーと異なる場合、そのタスクを「ストーリー間競合のため除外」として除外する。
-     - 親ストーリーが進行中のストーリーと同一の場合、または親ストーリーが存在しない場合は、引き続きアサイン候補として維持する。
+     - アサイン候補タスクに親ストーリーが存在し、かつその親ストーリーが進行中のストーリーリストに含まれない場合、そのタスクを「ストーリー間競合のため除外」として除外する。
+     - アサイン候補タスクの親ストーリーが進行中のストーリーと同一の場合、引き続きアサイン候補として維持する。
+     - アサイン候補タスクに親ストーリーが存在しない場合は、引き続きアサイン候補として維持する。
    - ストーリー間競合で除外されたタスクについて、進行中のストーリー情報（Issue番号、タイトル、URL）を含めて報告する。
 7. 残ったIssueについて「競合分析とアサイン対象選定」を実施する:
    - 各Issueについて、Issue本文から実装内容や変更対象ファイルの情報を抽出する。
