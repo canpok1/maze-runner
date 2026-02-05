@@ -110,14 +110,18 @@ optimize_labels() {
 breakdown_stories() {
   log "ストーリー細分化をチェックします..."
 
-  # storyラベルあり・in-progress-by-claudeラベルなし・open状態のissueを1件取得
-  if issue_number=$(gh issue list --search "label:story -label:$IN_PROGRESS_LABEL" --state open --limit 1 --json number --jq '.[0].number' 2>/dev/null); then
+  # storyラベルあり・open状態のissueを1件取得
+  if issue_number=$(gh issue list --search "label:story" --state open --limit 1 --json number --jq '.[0].number' 2>/dev/null); then
     if [ -n "$issue_number" ] && [ "$issue_number" != "null" ]; then
       # サブIssueの件数を取得
       if sub_issue_count=$(gh api "/repos/${REPO_OWNER}/${REPO_NAME}/issues/${issue_number}/sub_issues" --jq 'length' 2>/dev/null); then
         if [ "$sub_issue_count" = "0" ]; then
           log "対象issue #${issue_number} を処理します（サブIssueなし）"
-          process_issue_with_lock "$issue_number" "breaking-down-story" "ストーリー分解"
+          if claude "/breaking-down-story ${issue_number}"; then
+            log "ストーリー分解が完了しました: #${issue_number}"
+          else
+            log "エラー: ストーリー分解に失敗しました: #${issue_number}" >&2
+          fi
           return 0
         fi
       else
