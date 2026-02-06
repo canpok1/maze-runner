@@ -25,7 +25,7 @@ layer: workflow
 
 このフェーズでは `/optimizing-issue-labels` スキルを使用して、トリアージとラベル最適化を一括で実行する。
 
-1. `github` スキルを使用してオープン状態のIssue一覧を取得する（`gh issue list --repo "${OWNER}/${REPO}" --state open --json number,labels --limit 100`）。
+1. `github` スキルを使用してオープン状態のIssue一覧を取得する（`gh issue list --repo "${OWNER}/${REPO}" --state open --json number,title,labels --limit 100`）。
 2. `story` および `task` ラベルがいずれも付与されていないIssueを抽出する。
 3. 対象Issueの一覧を報告する。
    - 対象が0件の場合は「対象なし」と報告し、フェーズ2に進む。
