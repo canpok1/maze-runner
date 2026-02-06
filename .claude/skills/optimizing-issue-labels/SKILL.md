@@ -1,6 +1,6 @@
 ---
 name: optimizing-issue-labels
-description: GitHub Issueのラベル（`story`/`task`）を内容に基づいて最適化します。Issueのラベルが未設定または誤っている場合に使用してください。
+description: GitHub Issueのトリアージとラベル最適化を行います。対応要否の判定を行い、対応不要なIssueをクローズ、対応必要なIssueのラベル（`story`/`task`）を内容に基づいて最適化します。
 layer: feature
 argument-hint: "<Issue番号...>"
 ---
@@ -12,10 +12,39 @@ argument-hint: "<Issue番号...>"
    - 引数未指定時は「Issue番号を指定してください」と報告して終了
 
 2. 各Issueについて情報取得（可能な限り並列実行）
-   - `github` スキル（`issue-get.sh`）でIssueの内容（タイトル、本文、ラベル）を取得
+   - `github` スキル（`issue-get.sh`）でIssueの内容（タイトル、本文、ラベル、状態）を取得
    - `github` スキル（`issue-sub-issues.sh`）でサブIssueの有無を確認
 
-3. 各Issueの判定
+3. 対応要否の判定
+   各Issueについて、対応の必要性を判定する。
+
+   **判定基準**:
+
+   **対応必要（後続のstory/task判定へ進む）**:
+   - 具体的な変更内容や改善要望がIssue本文に記載されている
+   - バグ報告が含まれている
+   - 実装すべき機能が記述されている
+
+   **対応不要（クローズ対象）**:
+   - Issueが既にクローズされている
+   - Issue本文に「既に実装済み」「問題が解決済み」などクローズ条件を満たす記載がある
+   - 重複Issueであることが本文やコメントで明示されている
+   - 対象となる機能やファイルがコードベースに存在しないことが明らか
+   - Issue本文が空または意図不明で判断材料が不足している
+
+   **対応不要と判定した場合の処理**:
+   - `github` スキル（`issue-add-comment.sh`）で対応不要の理由を日本語でコメント追加
+     - コメント例: 「このIssueは既に対応済みのため、クローズします。」
+     - 理由を具体的に記載すること
+   - `github` スキル（`issue-update.sh`）の `--state closed --state-reason completed` または `--state closed --state-reason not_planned` でIssueをクローズ
+     - 実装済み・解決済みの場合: `--state-reason completed`
+     - 重複・対象不在・意図不明の場合: `--state-reason not_planned`
+   - 以降の構造的判定はスキップ
+
+   **対応必要と判定した場合**:
+   - 次の手順（構造的判定）へ進む
+
+4. 各Issueの構造的判定
    以下の基準で story/task を判定する。
 
    **ラベルの定義**:
@@ -42,11 +71,13 @@ argument-hint: "<Issue番号...>"
    - 両方満たす（矛盾） → 両ラベル削除、エラー表示
    - どちらも満たさない → ラベル変更なし、判定不能を報告
 
-4. ラベル操作
+5. ラベル操作
    - `github` スキル（`issue-update.sh`）の `--add-label` / `--remove-label` を使用
    - story/task以外のラベルは一切変更しない
    - 既に正しいラベルが付与されている場合は変更不要
 
-5. 結果報告
+6. 結果報告
    処理結果を一覧形式でユーザーに報告する:
-   - Issue番号、タイトル、判定結果（story/task/矛盾/判定不能）、実行したラベル操作
+   - Issue番号、タイトル、トリアージ結果（対応必要/対応不要）
+   - 対応不要の場合: クローズ理由とstate-reason
+   - 対応必要の場合: 構造的判定結果（story/task/矛盾/判定不能）と実行したラベル操作
