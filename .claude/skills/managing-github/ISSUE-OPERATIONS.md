@@ -29,7 +29,7 @@ EOF
 
 **出力**: 作成されたIssueのJSON
 
-**注意**: Issue本文の末尾に、区切り線と「*このIssueは [Claude Code](https://claude.ai/code) により自動作成されました*」（イタリック、リンク付き）が自動的に追加されます。
+**注意**: Issue本文の末尾に、区切り線と「*このIssueは [Claude Code](https://claude.ai/code) により自動作成されました*」が自動的に追加されます。
 
 **推奨**: document-specialistエージェントで説明文を生成してから使用
 
