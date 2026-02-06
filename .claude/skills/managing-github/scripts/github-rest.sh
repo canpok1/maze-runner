@@ -38,7 +38,7 @@ method="${2:-GET}"
 body="${3:-}"
 
 # エンドポイントが指定されているかチェック
-if [[ -z "$endpoint" ]]; then
+if [[ -z "$endpoint" || ! "$endpoint" =~ ^/ ]]; then
     echo "使用方法: $0 [--paginate] <endpoint> [method] [body]" >&2
     echo "例: $0 /repos/owner/repo/pulls" >&2
     echo "例: $0 /repos/owner/repo/pulls POST '{\"title\":\"test\"}'" >&2
@@ -80,7 +80,6 @@ if [[ "$paginate" == "true" ]]; then
     temp_dir=$(mktemp -d)
     trap 'rm -rf "$temp_dir"' EXIT
 
-    page=1
     next_url="$api_url"
     all_results="$temp_dir/all_results.json"
     : > "$all_results"
@@ -115,12 +114,15 @@ if [[ "$paginate" == "true" ]]; then
 
         # ページのレスポンスを結果ファイルに追加
         cat "$temp_body" >> "$all_results"
-        echo "" >> "$all_results"
 
         # Link headerから次のページURLを抽出
         next_url=$(grep -i '^link:' "$temp_headers" | sed -n 's/.*<\([^>]*\)>; rel="next".*/\1/p' || true)
 
-        page=$((page + 1))
+        # 次のページURLがapi.github.comであることを検証
+        if [[ -n "$next_url" && ! "$next_url" =~ ^https://api\.github\.com/ ]]; then
+            echo "エラー: 不正な次のページURLが検出されました: $next_url" >&2
+            exit 1
+        fi
     done
 
     # 全ページのJSONをマージ
