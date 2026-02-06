@@ -81,10 +81,7 @@ echo "Owner: $OWNER, Repo: $REPO" >&2
 echo "PR作成中..." >&2
 
 # PR本文にClaude Code自動作成の文言を追記
-PR_BODY="${PR_BODY}
-
----
-*このPRは [Claude Code](https://claude.ai/code) により自動作成されました*"
+PR_BODY+=$(printf '\n\n---\n*このPRは [Claude Code](https://claude.ai/code) により自動作成されました*')
 
 # JSON ペイロードを作成
 JSON_PAYLOAD=$(jq -n \
