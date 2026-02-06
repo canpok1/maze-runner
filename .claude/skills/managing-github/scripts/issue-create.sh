@@ -47,6 +47,8 @@ TITLE=""
 BODY=""
 BODY_FILE=""
 LABELS=()
+FOOTER_TEXT="---
+*このIssueは [Claude Code](https://claude.ai/code) により自動作成されました*"
 
 # 引数パース
 while [[ $# -gt 0 ]]; do
@@ -115,6 +117,15 @@ if [[ -n "$BODY_FILE" ]]; then
         fi
         BODY=$(cat "$BODY_FILE")
     fi
+fi
+
+# 本文の末尾に自動作成文言を追加
+if [[ -n "$BODY" ]]; then
+    BODY="${BODY}
+
+${FOOTER_TEXT}"
+else
+    BODY="$FOOTER_TEXT"
 fi
 
 # リポジトリ情報を取得
