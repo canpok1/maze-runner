@@ -21,11 +21,37 @@
 
 ## 品質チェック手順
 
-コーディング完了後、以下のコマンドを順番に実行すること。
+コーディング完了後、変更対象ファイルに応じて以下のコマンドを実行すること。
+**複数種類のファイルを変更した場合は、該当するすべての手順を実行すること。**
+
+### TypeScript/JavaScriptの変更がある場合
+
+以下のコマンドを順番に実行すること。
 
 1. ビルド: `npm run build`
 2. リント・フォーマット: `npm run lint:fix`
 3. テスト: `npm test`
+
+### シェルスクリプトの変更がある場合
+
+以下のコマンドで構文チェックと静的解析を実行すること。
+
+```bash
+# 単一ファイルの場合
+bash -n scripts/example.sh
+
+# 複数ファイルの場合
+find .claude/skills -name "*.sh" -exec bash -n {} \;
+
+# 静的解析（shellcheckが利用可能な場合）
+shellcheck scripts/example.sh
+# または複数ファイル
+find .claude/skills -name "*.sh" -exec shellcheck {} \;
+```
+
+### ドキュメント（.md）のみの変更の場合
+
+品質チェックコマンドは不要。目視でリンク切れや表記の整合性を確認すること。
 
 ## GitHub操作
 
