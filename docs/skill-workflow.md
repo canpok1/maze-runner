@@ -41,7 +41,7 @@
 | スキル | コマンド | 役割 |
 |-------|---------|------|
 | running-dev | `/running-dev` | タスク実装から完了までの全体ワークフローを自動化するメタスキル |
-| running-refinement | `/running-refinement` | バックログ全体のラベル最適化、ストーリー細分化、タスクアサインを一括実行 |
+| running-refinement | `/running-refinement` | バックログ全体のラベル最適化、ストーリー細分化を一括実行 |
 | running-retro | `/running-retro` | 作業セッションを振り返り、設定改善点を分析してIssue作成 |
 
 ## スキル間の依存関係
