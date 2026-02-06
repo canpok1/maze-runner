@@ -117,6 +117,17 @@ if [[ -n "$BODY_FILE" ]]; then
     fi
 fi
 
+# 本文の末尾に自動作成文言を追加
+FOOTER_TEXT="---
+*このIssueは [Claude Code](https://claude.ai/code) により自動作成されました*"
+if [[ -n "$BODY" ]]; then
+    BODY="${BODY}
+
+${FOOTER_TEXT}"
+else
+    BODY="$FOOTER_TEXT"
+fi
+
 # リポジトリ情報を取得
 read -r OWNER REPO < <("$SCRIPT_DIR/repo-info.sh")
 
