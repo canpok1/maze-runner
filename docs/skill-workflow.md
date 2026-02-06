@@ -34,7 +34,6 @@
 |-------|---------|------|
 | requesting | `/requesting` | ユーザー要望をstory/task Issueとして作成 |
 | breaking-down-story | `/breaking-down-story` | ストーリーIssueを実装タスクに細分化してサブIssue化 |
-| assigning-tasks | `/assigning-tasks` | 細分化したタスクにassign-to-claudeラベルを付与して自動対応可能にする |
 | optimizing-issue-labels | `/optimizing-issue-labels` | Issueのstory/taskラベルを内容に基づいて最適化 |
 
 ### メタスキル
@@ -65,7 +64,6 @@ graph TD
     subgraph "タスク管理スキル"
         RQ[requesting<br/>要望Issue化]
         BD[breaking-down-story<br/>ストーリー細分化]
-        AT[assigning-tasks<br/>タスクアサイン]
         OL[optimizing-issue-labels<br/>ラベル最適化]
     end
 
@@ -86,7 +84,6 @@ graph TD
     RQ --> DS
     BD --> MG
     BD --> DS
-    AT --> MG
     OL --> MG
 
     RD --> CD
@@ -97,7 +94,6 @@ graph TD
 
     RF --> OL
     RF --> BD
-    RF --> AT
     RF --> MG
     RF --> DS
 ```
@@ -111,8 +107,7 @@ graph TD
 ```mermaid
 graph LR
     A[requesting<br/>要望Issue化] --> B[breaking-down-story<br/>タスク細分化]
-    B --> C[assigning-tasks<br/>タスクアサイン]
-    C --> D[running-dev<br/>開発ワークフロー]
+    B --> D[running-dev<br/>開発ワークフロー]
 
     subgraph "running-dev内部"
         D1[coding<br/>実装] --> D2[reviewing<br/>レビュー]
@@ -132,8 +127,7 @@ graph LR
 **実行手順:**
 1. `/requesting` - ユーザー要望をIssue化
 2. `/breaking-down-story` - ストーリーを実装可能なタスクに分解
-3. `/assigning-tasks` - タスクにassign-to-claudeラベルを付与
-4. `/running-dev` - タスクを実装してPRを作成し、マージまで完了
+3. `/running-dev` - タスクを実装してPRを作成し、マージまで完了
 
 ### ワークフロー B: リファインメントフロー
 
@@ -143,7 +137,6 @@ graph LR
 graph LR
     subgraph "running-refinement<br/>リファインメント"
         A[optimizing-issue-labels<br/>ラベル最適化] --> B[breaking-down-story<br/>ストーリー細分化]
-        B --> C[assigning-tasks<br/>タスクアサイン]
     end
 ```
 
@@ -155,7 +148,6 @@ graph LR
 1. `/running-refinement` - 一括でバックログを整理
    - フェーズ1: ラベル最適化
    - フェーズ2: ストーリー細分化
-   - フェーズ3: タスクアサイン
 
 ## スキルの使い分け
 
