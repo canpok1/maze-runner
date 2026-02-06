@@ -20,18 +20,15 @@ HASH_FILE="node_modules/.npm-ci-hash"
 # 現在の package-lock.json のハッシュを計算
 CURRENT_HASH=$(md5sum package-lock.json | awk '{print $1}')
 
-# スキップ判定: node_modules/.package-lock.json が存在し、ハッシュが一致する場合
-if [[ -f "node_modules/.package-lock.json" ]] && [[ -f "${HASH_FILE}" ]]; then
-  SAVED_HASH=$(cat "${HASH_FILE}")
-  if [[ "${CURRENT_HASH}" == "${SAVED_HASH}" ]]; then
-    echo "npm ci is already completed (package-lock.json hash matches)"
-    exit 0
-  fi
+# スキップ判定: ハッシュが一致する場合
+if [[ -f "${HASH_FILE}" ]] && [[ "$(cat "${HASH_FILE}")" == "${CURRENT_HASH}" ]]; then
+  echo "npm ci is already completed (package-lock.json hash matches)"
+  exit 0
 fi
 
 echo "Running npm ci to install dependencies..."
 
-if ! npm ci; then
+if ! npm ci --ignore-scripts; then
   echo "Error: npm ci failed" >&2
   exit 1
 fi
