@@ -5,6 +5,7 @@
 #   1. ラベル最適化（story/taskラベルのないIssueにclaudeコマンドでチケット内容を分析してラベル付与）
 #   2. 受け入れ確認（サブタスク完了済みストーリーの受け入れ確認）
 #   3. タスクアサイン（進行中ストーリー・未着手ストーリー・親なしタスクの優先順制御）
+#      ※アサイン時に対象タスクへin-progress-by-claudeラベルを付与し、重複実行を防止する
 #   4. ストーリー細分化（storyラベル付きでサブIssueのないストーリーを分解）
 #
 # 使用方法:
@@ -43,7 +44,7 @@ log() {
   echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*"
 }
 
-# タスクにin-progress-by-claudeラベルを付与する関数
+# タスクにin-progress-by-claudeラベルを付与する関数（重複実行防止のため）
 # 成功したら0、失敗したら1を返す
 lock_task() {
   local task_number=$1
@@ -117,6 +118,7 @@ breakdown_stories() {
 # タスクアサイン関数
 # 優先順位1: 進行中ストーリーの子タスク
 # 優先順位2: 未着手ストーリーの子タスク、または親なしタスク
+# アサイン時に対象タスクへin-progress-by-claudeラベルを付与し、重複実行を防止する
 # アサインが発生したら0を返し、発生しなかったら1を返す
 assign_tasks() {
   log "タスクアサインをチェックします..."
@@ -194,7 +196,7 @@ assign_tasks() {
     if [ -n "$available_task" ] && [ "$available_task" != "null" ]; then
       log "タスク #${available_task} にアサインします（進行中ストーリー #${in_progress_story} の子タスク）"
 
-      # タスクにin-progress-by-claudeラベルを付与
+      # タスクにin-progress-by-claudeラベルを付与（重複実行防止のため）
       if ! lock_task "${available_task}"; then
         return 1
       fi
@@ -264,7 +266,7 @@ assign_tasks() {
     if [ -n "$available_task" ] && [ "$available_task" != "null" ]; then
       log "タスク #${available_task} にアサインします（未着手ストーリー #${target_number} の子タスク）"
 
-      # タスクにin-progress-by-claudeラベルを付与
+      # タスクにin-progress-by-claudeラベルを付与（重複実行防止のため）
       if ! lock_task "${available_task}"; then
         return 1
       fi
