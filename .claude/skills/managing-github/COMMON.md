@@ -10,21 +10,19 @@
 
 PR・Issueの作成・更新で本文（body）に複数行テキストを含む場合、以下の方法を使用すること。
 
-### `gh` CLI + HEREDOC
+### 推奨: `pr-create.sh` / `issue-create.sh` を使用
 
-`gh` CLI と HEREDOC を使用してテキストを渡すこと。
+通常のPR・Issue作成では、managing-githubスキルが提供するスクリプトを使用すること。
+これらのスクリプトは引数として複数行テキストを受け取ることができます。
 
-#### コマンド例: PR作成
+詳細は以下を参照:
+- PR作成: [PR-OPERATIONS.md](PR-OPERATIONS.md#pr作成)
+- Issue作成: [ISSUE-OPERATIONS.md](ISSUE-OPERATIONS.md#issue作成)
 
-```bash
-gh pr create --title "タイトル" --body-file - <<'EOF'
-## Summary
-- 変更内容の説明
+### 参考: `gh` CLI + HEREDOC の直接使用
 
-## Test plan
-- テスト計画
-EOF
-```
+スクリプトが対応していない特殊な操作（例: PR本文の直接更新）が必要な場合は、
+`gh` CLI と HEREDOC を組み合わせて使用できます。
 
 #### コマンド例: PR更新
 
@@ -35,19 +33,6 @@ gh pr edit <PR番号> --body-file - <<'EOF'
 
 ## Test plan
 - テスト計画
-EOF
-```
-
-#### コマンド例: Issue作成
-
-```bash
-gh issue create --title "タイトル" --body-file - <<'EOF'
-## 概要
-Issueの詳細な説明
-
-## 受け入れ条件
-- 条件1
-- 条件2
 EOF
 ```
 
@@ -63,6 +48,10 @@ Issueの詳細な説明
 - 条件2
 EOF
 ```
+
+**注意**: PR・Issue作成には上記の推奨スクリプトを使用してください。
+`gh pr create` / `gh issue create` の直接使用は、プッシュ処理やエラーハンドリングを
+自前で実装する必要があるため推奨しません。
 
 ## リポジトリ情報の取得
 
