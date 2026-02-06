@@ -48,11 +48,11 @@ log() {
 # 成功したら0、失敗したら1を返す
 lock_task() {
   local task_number=$1
-  if ! ./.claude/skills/managing-github/scripts/issue-update.sh "${task_number}" --add-label "$IN_PROGRESS_LABEL" >/dev/null 2>&1; then
+  if ! ./.claude/skills/managing-github/scripts/issue-update.sh "${task_number}" --add-label "$IN_PROGRESS_LABEL" --add-label "$ASSIGN_LABEL" >/dev/null 2>&1; then
     log "エラー: タスク #${task_number} へのラベル付与に失敗しました" >&2
     return 1
   fi
-  log "タスク #${task_number} にin-progress-by-claudeラベルを付与しました"
+  log "タスク #${task_number} にassign-to-claudeとin-progress-by-claudeラベルを付与しました"
   return 0
 }
 
