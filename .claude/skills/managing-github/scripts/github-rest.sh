@@ -83,7 +83,7 @@ if [[ "$paginate" == "true" ]]; then
     page=1
     next_url="$api_url"
     all_results="$temp_dir/all_results.json"
-    echo -n "" > "$all_results"
+    : > "$all_results"
 
     while [[ -n "$next_url" ]]; do
         # ヘッダーとボディを分離して取得
