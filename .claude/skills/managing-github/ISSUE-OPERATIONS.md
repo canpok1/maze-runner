@@ -29,6 +29,8 @@ EOF
 
 **出力**: 作成されたIssueのJSON
 
+**注意**: Issue本文の末尾に「このIssueはClaude Codeにより自動作成されました」という文言が自動的に追加されます。
+
 **推奨**: document-specialistエージェントで説明文を生成してから使用
 
 ## Issue更新

@@ -18,6 +18,7 @@
 #   - --title は必須です
 #   - --body と --body-file は排他的です
 #   - --body-file - で標準入力から読み取ります
+#   - Issue本文の末尾に自動的にClaude Code作成の文言が追加されます
 #   - --label は複数回指定可能です
 
 set -euo pipefail
