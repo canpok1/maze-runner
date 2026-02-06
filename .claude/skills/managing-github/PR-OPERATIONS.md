@@ -28,7 +28,33 @@
 - mainブランチからは実行不可
 - PRタイトルにissue番号を含めない
 - 本文には `fixed #<issue番号>` を含める
-- 本文に複数行テキストを含む場合はCOMMON.mdの複数行テキストの取り扱いルールを参照
+- 本文に複数行を含む場合はシェルの文字列として渡すこと（改行は`\n`または実際の改行でOK）
+
+**使用例**:
+
+```bash
+# 単一行の本文
+./.claude/skills/managing-github/scripts/pr-create.sh "機能Aを追加" "fixed #123"
+
+# 複数行の本文（方法1: 実際の改行を含む）
+./.claude/skills/managing-github/scripts/pr-create.sh "機能Aを追加" "## Summary
+- 機能Aを実装しました
+
+fixed #123"
+
+# 複数行の本文（方法2: ヒアドキュメントを使用）
+TITLE="機能Aを追加"
+BODY=$(cat <<'EOF'
+## Summary
+- 機能Aを実装しました
+
+fixed #123
+EOF
+)
+./.claude/skills/managing-github/scripts/pr-create.sh "$TITLE" "$BODY"
+```
+
+**備考**: `pr-create.sh`は内部でプッシュ処理とリポジトリ情報取得を自動実行します。
 
 ## 現在のブランチのPR番号取得
 
