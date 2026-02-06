@@ -113,6 +113,11 @@
             "type": "command",
             "command": "./.claude/hooks/install-gh.sh",
             "timeout": 120
+          },
+          {
+            "type": "command",
+            "command": "./.claude/hooks/setup-npm.sh",
+            "timeout": 120
           }
         ]
       }
