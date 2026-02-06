@@ -5,7 +5,7 @@
 #   1. ラベル最適化（story/taskラベルのないIssueにclaudeコマンドでチケット内容を分析してラベル付与）
 #   2. 受け入れ確認（サブタスク完了済みストーリーの受け入れ確認）
 #   3. タスクアサイン（進行中ストーリー・未着手ストーリー・親なしタスクの優先順制御）
-#      ※アサイン時に対象タスクへin-progress-by-claudeラベルを付与し、重複実行を防止する
+#      ※アサイン時に対象タスクへassign-to-claudeとin-progress-by-claudeラベルを付与し、重複実行を防止する
 #   4. ストーリー細分化（storyラベル付きでサブIssueのないストーリーを分解）
 #
 # 使用方法:
@@ -44,15 +44,15 @@ log() {
   echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*"
 }
 
-# タスクにin-progress-by-claudeラベルを付与する関数（重複実行防止のため）
+# タスクにassign-to-claudeとin-progress-by-claudeラベルを付与する関数（重複実行防止のため）
 # 成功したら0、失敗したら1を返す
 lock_task() {
   local task_number=$1
-  if ! ./.claude/skills/managing-github/scripts/issue-update.sh "${task_number}" --add-label "$IN_PROGRESS_LABEL" >/dev/null 2>&1; then
-    log "エラー: タスク #${task_number} へのラベル付与に失敗しました" >&2
+  if ! error_output=$(./.claude/skills/managing-github/scripts/issue-update.sh "${task_number}" --add-label "$IN_PROGRESS_LABEL" --add-label "$ASSIGN_LABEL" 2>&1); then
+    log "エラー: タスク #${task_number} へのラベル付与に失敗しました: ${error_output}" >&2
     return 1
   fi
-  log "タスク #${task_number} にin-progress-by-claudeラベルを付与しました"
+  log "タスク #${task_number} に${ASSIGN_LABEL}と${IN_PROGRESS_LABEL}ラベルを付与しました"
   return 0
 }
 
@@ -118,7 +118,7 @@ breakdown_stories() {
 # タスクアサイン関数
 # 優先順位1: 進行中ストーリーの子タスク
 # 優先順位2: 未着手ストーリーの子タスク、または親なしタスク
-# アサイン時に対象タスクへin-progress-by-claudeラベルを付与し、重複実行を防止する
+# アサイン時に対象タスクへassign-to-claudeとin-progress-by-claudeラベルを付与し、重複実行を防止する
 # アサインが発生したら0を返し、発生しなかったら1を返す
 assign_tasks() {
   log "タスクアサインをチェックします..."
