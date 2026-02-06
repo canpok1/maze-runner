@@ -65,14 +65,14 @@ model: sonnet
 | 層 | 説明 | 対象 |
 |---|---|---|
 | 呼び出し層（invocation） | 外部からスキルを起動する自動化スクリプト | `scripts/schedule.sh` |
-| ワークフロー層（workflow） | ユーザー起動専用。他スキルを組み合わせて実行する統合スキル | `running-dev`, `running-refinement` |
-| 機能層（feature） | 独立した単機能スキル | `coding`, `reviewing`, `creating-pr`, `fixing-pr`, `requesting`, `breaking-down-story`, `optimizing-issue-labels`, `running-retro`, `solving-issue` |
+| ワークフロー層（workflow） | 他スキルを組み合わせて実行する統合スキル | `running-dev`, `running-refinement`, `solving-issue` |
+| 機能層（feature） | 独立した単機能スキル | `breaking-down-story`, `coding`, `creating-pr`, `fixing-pr`, `optimizing-issue-labels`, `requesting`, `reviewing`, `running-retro`, `verifying-acceptance` |
 | 基盤層（foundation） | 他スキルから共通利用されるインフラスキル | `managing-github` |
 
 ### 依存ルール
 
 - 呼び出し層はワークフロー層と機能層に依存可能
-- ワークフロー層は機能層と基盤層に依存可能
+- ワークフロー層はワークフロー層、機能層、基盤層に依存可能（循環依存は禁止）
 - 機能層は基盤層にのみ依存可能（機能層同士の依存は禁止）
 - 基盤層は他の層に依存しない
 

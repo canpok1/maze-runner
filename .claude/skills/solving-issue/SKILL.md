@@ -1,7 +1,7 @@
 ---
 name: solving-issue
 description: GitHub Issueの実装からPR作成・マージまでの一連のフローを自動実行します。Issue対応の核となる実装・レビュー・PR管理を行う場合に使用してください。
-layer: feature
+layer: workflow
 argument-hint: [GitHub Issueの番号]
 ---
 ## 手順
