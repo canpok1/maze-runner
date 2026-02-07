@@ -4,7 +4,7 @@
 # テスト前準備
 setup() {
     # スクリプトディレクトリの取得
-    SCRIPT_DIR="/home/user/maze-runner/.claude/skills/managing-github/scripts"
+    SCRIPT_DIR="$(cd "${BATS_TEST_DIRNAME}/../../.claude/skills/managing-github/scripts" && pwd)"
     TARGET_SCRIPT="$SCRIPT_DIR/issue-verify-and-fix.sh"
 
     # モックディレクトリの作成（元のスクリプトディレクトリをバックアップ）
@@ -54,19 +54,21 @@ create_mock_issue_get() {
         done
     fi
 
-    # bodyをJSONエスケープ
+    # titleとbodyをJSONエスケープ
+    local escaped_title=$(echo "$title" | jq -Rs .)
     local escaped_body=$(echo "$body" | jq -Rs .)
 
-    cat > "$SCRIPT_DIR/issue-get.sh" <<SCRIPT_EOF
+    # まずテンプレートを作成（1行のechoで入れ子のヒアドキュメントを回避）
+    cat > "$SCRIPT_DIR/issue-get.sh" <<'SCRIPT_EOF'
 #!/bin/bash
-cat <<'JSON_END'
-{
-  "title": "${title}",
-  "body": ${escaped_body},
-  "labels": [${label_json}]
-}
-JSON_END
+echo '{ "title": __TITLE__, "body": __BODY__, "labels": [__LABELS__] }'
 SCRIPT_EOF
+
+    # プレースホルダーを実際の値に置換
+    sed -i "s|__TITLE__|$escaped_title|" "$SCRIPT_DIR/issue-get.sh"
+    sed -i "s|__BODY__|$escaped_body|" "$SCRIPT_DIR/issue-get.sh"
+    sed -i "s|__LABELS__|$label_json|" "$SCRIPT_DIR/issue-get.sh"
+
     chmod +x "$SCRIPT_DIR/issue-get.sh"
 }
 
@@ -75,13 +77,14 @@ create_mock_issue_update() {
     cat > "$SCRIPT_DIR/issue-update.sh" <<'SCRIPT_EOF'
 #!/bin/bash
 # 引数を記録
-echo "issue-update.sh called with: $@" >> /tmp/issue-update.log
+echo "issue-update.sh called with: $@" >> "__MOCK_DIR__/issue-update.log"
 
 # body-fileの内容を記録
 if [[ "$2" == "--body-file" ]]; then
-    cp "$3" /tmp/updated-body.txt
+    cp "$3" "__MOCK_DIR__/updated-body.txt"
 fi
 SCRIPT_EOF
+    sed -i "s|__MOCK_DIR__|$MOCK_DIR|g" "$SCRIPT_DIR/issue-update.sh"
     chmod +x "$SCRIPT_DIR/issue-update.sh"
 }
 
@@ -90,9 +93,10 @@ create_mock_issue_add_comment() {
     cat > "$SCRIPT_DIR/issue-add-comment.sh" <<'SCRIPT_EOF'
 #!/bin/bash
 # 引数を記録
-echo "Issue: $1" > /tmp/comment.log
-echo "Comment: $2" >> /tmp/comment.log
+echo "Issue: $1" > "__MOCK_DIR__/comment.log"
+echo "Comment: $2" >> "__MOCK_DIR__/comment.log"
 SCRIPT_EOF
+    sed -i "s|__MOCK_DIR__|$MOCK_DIR|g" "$SCRIPT_DIR/issue-add-comment.sh"
     chmod +x "$SCRIPT_DIR/issue-add-comment.sh"
 }
 
@@ -143,7 +147,7 @@ BODY
     create_mock_issue_add_comment
 
     # テスト前にログファイルを削除
-    rm -f /tmp/issue-update.log
+    rm -f "$MOCK_DIR/issue-update.log"
 
     run bash "$TARGET_SCRIPT" 123
 
@@ -151,7 +155,7 @@ BODY
     echo "$output" | grep -q "問題はありませんでした"
 
     # issue-update.shが呼ばれていないことを確認
-    [ ! -f /tmp/issue-update.log ]
+    [ ! -f "$MOCK_DIR/issue-update.log" ]
 }
 
 @test "story ラベル付きIssueの必須セクション検証（不足あり）" {
@@ -178,7 +182,7 @@ BODY
     create_mock_issue_add_comment
 
     # テスト前にログファイルを削除
-    rm -f /tmp/issue-update.log /tmp/updated-body.txt
+    rm -f "$MOCK_DIR/issue-update.log" "$MOCK_DIR/updated-body.txt"
 
     run bash "$TARGET_SCRIPT" 123
 
@@ -186,11 +190,11 @@ BODY
     echo "$output" | grep -q "不足セクション検出: 受け入れ条件"
 
     # issue-update.shが呼ばれたことを確認
-    [ -f /tmp/issue-update.log ]
+    [ -f "$MOCK_DIR/issue-update.log" ]
 
     # 更新された本文に不足セクションが追加されていることを確認
-    [ -f /tmp/updated-body.txt ]
-    grep -q "## 受け入れ条件" /tmp/updated-body.txt
+    [ -f "$MOCK_DIR/updated-body.txt" ]
+    grep -q "## 受け入れ条件" "$MOCK_DIR/updated-body.txt"
 }
 
 @test "task ラベル付きIssueの必須セクション検証（すべて存在）" {
@@ -214,7 +218,7 @@ BODY
     create_mock_issue_add_comment
 
     # テスト前にログファイルを削除
-    rm -f /tmp/issue-update.log
+    rm -f "$MOCK_DIR/issue-update.log"
 
     run bash "$TARGET_SCRIPT" 124
 
@@ -222,7 +226,7 @@ BODY
     echo "$output" | grep -q "問題はありませんでした"
 
     # issue-update.shが呼ばれていないことを確認
-    [ ! -f /tmp/issue-update.log ]
+    [ ! -f "$MOCK_DIR/issue-update.log" ]
 }
 
 @test "task ラベル付きIssueの必須セクション検証（不足あり）" {
@@ -243,7 +247,7 @@ BODY
     create_mock_issue_add_comment
 
     # テスト前にログファイルを削除
-    rm -f /tmp/issue-update.log /tmp/updated-body.txt
+    rm -f "$MOCK_DIR/issue-update.log" "$MOCK_DIR/updated-body.txt"
 
     run bash "$TARGET_SCRIPT" 124
 
@@ -251,11 +255,11 @@ BODY
     echo "$output" | grep -q "不足セクション検出: 実施内容"
 
     # issue-update.shが呼ばれたことを確認
-    [ -f /tmp/issue-update.log ]
+    [ -f "$MOCK_DIR/issue-update.log" ]
 
     # 更新された本文に不足セクションが追加されていることを確認
-    [ -f /tmp/updated-body.txt ]
-    grep -q "## 実施内容" /tmp/updated-body.txt
+    [ -f "$MOCK_DIR/updated-body.txt" ]
+    grep -q "## 実施内容" "$MOCK_DIR/updated-body.txt"
 }
 
 @test "story と task の両方のラベルが付いている場合の警告" {
@@ -311,7 +315,7 @@ BODY
     create_mock_issue_add_comment
 
     # テスト前にログファイルを削除
-    rm -f /tmp/issue-update.log
+    rm -f "$MOCK_DIR/issue-update.log"
 
     run bash "$TARGET_SCRIPT" 127
 
@@ -325,7 +329,7 @@ BODY
     echo "$output" | grep -q "不足セクション検出: 補足情報"
 
     # issue-update.shが呼ばれたことを確認
-    [ -f /tmp/issue-update.log ]
+    [ -f "$MOCK_DIR/issue-update.log" ]
 }
 
 @test "不足セクションの自動追加とコメント記録" {
@@ -343,16 +347,16 @@ BODY
     create_mock_issue_add_comment
 
     # テスト前にログファイルを削除
-    rm -f /tmp/comment.log
+    rm -f "$MOCK_DIR/comment.log"
 
     run bash "$TARGET_SCRIPT" 128
 
     [ "$status" -eq 0 ]
 
     # コメントが追加されたことを確認
-    [ -f /tmp/comment.log ]
-    grep -q "Issue内容の自動修正" /tmp/comment.log
-    grep -q "本文に不足していたセクションを追加しました" /tmp/comment.log
+    [ -f "$MOCK_DIR/comment.log" ]
+    grep -q "Issue内容の自動修正" "$MOCK_DIR/comment.log"
+    grep -q "本文に不足していたセクションを追加しました" "$MOCK_DIR/comment.log"
 }
 
 @test "特殊文字を含むセクション名の検証" {

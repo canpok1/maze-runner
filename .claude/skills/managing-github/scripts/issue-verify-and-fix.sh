@@ -115,8 +115,8 @@ fi
 # 各セクションの存在確認
 for section in "${REQUIRED_SECTIONS[@]}"; do
     # セクションヘッダーのパターン: ## セクション名 または # セクション名
-    # grep -F を使用してリテラル文字列として検索
-    if ! echo "$BODY" | grep -qF "# ${section}"; then
+    # grep -E を使用して正規表現で検索（複数の#に対応）
+    if ! echo "$BODY" | grep -qE "^#+ ${section}"; then
         MISSING_SECTIONS+=("$section")
         echo "不足セクション検出: $section" >&2
     fi
