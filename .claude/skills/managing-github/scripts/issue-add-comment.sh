@@ -20,7 +20,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # 使用方法を表示
 usage() {
-    echo -e "使用方法: $0 <Issue番号> <コメント本文>\n例: $0 123 \"Merged via PR #456\"" >&2
+    printf "使用方法: %s <Issue番号> <コメント本文>\n例: %s 123 \"Merged via PR #456\"\n" "$0" "$0" >&2
     exit 1
 }
 
