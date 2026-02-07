@@ -201,7 +201,11 @@ assign_tasks() {
         return 1
       fi
 
-      claude --remote "/running-dev ${available_task}"
+      if ! claude --remote "/running-dev ${available_task}"; then
+        log "エラー: タスク #${available_task} の実行に失敗しました" >&2
+        ./.claude/skills/managing-github/scripts/issue-update.sh "${available_task}" --remove-label "$IN_PROGRESS_LABEL" --remove-label "$ASSIGN_LABEL" 2>&1 || true
+        return 1
+      fi
       log "タスク #${available_task} のアサインが完了しました"
       return 0
     fi
@@ -271,7 +275,11 @@ assign_tasks() {
         return 1
       fi
 
-      claude --remote "/running-dev ${available_task}"
+      if ! claude --remote "/running-dev ${available_task}"; then
+        log "エラー: タスク #${available_task} の実行に失敗しました" >&2
+        ./.claude/skills/managing-github/scripts/issue-update.sh "${available_task}" --remove-label "$IN_PROGRESS_LABEL" --remove-label "$ASSIGN_LABEL" 2>&1 || true
+        return 1
+      fi
       log "タスク #${available_task} のアサインが完了しました"
       return 0
     fi
@@ -286,7 +294,11 @@ assign_tasks() {
       return 1
     fi
 
-    claude --remote "/running-dev ${target_number}"
+    if ! claude --remote "/running-dev ${target_number}"; then
+      log "エラー: タスク #${target_number} の実行に失敗しました" >&2
+      ./.claude/skills/managing-github/scripts/issue-update.sh "${target_number}" --remove-label "$IN_PROGRESS_LABEL" --remove-label "$ASSIGN_LABEL" 2>&1 || true
+      return 1
+    fi
     log "タスク #${target_number} のアサインが完了しました"
     return 0
   fi
