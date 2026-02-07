@@ -78,7 +78,7 @@ EOF
 
 **出力形式** (NDJSON):
 ```json
-{"id": "...", "number": 123, "title": "...", "state": "OPEN", "url": "...", "labels": ["label1"]}
+{"id": "...", "number": 123, "title": "...", "state": "OPEN", "url": "...", "labels": ["label1"], "createdAt": "2024-01-15T10:30:00Z"}
 ```
 
 ## サブIssue追加
