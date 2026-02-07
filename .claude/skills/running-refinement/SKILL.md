@@ -57,35 +57,32 @@ layer: workflow
 
 このフェーズでは、schedule.shの優先順位制御ロジックに従ってタスクを1件選択し、`assign-to-claude` ラベルを付与する。**`/running-dev` は実行しない。**
 
-#### 優先順位1: 進行中ストーリーの子タスク
+**進行中ストーリーの特定方法**: openかつassignees未指定のストーリーを作成日順に確認し、各ストーリーについてサブIssueのいずれかに `assign-to-claude` または `in-progress-by-claude` ラベルが付与されているかを確認する。付与されていれば進行中ストーリーと判断する。
 
-1. `github` スキルを使用して `task` ラベル付きのオープンIssue一覧を取得する（`gh issue list --repo "${OWNER}/${REPO}" --state open --label task --json number,title,labels,createdAt --limit 100`）。
-2. 取得したタスクから、以下の条件を満たすタスクを抽出する:
-   - `assign-to-claude` ラベル未付与
-   - `in-progress-by-claude` ラベル未付与
-3. 各タスクについて `github` スキルの `github-graphql.sh` を使用して親Issue（`trackedInIssues`）を取得する。
-4. 親Issueのうち `story` ラベルが付与されているものを親ストーリーとして特定する。
-5. 親ストーリーについて、assignees未指定かつ子タスクのいずれかに `assign-to-claude` または `in-progress-by-claude` ラベルが付与されているものを「進行中ストーリー」と判定する。
-6. 進行中ストーリーの子タスクのうち、`assign-to-claude` および `in-progress-by-claude` の両ラベルが未付与のタスクを候補とする。
-7. 候補が1件以上存在する場合、作成日が最も古いタスクを1件選択する。
-8. 選択したタスクがある場合、手順15（ラベル付与）に進む。
-9. 候補が0件の場合、優先順位2の処理に進む。
+#### 優先順位1: 進行中ストーリーのサブIssue
 
-#### 優先順位2: 未着手ストーリーの子タスクまたは親なしタスク
+1. `github` スキルを使用して `story` ラベル付きのオープンIssue一覧を取得する（`gh issue list --repo "${OWNER}/${REPO}" --state open --label story --json number,title,assignees,createdAt --limit 100`）。
+2. assignees未指定のストーリーを抽出し、作成日の古い順にソートする。
+3. 各ストーリーについて `github` スキル（`issue-sub-issues.sh`）でサブIssue一覧を取得する。
+4. サブIssueのいずれかに `assign-to-claude` または `in-progress-by-claude` ラベルが付与されているストーリーのうち、最も古いものを「進行中ストーリー」として特定する。
+5. 進行中ストーリーが見つかった場合、そのストーリーのサブIssueのうち、`assign-to-claude` および `in-progress-by-claude` の両ラベルが未付与のタスクを候補とする。
+6. 候補が1件以上存在する場合、作成日が最も古いタスクを1件選択し、手順12（ラベル付与）に進む。
+7. 進行中ストーリーが見つからない、または候補が0件の場合は、優先順位2の処理に進む。
 
-10. 手順5で特定した親ストーリーのうち、全子タスクが `assign-to-claude` および `in-progress-by-claude` の両ラベル未付与のものを「未着手ストーリー」と判定する。
-11. 未着手ストーリーの子タスクを候補Aとする。
-12. 親Issueを持たないタスク（手順3で `trackedInIssues` が空のタスク）を候補Bとする。
-13. 候補Aと候補Bを統合し、作成日が最も古いタスクを1件選択する。
-14. 選択したタスクがある場合、手順15（ラベル付与）に進む。候補が0件の場合、「アサイン対象なし」と報告してフェーズ4に進む。
+#### 優先順位2: 未着手ストーリーのサブIssueまたは親なしタスク
+
+8. 手順1-3で取得したストーリーのうち、進行中でないストーリー（サブIssueのいずれも `assign-to-claude` および `in-progress-by-claude` の両ラベル未付与）を「未着手ストーリー」と判定する。
+9. 未着手ストーリーのサブIssueを候補Aとする。
+10. `github` スキルを使用して `task` ラベル付きのオープンIssue一覧を取得し、親Issue（`trackedInIssues`）を持たないタスクを候補Bとする。
+11. 候補Aと候補Bを統合し、作成日が最も古いタスクを1件選択する。選択したタスクがある場合、手順12（ラベル付与）に進む。候補が0件の場合、「アサイン対象なし」と報告してフェーズ4に進む。
 
 #### ラベル付与
 
-15. 選択したタスクについて `github` スキル（`issue-get.sh`）で現在のラベル一覧を取得する。
-16. 既存ラベルに `assign-to-claude` を追加する。
-17. `github` スキル（`issue-update.sh`）でラベルを更新する。
-18. ラベル付与の結果を報告する（タスク番号、タイトル、URL、成功/エラー）。
-19. **注記**: `/running-dev` スキルは実行しない。タスクの実行は schedule.sh から呼び出される。
+12. 選択したタスクについて `github` スキル（`issue-get.sh`）で現在のラベル一覧を取得する。
+13. 既存ラベルに `assign-to-claude` を追加する。
+14. `github` スキル（`issue-update.sh`）でラベルを更新する。
+15. ラベル付与の結果を報告する（タスク番号、タイトル、URL、成功/エラー）。
+16. **注記**: `/running-dev` スキルは実行しない。タスクの実行は schedule.sh から呼び出される。
 
 ### フェーズ4: ストーリー細分化
 
