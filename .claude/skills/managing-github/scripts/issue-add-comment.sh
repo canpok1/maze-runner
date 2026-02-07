@@ -48,6 +48,9 @@ fi
 # リポジトリ情報を取得
 read -r OWNER REPO < <("$SCRIPT_DIR/repo-info.sh")
 
+# コメント本文に自動作成の文言を追加
+COMMENT_BODY=$(printf '%s\n\n---\n*このコメントは [Claude Code](https://claude.ai/code) により自動作成されました*' "$COMMENT_BODY")
+
 # リクエストボディをJSONで構築
 REQUEST_BODY=$(jq -n --arg body "$COMMENT_BODY" '{body: $body}')
 
