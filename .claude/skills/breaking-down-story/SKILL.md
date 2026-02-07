@@ -9,13 +9,17 @@ argument-hint: "[ユーザーストーリーのIssue番号]"
 
 1. ユーザーストーリーのIssue番号をユーザーに確認する。
     - 引数で指定されている場合、この手順はスキップする。
-2. `github` スキルでユーザーストーリーIssueの内容を把握する。
+2. `managing-github` スキルでユーザーストーリーIssueの内容を把握する。
 3. ユーザーストーリーを元に「タスク細分化の原則」に従ってタスクを細分化する。
 4. 細分化した各タスクについて以下を実行する:
     - `document-specialist` エージェントに依頼してタスクのIssue本文を「タスクIssue作成ルール」に従って生成する。
-    - `github` スキル（`issue-create.sh`）でIssueを作成する。`--label task` オプションを付与して `task` ラベルを自動付与すること。
-    - `github` スキル（`sub-issue-add.sh`）でユーザーストーリーIssueのサブissueとして登録する。
-5. 作成したタスクIssueの一覧（タイトル・URL・依存関係）をユーザーに報告する。
+    - `managing-github` スキルでIssueを作成する。`--label task` オプションを付与して `task` ラベルを自動付与すること。
+    - `managing-github` スキルでユーザーストーリーIssueのサブissueとして登録する。
+5. **サブIssue登録の確認と修正**:
+    - `managing-github` スキルでユーザーストーリーのサブIssue一覧を取得する。
+    - 作成した全タスクがサブIssueとして登録されているか確認する。
+    - 未登録のタスクがあれば、`managing-github` スキルでサブIssueとして追加登録する。
+6. 作成したタスクIssueの一覧（タイトル・URL・依存関係）をユーザーに報告する。サブIssueとして登録できなかったタスクがあれば、その旨も報告すること。
 
 ## タスクIssue作成ルール
 
