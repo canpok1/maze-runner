@@ -21,18 +21,26 @@ setup() {
 
 # テスト後クリーンアップ
 teardown() {
-    # バックアップを復元
+    # バックアップを復元、なければモックを削除
     if [[ -f "$MOCK_DIR/issue-create.sh.backup" ]]; then
         mv "$MOCK_DIR/issue-create.sh.backup" "$SCRIPT_DIR/issue-create.sh"
+    else
+        rm -f "$SCRIPT_DIR/issue-create.sh"
     fi
     if [[ -f "$MOCK_DIR/issue-get.sh.backup" ]]; then
         mv "$MOCK_DIR/issue-get.sh.backup" "$SCRIPT_DIR/issue-get.sh"
+    else
+        rm -f "$SCRIPT_DIR/issue-get.sh"
     fi
     if [[ -f "$MOCK_DIR/issue-update.sh.backup" ]]; then
         mv "$MOCK_DIR/issue-update.sh.backup" "$SCRIPT_DIR/issue-update.sh"
+    else
+        rm -f "$SCRIPT_DIR/issue-update.sh"
     fi
     if [[ -f "$MOCK_DIR/issue-add-comment.sh.backup" ]]; then
         mv "$MOCK_DIR/issue-add-comment.sh.backup" "$SCRIPT_DIR/issue-add-comment.sh"
+    else
+        rm -f "$SCRIPT_DIR/issue-add-comment.sh"
     fi
 
     if [[ -d "$MOCK_DIR" ]]; then
@@ -103,29 +111,27 @@ SCRIPT_EOF
 
 # モック: issue-update.sh
 create_mock_issue_update() {
-    cat > "$SCRIPT_DIR/issue-update.sh" <<'SCRIPT_EOF'
+    cat > "$SCRIPT_DIR/issue-update.sh" <<SCRIPT_EOF
 #!/bin/bash
 # 引数を記録
-echo "issue-update.sh called with: $@" >> "__MOCK_DIR__/issue-update.log"
+echo "issue-update.sh called with: \$@" >> "$MOCK_DIR/issue-update.log"
 
 # body-fileの内容を記録
-if [[ "$2" == "--body-file" ]]; then
-    cp "$3" "__MOCK_DIR__/updated-body.txt"
+if [[ "\$2" == "--body-file" ]]; then
+    cp "\$3" "$MOCK_DIR/updated-body.txt"
 fi
 SCRIPT_EOF
-    sed -i "s|__MOCK_DIR__|$MOCK_DIR|g" "$SCRIPT_DIR/issue-update.sh"
     chmod +x "$SCRIPT_DIR/issue-update.sh"
 }
 
 # モック: issue-add-comment.sh
 create_mock_issue_add_comment() {
-    cat > "$SCRIPT_DIR/issue-add-comment.sh" <<'SCRIPT_EOF'
+    cat > "$SCRIPT_DIR/issue-add-comment.sh" <<SCRIPT_EOF
 #!/bin/bash
 # 引数を記録
-echo "Issue: $1" > "__MOCK_DIR__/comment.log"
-echo "Comment: $2" >> "__MOCK_DIR__/comment.log"
+echo "Issue: \$1" > "$MOCK_DIR/comment.log"
+echo "Comment: \$2" >> "$MOCK_DIR/comment.log"
 SCRIPT_EOF
-    sed -i "s|__MOCK_DIR__|$MOCK_DIR|g" "$SCRIPT_DIR/issue-add-comment.sh"
     chmod +x "$SCRIPT_DIR/issue-add-comment.sh"
 }
 
