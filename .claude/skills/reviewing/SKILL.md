@@ -1,6 +1,6 @@
 ---
 name: reviewing
-description: コーディング規約、テスト配置、ファイル構造、ドキュメント品質の観点からコードレビューを実行します。実装完了後のコードレビューやPR作成前の最終確認で使用してください。
+description: コーディング規約、テスト配置、ファイル構造、ドキュメント品質、スキルファイル品質の観点からコードレビューを実行します。実装完了後のコードレビューやPR作成前の最終確認で使用してください。
 layer: feature
 ---
 
@@ -12,6 +12,7 @@ layer: feature
 - **テストルール**: `testing-specialist`
 - **構造ルール**: `structure-specialist`
 - **ドキュメント品質**: `document-specialist`
+- **スキルファイル品質**: `skill-specialist`
 
 ## 注意事項
 
