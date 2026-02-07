@@ -9,7 +9,7 @@
 #
 # 出力形式:
 #   NDJSON形式（1行1Issue）
-#   {"id": "...", "number": 123, "title": "...", "state": "...", "url": "...", "labels": ["label1", ...]}
+#   {"id": "...", "number": 123, "title": "...", "state": "...", "url": "...", "labels": ["label1", ...], "createdAt": "..."}
 #
 # 注意事項:
 #   - 最大50件のサブIssueを取得します
@@ -54,6 +54,7 @@ query($owner: String!, $name: String!, $number: Int!) {
           number
           title
           state
+          createdAt
           url
           labels(first: 10) {
             nodes {
@@ -94,5 +95,6 @@ echo "$RESPONSE" | jq -c '.data.repository.issue.subIssues.nodes[] | {
     title: .title,
     state: .state,
     url: .url,
-    labels: [.labels.nodes[].name]
+    labels: [.labels.nodes[].name],
+    createdAt: .createdAt
 }'
