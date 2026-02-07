@@ -2,6 +2,7 @@
 name: managing-github
 description: GitHubのIssue、PR、レビュースレッドを操作します。GitHub関連の情報取得・作成・更新が必要な場合に使用してください。
 layer: foundation
+allowed-tools: Read, Bash(./.claude/skills/managing-github/scripts/*)
 ---
 
 **Issue操作**（取得・作成・更新・コメント・サブIssue）→ [ISSUE-OPERATIONS.md](ISSUE-OPERATIONS.md)を参照
