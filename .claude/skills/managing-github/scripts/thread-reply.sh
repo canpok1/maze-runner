@@ -102,6 +102,9 @@ GRAPHQL_QUERY='mutation($pullRequestReviewThreadId: ID!, $body: String!) {
   }
 }'
 
+# Claude Code自動作成の文言を追加
+COMMENT_BODY+=$'\n---\n*このコメントは [Claude Code](https://claude.ai/code) により自動作成されました*'
+
 # GraphQL 変数を構築
 VARIABLES=$(jq -n \
   --arg threadId "$THREAD_ID" \
