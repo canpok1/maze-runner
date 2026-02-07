@@ -9,7 +9,8 @@ layer: feature
 2. 作業ブランチにコミットされた修正内容を把握する。
 3. プルリクエストのタイトルと本文を作成する。
     - `document-specialist` エージェントと協力して作成すること。
-4. `managing-github` スキルを使用してプルリクエストを作成する。
+4. `managing-github` スキルの `scripts/pr-create.sh` を使用してプルリクエストを作成する。
+    - 詳細な使用方法は `.claude/skills/managing-github/PR-OPERATIONS.md` の「PR作成」セクションを参照
 5. PR作成後の検証と自動修正を行う。
     - 手順3で作成したタイトルと本文を変数に保持しておく
     - `managing-github` スキルの `scripts/pr-get.sh` で作成したPRの実際の情報を取得する
