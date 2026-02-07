@@ -18,11 +18,16 @@ layer: feature
         - 完了条件
 2. `document-specialist` エージェントに依頼してIssueの本文を「Issue作成ルール」に従って生成する。
 3. タイトルと本文をユーザーに提示し承認を得る。修正指示があれば反映して再提示する。
-4. `github` スキル（`issue-create.sh`）を使用してIssueを作成する。
+4. `managing-github` スキル（`issue-create.sh`）を使用してIssueを作成する。
     - **storyの場合**: `--label story` を指定
     - **taskの場合**: `--label task` を指定
-5. 作成したIssueのタイトルとURLをユーザーに報告する。
-6. storyラベルの場合のみ、タスク細分化が必要かユーザーに確認し、必要であれば細分化の方法をユーザーと相談する。
+5. 作成したIssueを `managing-github` スキル（`.claude/skills/managing-github/scripts/issue-verify-and-fix.sh`）で検証・修正する。
+    - `issue-create.sh` のレスポンスJSONから Issue番号を抽出し、`issue-verify-and-fix.sh` に渡す
+    - **検証結果の報告**: 検証結果（ラベルチェック結果、本文フォーマットチェック結果）をユーザーに報告する
+    - **修正内容の報告**: 修正が発生した場合、具体的な修正内容をユーザーに報告する
+    - **エラーハンドリング**: スクリプト実行が失敗した場合は、エラー内容をユーザーに報告し、手動での確認を促す（Issue作成自体は成功しているため、処理は続行する）
+6. 作成したIssueのタイトルとURLをユーザーに報告する。
+7. storyラベルの場合のみ、タスク細分化が必要かユーザーに確認し、必要であれば細分化の方法をユーザーと相談する。
 
 ## Issue作成ルール
 
