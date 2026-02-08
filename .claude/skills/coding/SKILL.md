@@ -25,4 +25,5 @@ argument-hint: [GitHub Issueの番号]
       - **複合タスク**: 主要な作業内容に基づいて判断
         - ドキュメント作成が主: `document-specialist`
         - コード実装が主: `coding-specialist`
+        - スキル作成が主: `skill-specialist`
     - CLAUDE.mdに定義された品質チェック手順を実行し、問題があれば実装の修正に戻る。
